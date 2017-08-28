@@ -492,9 +492,7 @@ def write_file(d, file_name, file_content, ctx):
             print('Writing file to: ' + os.getcwd() + os.sep + file_name)
         os.chdir(wd)
     with open(d + os.sep + file_name, 'w+') as f:
-        #print(file_content )
-
-        if isinstance(file_content, unicode):
+        if isinstance(file_content, str):
             f.write(file_content)
         else:
             for line in file_content:
@@ -1007,12 +1005,12 @@ class ClassGenerator(object):
         # Namespace and prefix
         ns_arg = search_one(self.stmt, 'namespace').arg
         prefix = search_one(self.stmt, 'prefix')
-        
+
         # Add root to class_hierarchy dict
         if self.rootpkg not in class_hierarchy:
             class_hierarchy[self.rootpkg] = set([])
         class_hierarchy[self.rootpkg].add(self.n)
-        
+
         # Add all classes that will be generated to class_hierarchy dict
         def record(stmt, package):
             for ch in search(stmt, yangelement_stmts):
@@ -1451,7 +1449,6 @@ class JavaClass(object):
         """Adds a clone method represented as a string"""
         if not isinstance(cloner, str):
             for import_ in cloner.imports:
-                #print(import_)
                 self.imports.add(import_)
         self.cloners.add(cloner)
 
@@ -1545,7 +1542,6 @@ class JavaClass(object):
                 if hasattr(method, 'exceptions'):
                     self.imports |= ['com.tailf.jnc.' + s for s in method.exceptions]
         if self.superclass:
-            #print(get_import(self.superclass))
             self.imports.add(get_import(self.superclass))
         imported_classes = []
         if self.imports:
@@ -1644,7 +1640,6 @@ class JavaValue(object):
         self.imports = set([])
         if imports is not None:
             for import_ in imports:
-                #print(import_)
                 self.imports.add(import_)
 
         self.exact = exact
@@ -1719,11 +1714,9 @@ class JavaValue(object):
         _, sep, class_name = import_.rpartition('.')
         if sep:
             if class_name not in java_built_in:
-                #print(import_)
                 self.imports.add(import_)
                 return class_name
         elif not any(x in java_built_in for x in (import_, import_[:-2])):
-            print(import_)
             self.imports.add(import_)
         return import_
 
