@@ -1,6 +1,6 @@
 package demo;
 
-import com.air.ianaIfType.Ianaift;
+//import com.air.ianaIfType.Ianaift;
 import com.tailf.jnc.JNCException;
 import org.python.util.PythonInterpreter;
 
@@ -12,7 +12,7 @@ import java.util.Properties;
 public class JPython {
     public static void main(String args[]) throws JNCException {
         Properties props = new Properties();
-        Ianaift.enable();
+//        Ianaift.enable();
         props.put("python.home","/opt/local/Library/Frameworks/Python.framework/Versions/2.7/lib");
 
 

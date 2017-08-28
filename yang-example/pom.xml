@@ -11,8 +11,20 @@
 
     <artifactId>yang-example</artifactId>
 
+<dependencies>
+    <dependency>
+        <groupId>com.airlenet.yang</groupId>
+        <artifactId>play-jnc</artifactId>
+        <version>1.0-SNAPSHOT</version>
+    </dependency>
+</dependencies>
 
     <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>com.airlenet.yang</groupId>
@@ -26,7 +38,44 @@
                         </goals>
                         <configuration>
                             <outputDirectory>target/generated-sources/java</outputDirectory>
-                            <skip>true</skip>
+                            <skip>false</skip>
+                            <!--<yangs>-->
+                                <!--<yang>demo.yang</yang>-->
+                                <!--<yang>iana-if-type.yang</yang>-->
+                            <!--</yangs>-->
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>1.7</version>
+                <executions>
+                    <execution>
+                        <id>add-source</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>target/generated-sources/java</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>add-resource</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>add-resource</goal>
+                        </goals>
+                        <configuration>
+                            <resources>
+                                <resource>
+                                    <directory>target/generated-sources/java</directory>
+                                </resource>
+                            </resources>
                         </configuration>
                     </execution>
                 </executions>

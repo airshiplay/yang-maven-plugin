@@ -5,6 +5,7 @@
  */
 package com.airlenet.yang.plugin;
 
+import com.airlenet.yang.codegen.Codegen;
 import com.google.common.base.Joiner;
 import org.apache.commons.io.FileUtils;
 import org.apache.maven.artifact.Artifact;
@@ -96,6 +97,11 @@ public abstract class AbstractProcessorMojo extends AbstractMojo {
      * @parameter
      */
     private boolean skip = false;
+
+    /**
+     * @parameter  required=false
+     */
+    private List<String> yangs;
     /**
      * @parameter
      */
@@ -347,81 +353,106 @@ public abstract class AbstractProcessorMojo extends AbstractMojo {
         Set<File> yangSourceDirectories = getYangSourceDirectories();
 
         getLog().debug("Using build context: " + buildContext);
+        List<String> yangImportRoots = getYangImportRoots();
 
-        StandardJavaFileManager fileManager = null;
+        File yangSourceRoot = getYangSourceRoot();
+
+        Codegen codegen = new Codegen(yangSourceRoot, getOutputDirectory(), "com.airlenet.yang.model");
 
         try {
-            JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
-            if (compiler == null) {
-                throw new MojoExecutionException("You need to run build with JDK or have tools.jar on the classpath."
-                        + "If this occures during eclipse build make sure you run eclipse under JDK as well");
-            }
-            List<String> yangImportRoots = getYangImportRoots();
-            Set<File> files = filterFiles(yangSourceDirectories);
-            if (files.isEmpty()) {
-                getLog().debug("No Yang sources found (skipping)");
-                return;
-            }
-
-            fileManager = compiler.getStandardFileManager(null, null, null);
-            Iterable<? extends JavaFileObject> compilationUnits1 = fileManager.getJavaFileObjectsFromFiles(files);
-            // clean all markers
-            for (JavaFileObject javaFileObject : compilationUnits1) {
-                buildContext.removeMessages(new File(javaFileObject.toUri().getPath()));
-            }
-
-            String compileClassPath = buildCompileClasspath();
-
-            String processor = buildProcessor();
-
-            String outputDirectory = getOutputDirectory().getPath();
-            File tempDirectory = null;
-
-            if (buildContext.isIncremental()) {
-                tempDirectory = new File(project.getBuild().getDirectory(), "apt" + System.currentTimeMillis());
-                tempDirectory.mkdirs();
-                outputDirectory = tempDirectory.getAbsolutePath();
-            }
-
-            List<String> compilerOptions = buildCompilerOptions(processor, compileClassPath, outputDirectory);
-
-            Writer out = null;
-            if (logOnlyOnError) {
-                out = new StringWriter();
-            }
-            ExecutorService executor = Executors.newSingleThreadExecutor();
-            try {
-                DiagnosticCollector<JavaFileObject> diagnosticCollector = new DiagnosticCollector<JavaFileObject>();
-                CompilationTask task = compiler.getTask(out, fileManager, diagnosticCollector, compilerOptions, null, compilationUnits1);
-                Future<Boolean> future = executor.submit(task);
-                Boolean rv = future.get();
-
-                if (Boolean.FALSE.equals(rv) && logOnlyOnError) {
-                    getLog().error(out.toString());
+            List<String> yangList = new ArrayList<>();
+            if(yangs==null ||yangs.isEmpty()){
+                Set<File> files = filterFiles(yangSourceDirectories);
+                for (File f:files){
+                    yangList.add(f.getAbsolutePath());
                 }
-                processDiagnostics(diagnosticCollector.getDiagnostics());
-            } finally {
-                executor.shutdown();
-                if (tempDirectory != null) {
-                    FileSync.syncFiles(tempDirectory, getOutputDirectory());
-                    FileUtils.deleteDirectory(tempDirectory);
+            }else{
+                for (String yang:yangs){
+                    yangList.add(yangSourceRoot.getAbsolutePath()+File.separator+yang);
                 }
             }
-
-            buildContext.refresh(getOutputDirectory());
-        } catch (Exception e1) {
-            getLog().error("execute error", e1);
-            throw new MojoExecutionException(e1.getMessage(), e1);
-
-        } finally {
-            if (fileManager != null) {
-                try {
-                    fileManager.close();
-                } catch (Exception e) {
-                    getLog().warn("Unable to close fileManager", e);
-                }
-            }
+            codegen.setYangList(yangList);
+            codegen.setYangImportList(yangImportRoots);
+            codegen.generatorCode();
+        } catch (IOException e) {
+                        getLog().error("execute error", e);
+            throw new MojoExecutionException(e.getMessage(), e);
         }
+
+//        StandardJavaFileManager fileManager = null;
+//
+//        try {
+//            JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
+//            if (compiler == null) {
+//                throw new MojoExecutionException("You need to run build with JDK or have tools.jar on the classpath."
+//                        + "If this occures during eclipse build make sure you run eclipse under JDK as well");
+//            }
+//            List<String> yangImportRoots = getYangImportRoots();
+//            Set<File> files = filterFiles(yangSourceDirectories);
+//            if (files.isEmpty()) {
+//                getLog().debug("No Yang sources found (skipping)");
+//                return;
+//            }
+//
+//            fileManager = compiler.getStandardFileManager(null, null, null);
+//            Iterable<? extends JavaFileObject> compilationUnits1 = fileManager.getJavaFileObjectsFromFiles(files);
+//            // clean all markers
+//            for (JavaFileObject javaFileObject : compilationUnits1) {
+//                buildContext.removeMessages(new File(javaFileObject.toUri().getPath()));
+//            }
+//
+//            String compileClassPath = buildCompileClasspath();
+//
+//            String processor = buildProcessor();
+//
+//            String outputDirectory = getOutputDirectory().getPath();
+//            File tempDirectory = null;
+//
+//            if (buildContext.isIncremental()) {
+//                tempDirectory = new File(project.getBuild().getDirectory(), "apt" + System.currentTimeMillis());
+//                tempDirectory.mkdirs();
+//                outputDirectory = tempDirectory.getAbsolutePath();
+//            }
+//
+//            List<String> compilerOptions = buildCompilerOptions(processor, compileClassPath, outputDirectory);
+//
+//            Writer out = null;
+//            if (logOnlyOnError) {
+//                out = new StringWriter();
+//            }
+//            ExecutorService executor = Executors.newSingleThreadExecutor();
+//            try {
+//                DiagnosticCollector<JavaFileObject> diagnosticCollector = new DiagnosticCollector<JavaFileObject>();
+//                CompilationTask task = compiler.getTask(out, fileManager, diagnosticCollector, compilerOptions, null, compilationUnits1);
+//                Future<Boolean> future = executor.submit(task);
+//                Boolean rv = future.get();
+//
+//                if (Boolean.FALSE.equals(rv) && logOnlyOnError) {
+//                    getLog().error(out.toString());
+//                }
+//                processDiagnostics(diagnosticCollector.getDiagnostics());
+//            } finally {
+//                executor.shutdown();
+//                if (tempDirectory != null) {
+//                    FileSync.syncFiles(tempDirectory, getOutputDirectory());
+//                    FileUtils.deleteDirectory(tempDirectory);
+//                }
+//            }
+//
+//            buildContext.refresh(getOutputDirectory());
+//        } catch (Exception e1) {
+//            getLog().error("execute error", e1);
+//            throw new MojoExecutionException(e1.getMessage(), e1);
+//
+//        } finally {
+//            if (fileManager != null) {
+//                try {
+//                    fileManager.close();
+//                } catch (Exception e) {
+//                    getLog().warn("Unable to close fileManager", e);
+//                }
+//            }
+//        }
     }
 
     protected abstract File getOutputDirectory();

@@ -1,7 +1,7 @@
 package demo;
 
-import com.airlenet.yang.common.PlayNetconfDevice;
-import com.airlenet.yang.common.PlayNetconfSession;
+//import com.airlenet.yang.common.PlayNetconfDevice;
+//import com.airlenet.yang.common.PlayNetconfSession;
 //import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tailf.jnc.Element;
 import com.tailf.jnc.JNCException;
@@ -25,7 +25,7 @@ public class DemoTest {
 //        employee.markCityDelete();
 //        employee.setTitleValue("title");
 //        System.out.print(new ObjectMapper().writeValueAsString(employees));
-        PlayNetconfDevice playNetconfDevice = new PlayNetconfDevice(1L, "admin", "admin", "admin", "admin", "172.16.129.187", 2022);
+//        PlayNetconfDevice playNetconfDevice = new PlayNetconfDevice(1L, "admin", "admin", "admin", "admin", "172.16.129.187", 2022);
 
 //        PlayNetconfSession session = playNetconfDevice.getNetconfSession();
 //       System.out.println( employees.toXMLString());

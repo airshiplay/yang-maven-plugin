@@ -149,14 +149,14 @@ class JNCPlugin(plugin.PyangPlugin):
             sys.exit(0)
         if ctx.opts.format == 'jnc':
             if not ctx.opts.directory:
-                ctx.opts.directory = 'src/gen'
+                ctx.opts.directory = 'java/gen'
                 print_warning(msg=('Option -d (or --jnc-output) not set, ' +
-                    'defaulting to "src/gen".'))
-            elif 'src' not in ctx.opts.directory:
-                ctx.opts.directory = 'src/gen'
-                print_warning(msg=('No "src" in output directory path, ' +
-                    'defaulting to "src/gen".'))
-            ctx.rootpkg = ctx.opts.directory.rpartition('src')[2][1:]
+                    'defaulting to "java/gen".'))
+            elif 'java' not in ctx.opts.directory:
+                ctx.opts.directory = 'java/gen'
+                print_warning(msg=('No "java" in output directory path, ' +
+                    'defaulting to "java/gen".'))
+            ctx.rootpkg = ctx.opts.directory.rpartition('java')[2][1:]
             self.ctx = ctx
             self.d = ctx.opts.directory.split('.')
 
@@ -1341,7 +1341,7 @@ class PackageInfoGenerator(object):
 
         """
         self.d = directory
-        self.pkg = directory.rpartition('src')[2][1:]
+        self.pkg = directory.rpartition('java')[2][1:]
         self.pkg = self.pkg.replace(os.sep, '.')
         self.stmt = stmt
         self.ctx = ctx
@@ -1414,7 +1414,7 @@ class JavaClass(object):
         if imports is None:
             imports = []
         self.filename = filename
-        self.package = package if package[:3] != 'src' else package[4:]
+        self.package = package if package[:3] != 'java' else package[4:]
         self.imports = OrderedSet()
         for i in range(len(imports)):
             self.imports.add(imports[i])
@@ -1893,8 +1893,8 @@ class MethodGenerator(object):
         self.pkg = get_package(stmt, ctx)
         self.basepkg = self.pkg.partition('.')[0]
         self.rootpkg = ctx.rootpkg.split(os.sep)
-        if self.rootpkg[:1] == ['src']:
-            self.rootpkg = self.rootpkg[1:]  # src not part of package
+        if self.rootpkg[:1] == ['java']:
+            self.rootpkg = self.rootpkg[1:]  # java not part of package
         self.rootpkg.append(camelize(self.module_stmt.arg))
 
         self.is_container = stmt.keyword in ('container', 'notification')
