@@ -21,8 +21,6 @@ public class ProcessUtil {
      * @throws IOException
      */
     public static boolean process(String... command) throws IOException {
-        for(String cmd:command)
-         System.out.print(cmd+" ");
         ProcessBuilder processBuilder = new ProcessBuilder();
 
         processBuilder.command(command);
@@ -34,7 +32,7 @@ public class ProcessUtil {
        if(error.equals("")){
            return false;
        }else{
-           logger.error(error);
+           logger.warn(error);
            return true;
        }
     }

@@ -1,5 +1,8 @@
 package com.airlenet.yang.codegen;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.*;
 import java.util.List;
 
@@ -7,6 +10,7 @@ import java.util.List;
  * Created by lig on 17/8/28.
  */
 public class Codegen {
+    static Logger logger  = LoggerFactory.getLogger(Codegen.class);
     private File yangRoot;
     private File outDir;
     private String basePkgName;
@@ -35,7 +39,9 @@ public class Codegen {
             builder.append(importFile);
         }
         String path = builder.toString();
+        logger.info("pyang -f jnc --plugindir "+jncHome+" --jnc-output "+ outDir.getAbsolutePath()+"/"+basePkgName+" -p "+path+" --jnc-classpath-schema-loading");
         for(String yangfile:yangList){
+            logger.info("convert yang file "+ yangfile);
             ProcessUtil.process("pyang","-f","jnc",
                     "--plugindir",jncHome,
                     "--jnc-output",outDir.getAbsolutePath()+"/"+basePkgName,

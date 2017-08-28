@@ -11,13 +11,13 @@
 
     <artifactId>yang-example</artifactId>
 
-<dependencies>
-    <dependency>
-        <groupId>com.airlenet.yang</groupId>
-        <artifactId>play-jnc</artifactId>
-        <version>1.0-SNAPSHOT</version>
-    </dependency>
-</dependencies>
+    <dependencies>
+        <dependency>
+            <groupId>com.airlenet.yang</groupId>
+            <artifactId>play-jnc</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
 
     <build>
         <resources>
@@ -39,6 +39,9 @@
                         <configuration>
                             <outputDirectory>target/generated-sources/java</outputDirectory>
                             <skip>false</skip>
+                            <!--<yangs>-->
+                                <!--<yang>router/rtm/certus-flexbng-rtm.yang</yang>-->
+                            <!--</yangs>-->
                             <!--<yangs>-->
                                 <!--<yang>demo.yang</yang>-->
                                 <!--<yang>iana-if-type.yang</yang>-->

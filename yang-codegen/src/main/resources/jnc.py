@@ -189,7 +189,8 @@ class JNCPlugin(plugin.PyangPlugin):
                     etag in ('MODULE_NOT_FOUND', 'MODULE_NOT_FOUND_REV')):
                     self.fatal("%s contains errors" % epos.top.arg)
                 if (etag in ('TYPE_NOT_FOUND', 'FEATURE_NOT_FOUND',
-                    'IDENTITY_NOT_FOUND', 'GROUPING_NOT_FOUND')):
+                    'IDENTITY_NOT_FOUND', 'GROUPING_NOT_FOUND','UNUSED_IMPORT','XPATH_FUNCTION','ILLEGAL_ESCAPE_WARN',
+                    'UNIQUE_IS_KEY','DUPLICATE_NAMESPACE','NODE_NOT_FOUND')):
                     print_warning(msg=(etag.lower() + ', generated class ' +
                         'hierarchy might be incomplete.'), key=etag)
                 else:
@@ -456,7 +457,7 @@ def print_warning(msg='', key='', ctx=None):
     if ((not key or key not in outputted_warnings) and
         (not ctx or ctx.opts.debug or ctx.opts.verbose)):
         if msg:
-            sys.stderr.write('WARNING: ' + msg)
+            sys.stderr.write('\nWARNING: ' + msg + ' ' + key)
             if key:
                 outputted_warnings.append(key)
         else:
