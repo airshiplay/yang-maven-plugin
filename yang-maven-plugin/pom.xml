@@ -13,22 +13,22 @@
     <packaging>maven-plugin</packaging>
     <name>play yang maven plugin</name>
 
-  <licenses>
-    <license>
-      <name>Apache License, Version 2.0</name>
-      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-    </license>
-  </licenses>
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
     <properties>
         <mvn.version>2.2.1</mvn.version>
     </properties>
     <dependencies>
         <!-- dependencies to annotations -->
         <!--<dependency>-->
-            <!--<groupId>org.apache.maven.plugin-tools</groupId>-->
-            <!--<artifactId>maven-plugin-annotations</artifactId>-->
-            <!--<version>3.4</version>-->
-            <!--<scope>provided</scope>-->
+        <!--<groupId>org.apache.maven.plugin-tools</groupId>-->
+        <!--<artifactId>maven-plugin-annotations</artifactId>-->
+        <!--<version>3.4</version>-->
+        <!--<scope>provided</scope>-->
         <!--</dependency>-->
 
         <dependency>
@@ -67,15 +67,21 @@
             <artifactId>guava</artifactId>
             <version>18.0</version>
         </dependency>
+        <dependency>
+            <groupId>com.airlenet.yang</groupId>
+            <artifactId>yang-codegen</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
-  <profiles>
-    <profile>
-      <activation>
-        <jdk>1.8</jdk>
-      </activation>
-      <properties>
-        <additionalparam>-Xdoclint:none</additionalparam>
-      </properties>
-    </profile>
-  </profiles>
+    <profiles>
+        <profile>
+            <id>jdk1.8</id>
+            <activation>
+                <jdk>1.8</jdk>
+            </activation>
+            <properties>
+                <additionalparam>-Xdoclint:none</additionalparam>
+            </properties>
+        </profile>
+    </profiles>
 </project>
