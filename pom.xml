@@ -20,8 +20,8 @@
         <module>yang-codegen</module>
         <module>yang-maven-plugin</module>
         <module>yang-example</module>
-        <module>netconf-service</module>
-        <module>netconf-common</module>
+        <!--<module>netconf-service</module>-->
+        <!--<module>netconf-common</module>-->
     </modules>
 
     <licenses>

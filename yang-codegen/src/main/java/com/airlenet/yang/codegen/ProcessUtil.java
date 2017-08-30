@@ -46,7 +46,7 @@ public class ProcessUtil {
                 throw new Exception(error);
             }
             if (error.contains("warning") || error.contains("WARNING")) {
-                if (showWaring||!error.contains("is a directory, not a file"))
+                if (showWaring)
                     logger.warn(error);
             } else {
                 logger.info(error);

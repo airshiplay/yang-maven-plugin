@@ -46,6 +46,7 @@ Usage
                     <outputDirectory>target/generated-sources/java</outputDirectory>
                     <skip>true</skip>
                     <showWarnings>false</showWarnings>
+                    <packageName>com.airlenet.yang.model</packageName>
                     <includes>
                         <include>tailf/*.yang</include>
                         <include>d*.yang</include>

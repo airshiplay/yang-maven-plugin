@@ -85,6 +85,10 @@ public abstract class AbstractProcessorMojo extends AbstractMojo {
     private boolean skip = false;
 
     /**
+     * @parameter required=true
+     */
+    private String packageName="com.airlenet.yang.model";
+    /**
      * @parameter
      */
     private List<String> excludes;
@@ -342,12 +346,12 @@ public abstract class AbstractProcessorMojo extends AbstractMojo {
 
         //检测jython 是否安装
         try {
-            ProcessUtil.process(new File(jythonHome, "/bin/jython").getAbsolutePath(), "-V");
+            ProcessUtil.process(showWarnings,new File(jythonHome, "/bin/jython").getAbsolutePath(), "-V");
         } catch (Exception e) {//安装jython
             getLog().info("Jython is not installed. Start installation");
             Installation.main(new String[]{"-s", "-d", jythonHome.getAbsolutePath(), "-t", "standard", "-e", "demo", "doc"});
             try {//再次检测
-                ProcessUtil.process(jython.getAbsolutePath(), "-V");
+                ProcessUtil.process(showWarnings,jython.getAbsolutePath(), "-V");
             } catch (Exception e1) {
                 getLog().error("install jython fail", e1);
                 throw new MojoExecutionException(e1.getMessage(), e1);
@@ -355,13 +359,13 @@ public abstract class AbstractProcessorMojo extends AbstractMojo {
         }
 
         try {//检测 pyang
-            ProcessUtil.process(jython.getAbsolutePath(), pyang.getAbsolutePath(), "-v");
+            ProcessUtil.process(showWarnings,jython.getAbsolutePath(), pyang.getAbsolutePath(), "-v");
         } catch (Exception e) {
             try {//安装pyang
-                getLog().info("Pyang is not installed. Start installation");
+                getLog().info("pyang is not installed. Start installation");
                 PyangInstall.copy(jythonHome);
-                ProcessUtil.process(pyangSource,jython.getAbsolutePath(), new File(pyangSource,"setup.py").getAbsolutePath(), "install");
-                ProcessUtil.process(jython.getAbsolutePath(), pyang.getAbsolutePath(), "-v");
+                ProcessUtil.process(showWarnings,pyangSource,jython.getAbsolutePath(), new File(pyangSource,"setup.py").getAbsolutePath(), "install");
+                ProcessUtil.process(showWarnings,jython.getAbsolutePath(), pyang.getAbsolutePath(), "-v");
             } catch (Exception e1) {
                 getLog().error("install pyang fail", e1);
                 throw new MojoExecutionException(e1.getMessage(), e1);
@@ -370,11 +374,9 @@ public abstract class AbstractProcessorMojo extends AbstractMojo {
 
 
         // make sure to add compileSourceRoots also during configuration build in m2e context
-        if (isForTest()) {
-            project.addTestCompileSourceRoot(getOutputDirectory().getAbsolutePath());
-        } else {
-            project.addCompileSourceRoot(getOutputDirectory().getAbsolutePath());
-        }
+
+        project.addCompileSourceRoot(getOutputDirectory().getAbsolutePath());
+
 
         Set<File> yangSourceDirectories = getYangSourceDirectories();
 
@@ -383,7 +385,7 @@ public abstract class AbstractProcessorMojo extends AbstractMojo {
 
         File yangSourceRoot = getYangSourceRoot();
 
-        Codegen codegen = new Codegen(yangSourceRoot, getOutputDirectory(), "com.airlenet.yang.model");
+        Codegen codegen = new Codegen(yangSourceRoot, getOutputDirectory(), packageName);
 
         try {
             List<String> yangList = new ArrayList<>();
