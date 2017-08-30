@@ -10,7 +10,7 @@
     </parent>
     <groupId>com.airlenet.yang</groupId>
     <artifactId>play-yang</artifactId>
-    <version>1.0.0.SNAPSHOT</version>
+    <version>1.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>play yang</name>
     <description>play yang</description>
