@@ -35,7 +35,7 @@ Usage
     <plugin>
         <groupId>com.airlenet.yang</groupId>
         <artifactId>yang-maven-plugin</artifactId>
-        <version>1.0.0.SNAPSHOT</version>
+        <version>1.0.0-SNAPSHOT</version>
         <executions>
             <execution>
                 <id>process</id>
