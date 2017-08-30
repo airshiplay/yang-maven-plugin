@@ -1,10 +1,12 @@
 # play-yang
- Play Platform is to build a high performance, high scalability java development platform, complete the general management function. It adopts the background management, centralized deployment, and the separation of the member business system. It can separate the background management system, the front-end display system and the user center system. Developers can expand on this basis, and then use a core, you can develop a variety of Internet products.
+ Play Yang  based on JNC,and a plugin for pyang to generate Java classes from YANG models
  
- [JNC](https://github.com/tail-f-systems/JNC)<br/>
+ Reference
+ [JNC](https://github.com/tail-f-systems/JNC)
  [pyang](https://github.com/mbj4668/pyang)
 # play-jnc
-[pyang](http://www.yang-central.org/twiki/pub/Main/YangTools/pyang.1.html)
+Modify based on [JNC](https://github.com/tail-f-systems/JNC)
+
 # yang-maven-plugin
 
 Download
@@ -23,35 +25,39 @@ or Gradle:
 compile 'com.airlenet.yang:yang-maven-plugin:1.0.0.RELEASE'
 ```
 
-Snapshots of the development version are available in [Sonatype's `snapshots` repository][snap].
+Snapshots of the development version are available in [Sonatype's `snapshots` repository](https://oss.sonatype.org/content/repositories/snapshots/com/airlenet/yang/yang-maven-plugin).
 
 Usage
 --------
 
 ```
 <plugins>
-   <plugin>
-       <groupId>com.airlenet.yang</groupId>
-       <artifactId>yang-maven-plugin</artifactId>
-       <version>${project.version}</version>
-       <executions>
-           <execution>
-               <id>process</id>
-               <goals>
-                   <goal>process</goal>
-               </goals>
-               <configuration>
-                   <outputDirectory>target/generated-sources/java</outputDirectory>
-                   <skip>false</skip>
-                   <yangs>
-                       <yang>demo.yang</yang>
-                       <yang>iana-if-type.yang</yang>
-                   </yangs>
-               </configuration>
-           </execution>
-       </executions>
-   </plugin>
-   <plugin>
+    <plugin>
+        <groupId>com.airlenet.yang</groupId>
+        <artifactId>yang-maven-plugin</artifactId>
+        <version>1.0.0.SNAPSHOT</version>
+        <executions>
+            <execution>
+                <id>process</id>
+                <goals>
+                    <goal>process</goal>
+                </goals>
+                <configuration>
+                    <outputDirectory>target/generated-sources/java</outputDirectory>
+                    <skip>true</skip>
+                    <showWarnings>false</showWarnings>
+                    <includes>
+                        <include>tailf/*.yang</include>
+                        <include>d*.yang</include>
+                    </includes>
+                    <excludes>
+                        <exclude>tailf/tailf-netconf-*.yang</exclude>
+                    </excludes>
+                </configuration>
+            </execution>
+        </executions>
+    </plugin>
+    <plugin>
        <groupId>org.codehaus.mojo</groupId>
        <artifactId>build-helper-maven-plugin</artifactId>
        <version>1.7</version>
@@ -87,7 +93,7 @@ Usage
 </plugins>
 ```
 
-参考 [yang-example](https://github.com/airshiplay/play-yang/tree/master/yang-example)
+ [yang-example](https://github.com/airshiplay/play-yang/tree/master/yang-example)
 
 
 ## License
