@@ -23,7 +23,7 @@ public class Codegen {
         this.basePkgName = basePkgName;
     }
 
-    public void generatorCode() throws IOException {
+    public void generatorCode(String jython,String pyang) throws Exception {
 
         String jncHome= System.getProperty("user.home")+File.separator+".jnc";
         if(!new File(jncHome).exists()){
@@ -42,7 +42,7 @@ public class Codegen {
         logger.info("pyang -f jnc --plugindir "+jncHome+" --jnc-output "+ outDir.getAbsolutePath()+"/"+basePkgName+" -p "+path+" --jnc-classpath-schema-loading");
         for(String yangfile:yangList){
             logger.info("convert yang file "+ yangfile);
-            ProcessUtil.process("pyang","-f","jnc",
+            ProcessUtil.process(jython,pyang,"-f","jnc",
                     "--plugindir",jncHome,
                     "--jnc-output",outDir.getAbsolutePath()+"/"+basePkgName,
                     "-p",path,"--jnc-classpath-schema-loading",

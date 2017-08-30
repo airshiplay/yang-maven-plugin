@@ -6,6 +6,8 @@
 package com.airlenet.yang.plugin;
 
 import com.airlenet.yang.codegen.Codegen;
+import com.airlenet.yang.codegen.ProcessUtil;
+import com.airlenet.yang.codegen.PyangInstall;
 import com.google.common.base.Joiner;
 import org.apache.commons.io.FileUtils;
 import org.apache.maven.artifact.Artifact;
@@ -15,16 +17,19 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.util.Scanner;
 import org.codehaus.plexus.util.StringUtils;
+import org.python.util.install.Installation;
 import org.sonatype.plexus.build.incremental.BuildContext;
 
 import javax.tools.*;
 import javax.tools.Diagnostic.Kind;
 import javax.tools.JavaCompiler.CompilationTask;
 import java.io.*;
+import java.net.URL;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.jar.JarEntry;
 
 /**
  * Base class for AnnotationProcessorMojo implementations
@@ -99,7 +104,7 @@ public abstract class AbstractProcessorMojo extends AbstractMojo {
     private boolean skip = false;
 
     /**
-     * @parameter  required=false
+     * @parameter required=false
      */
     private List<String> yangs;
     /**
@@ -343,6 +348,40 @@ public abstract class AbstractProcessorMojo extends AbstractMojo {
             getOutputDirectory().mkdirs();
         }
 
+        File jythonHome = new File(System.getProperty("user.home"), ".jython");
+        File jython = new File(jythonHome, "bin/jython");
+        File pyang = new File(jythonHome, "bin/pyang");
+        File pyangSource = new File(jythonHome,"pyang");
+
+        //检测jython 是否安装
+        try {
+            ProcessUtil.process(new File(jythonHome, "/bin/jython").getAbsolutePath(), "-V");
+        } catch (Exception e) {//安装jython
+            getLog().info("Jython is not installed. Start installation");
+            Installation.main(new String[]{"-s", "-d", jythonHome.getAbsolutePath(), "-t", "standard", "-e", "demo", "doc"});
+            try {//再次检测
+                ProcessUtil.process(jython.getAbsolutePath(), "-V");
+            } catch (Exception e1) {
+                getLog().error("install jython fail", e1);
+                throw new MojoExecutionException(e1.getMessage(), e1);
+            }
+        }
+
+        try {//检测 pyang
+            ProcessUtil.process(jython.getAbsolutePath(), pyang.getAbsolutePath(), "-v");
+        } catch (Exception e) {
+            try {//安装pyang
+                getLog().info("Pyang is not installed. Start installation");
+                PyangInstall.copy(jythonHome);
+                ProcessUtil.process(pyangSource,jython.getAbsolutePath(), new File(pyangSource,"setup.py").getAbsolutePath(), "install");
+                ProcessUtil.process(jython.getAbsolutePath(), pyang.getAbsolutePath(), "-v");
+            } catch (Exception e1) {
+                getLog().error("install pyang fail", e1);
+                throw new MojoExecutionException(e1.getMessage(), e1);
+            }
+        }
+
+
         // make sure to add compileSourceRoots also during configuration build in m2e context
         if (isForTest()) {
             project.addTestCompileSourceRoot(getOutputDirectory().getAbsolutePath());
@@ -361,21 +400,21 @@ public abstract class AbstractProcessorMojo extends AbstractMojo {
 
         try {
             List<String> yangList = new ArrayList<>();
-            if(yangs==null ||yangs.isEmpty()){
+            if (yangs == null || yangs.isEmpty()) {
                 Set<File> files = filterFiles(yangSourceDirectories);
-                for (File f:files){
+                for (File f : files) {
                     yangList.add(f.getAbsolutePath());
                 }
-            }else{
-                for (String yang:yangs){
-                    yangList.add(yangSourceRoot.getAbsolutePath()+File.separator+yang);
+            } else {
+                for (String yang : yangs) {
+                    yangList.add(yangSourceRoot.getAbsolutePath() + File.separator + yang);
                 }
             }
             codegen.setYangList(yangList);
             codegen.setYangImportList(yangImportRoots);
-            codegen.generatorCode();
-        } catch (IOException e) {
-                        getLog().error("execute error", e);
+            codegen.generatorCode(jython.getAbsolutePath(),pyang.getAbsolutePath());
+        } catch (Exception e) {
+            getLog().error("execute error", e);
             throw new MojoExecutionException(e.getMessage(), e);
         }
 
@@ -472,6 +511,7 @@ public abstract class AbstractProcessorMojo extends AbstractMojo {
         }
         return directories;
     }
+
     protected Set<File> getYangSourceDirectories() {
         File outputDirectory = getOutputDirectory();
         String outputPath = outputDirectory.getAbsolutePath();
@@ -535,7 +575,7 @@ public abstract class AbstractProcessorMojo extends AbstractMojo {
             }
         });
         for (File f : files) {
-            getFolder(list,f);
+            getFolder(list, f);
             list.add(f.getAbsolutePath());
         }
         return list;

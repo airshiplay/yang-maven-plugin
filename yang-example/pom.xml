@@ -42,10 +42,10 @@
                             <!--<yangs>-->
                                 <!--<yang>router/rtm/certus-flexbng-rtm.yang</yang>-->
                             <!--</yangs>-->
-                            <!--<yangs>-->
-                                <!--<yang>demo.yang</yang>-->
-                                <!--<yang>iana-if-type.yang</yang>-->
-                            <!--</yangs>-->
+                            <yangs>
+                                <yang>demo.yang</yang>
+                                <yang>iana-if-type.yang</yang>
+                            </yangs>
                         </configuration>
                     </execution>
                 </executions>
