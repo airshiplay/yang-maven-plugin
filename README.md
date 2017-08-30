@@ -1,5 +1,5 @@
 # play-yang
- Play Yang  based on JNC,and a plugin for pyang to generate Java classes from YANG models
+ Play Yang  based on JNC,and a plugin for pyang to generate Java classes from YANG models.
  
  Reference
  [JNC](https://github.com/tail-f-systems/JNC)
