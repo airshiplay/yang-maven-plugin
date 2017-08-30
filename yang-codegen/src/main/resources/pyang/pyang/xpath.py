@@ -175,4 +175,5 @@ core_functions = [
     'floor',
     'ceiling',
     'round',
+    'compare'
     ]
