@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * Created by lig on 17/8/28.
+ * Created by airlenet on 17/8/28.
  */
 public class IOUtil {
     public static void cp(InputStream inputStream,String file){

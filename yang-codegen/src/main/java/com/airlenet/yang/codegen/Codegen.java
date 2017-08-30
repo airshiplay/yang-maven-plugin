@@ -7,7 +7,7 @@ import java.io.*;
 import java.util.List;
 
 /**
- * Created by lig on 17/8/28.
+ * Created by airlenet on 17/8/28.
  */
 public class Codegen {
     static Logger logger  = LoggerFactory.getLogger(Codegen.class);
@@ -23,7 +23,7 @@ public class Codegen {
         this.basePkgName = basePkgName;
     }
 
-    public void generatorCode(String jython,String pyang) throws Exception {
+    public void generatorCode(boolean showWarnings, String jython, String pyang) throws Exception {
 
         String jncHome= System.getProperty("user.home")+File.separator+".jnc";
         if(!new File(jncHome).exists()){
@@ -39,10 +39,10 @@ public class Codegen {
             builder.append(importFile);
         }
         String path = builder.toString();
-        logger.info("pyang -f jnc --plugindir "+jncHome+" --jnc-output "+ outDir.getAbsolutePath()+"/"+basePkgName+" -p "+path+" --jnc-classpath-schema-loading");
+        //logger.info("pyang -f jnc --plugindir "+jncHome+" --jnc-output "+ outDir.getAbsolutePath()+"/"+basePkgName+" -p "+path+" --jnc-classpath-schema-loading");
         for(String yangfile:yangList){
             logger.info("convert yang file "+ yangfile);
-            ProcessUtil.process(jython,pyang,"-f","jnc",
+            ProcessUtil.process(showWarnings,jython,pyang,"-f","jnc",
                     "--plugindir",jncHome,
                     "--jnc-output",outDir.getAbsolutePath()+"/"+basePkgName,
                     "-p",path,"--jnc-classpath-schema-loading",

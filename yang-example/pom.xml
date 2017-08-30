@@ -18,7 +18,6 @@
             <version>1.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
-
     <build>
         <resources>
             <resource>
@@ -38,14 +37,15 @@
                         </goals>
                         <configuration>
                             <outputDirectory>target/generated-sources/java</outputDirectory>
-                            <skip>false</skip>
-                            <!--<yangs>-->
-                                <!--<yang>router/rtm/certus-flexbng-rtm.yang</yang>-->
-                            <!--</yangs>-->
-                            <yangs>
-                                <yang>demo.yang</yang>
-                                <yang>iana-if-type.yang</yang>
-                            </yangs>
+                            <skip>true</skip>
+                            <showWarnings>false</showWarnings>
+                            <includes>
+                                <include>tailf/*.yang</include>
+                                <include>d*.yang</include>
+                            </includes>
+                            <excludes>
+                                <exclude>tailf/tailf-netconf-*.yang</exclude>
+                            </excludes>
                         </configuration>
                     </execution>
                 </executions>

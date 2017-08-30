@@ -6,7 +6,7 @@ import com.tailf.jnc.JNCException;
 import java.util.Properties;
 
 /**
- * Created by lig on 17/8/27.
+ * Created by airlenet on 17/8/27.
  */
 public class JPython {
     public static void main(String args[]) throws JNCException {

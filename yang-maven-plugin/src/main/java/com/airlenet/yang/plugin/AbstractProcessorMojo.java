@@ -9,7 +9,6 @@ import com.airlenet.yang.codegen.Codegen;
 import com.airlenet.yang.codegen.ProcessUtil;
 import com.airlenet.yang.codegen.PyangInstall;
 import com.google.common.base.Joiner;
-import org.apache.commons.io.FileUtils;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.plugin.AbstractMojo;
@@ -22,14 +21,8 @@ import org.sonatype.plexus.build.incremental.BuildContext;
 
 import javax.tools.*;
 import javax.tools.Diagnostic.Kind;
-import javax.tools.JavaCompiler.CompilationTask;
 import java.io.*;
-import java.net.URL;
 import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.jar.JarEntry;
 
 /**
  * Base class for AnnotationProcessorMojo implementations
@@ -38,8 +31,8 @@ import java.util.jar.JarEntry;
  */
 public abstract class AbstractProcessorMojo extends AbstractMojo {
 
-    private static final String JAVA_FILE_FILTER = "/*.yang";
-    private static final String[] ALL_JAVA_FILES_FILTER = new String[]{"**" + JAVA_FILE_FILTER};
+    private static final String YANG_FILE_FILTER = "*.yang";
+    private static final String[] ALL_YANG_FILES_FILTER = new String[]{"**/" + YANG_FILE_FILTER};
 
     /**
      * @component
@@ -77,18 +70,6 @@ public abstract class AbstractProcessorMojo extends AbstractMojo {
     private Map<String, String> compilerOptions;
 
     /**
-     * A list of inclusion package filters for the apt processor.
-     * <p>
-     * If not specified all sources will be used for apt processor
-     * <p>
-     * <pre>
-     * e.g.:
-     * &lt;includes&gt;
-     * 	&lt;include&gt;com.mypackge.**.bo.**&lt;/include&gt;
-     * &lt;/includes&gt;
-     * </pre>
-     * <p>
-     * will include all files which match com/mypackge/ ** /bo/ ** / *.java
      *
      * @parameter
      */
@@ -97,16 +78,16 @@ public abstract class AbstractProcessorMojo extends AbstractMojo {
     /**
      * @parameter
      */
-    private boolean showWarnings = false;
+    private boolean showWarnings = true;
     /**
      * @parameter
      */
     private boolean skip = false;
 
     /**
-     * @parameter required=false
+     * @parameter
      */
-    private List<String> yangs;
+    private List<String> excludes;
     /**
      * @parameter
      */
@@ -260,12 +241,9 @@ public abstract class AbstractProcessorMojo extends AbstractMojo {
      * files to process
      */
     private Set<File> filterFiles(Set<File> directories) {
-        String[] filters = ALL_JAVA_FILES_FILTER;
+        String[] filters = ALL_YANG_FILES_FILTER;
         if (includes != null && !includes.isEmpty()) {
             filters = includes.toArray(new String[includes.size()]);
-            for (int i = 0; i < filters.length; i++) {
-                filters[i] = filters[i].replace('.', '/') + JAVA_FILE_FILTER;
-            }
         }
 
         Set<File> files = new HashSet<File>();
@@ -273,6 +251,9 @@ public abstract class AbstractProcessorMojo extends AbstractMojo {
             // support for incremental build in m2e context
             Scanner scanner = buildContext.newScanner(directory, false);
             scanner.setIncludes(filters);
+            if(excludes !=null && !excludes.isEmpty()){
+                scanner.setExcludes(excludes.toArray(new String[0]));
+            }
             scanner.scan();
             String[] includedFiles = scanner.getIncludedFiles();
 
@@ -280,6 +261,9 @@ public abstract class AbstractProcessorMojo extends AbstractMojo {
             if (buildContext.isIncremental() && (includedFiles == null || includedFiles.length == 0)) {
                 scanner = buildContext.newDeleteScanner(directory);
                 scanner.setIncludes(filters);
+                if(excludes !=null && !excludes.isEmpty()){
+                    scanner.setExcludes(excludes.toArray(new String[0]));
+                }
                 scanner.scan();
                 includedFiles = scanner.getIncludedFiles();
             }
@@ -288,6 +272,9 @@ public abstract class AbstractProcessorMojo extends AbstractMojo {
             if (ignoreDelta && buildContext.isIncremental() && includedFiles != null && includedFiles.length > 0) {
                 scanner = buildContext.newScanner(directory, true);
                 scanner.setIncludes(filters);
+                if(excludes !=null && !excludes.isEmpty()){
+                    scanner.setExcludes(excludes.toArray(new String[0]));
+                }
                 scanner.scan();
                 includedFiles = scanner.getIncludedFiles();
             }
@@ -400,19 +387,15 @@ public abstract class AbstractProcessorMojo extends AbstractMojo {
 
         try {
             List<String> yangList = new ArrayList<>();
-            if (yangs == null || yangs.isEmpty()) {
-                Set<File> files = filterFiles(yangSourceDirectories);
-                for (File f : files) {
-                    yangList.add(f.getAbsolutePath());
-                }
-            } else {
-                for (String yang : yangs) {
-                    yangList.add(yangSourceRoot.getAbsolutePath() + File.separator + yang);
-                }
+
+            Set<File> files = filterFiles(yangSourceDirectories);
+            for (File f : files) {
+                yangList.add(f.getAbsolutePath());
             }
+
             codegen.setYangList(yangList);
             codegen.setYangImportList(yangImportRoots);
-            codegen.generatorCode(jython.getAbsolutePath(),pyang.getAbsolutePath());
+            codegen.generatorCode(showWarnings,jython.getAbsolutePath(),pyang.getAbsolutePath());
         } catch (Exception e) {
             getLog().error("execute error", e);
             throw new MojoExecutionException(e.getMessage(), e);

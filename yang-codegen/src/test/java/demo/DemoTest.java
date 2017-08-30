@@ -13,7 +13,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
 /**
- * Created by lig on 17/8/24.
+ * Created by airlenet on 17/8/24.
  */
 public class DemoTest {
     public  static void main(String args[]) throws JNCException, IOException {

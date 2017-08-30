@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.FileFilter;
 
 /**
- * Created by lig on 17/8/29.
+ * Created by airlenet on 17/8/29.
  */
 public class DeletePyClass {
     public static void main(String args[]){

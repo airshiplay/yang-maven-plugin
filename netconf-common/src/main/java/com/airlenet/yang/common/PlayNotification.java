@@ -5,7 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Created by lig on 17/8/24.
+ * Created by airlenet on 17/8/24.
  */
 public class PlayNotification extends IOSubscriber {
 
