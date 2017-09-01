@@ -344,7 +344,11 @@ public abstract class AbstractProcessorMojo extends AbstractMojo {
         File jython = new File(jythonHome, "bin/jython");
         File pyang = new File(jythonHome, "bin/pyang");
         File pyangSource = new File(jythonHome,"pyang");
-
+        String osName=System.getProperty("os.name");
+        boolean linux =false;
+        if(osName.startsWith("linux")|| osName.startsWith("Linux")){
+            linux=true;
+        }
         try{//检测 Python
             ProcessUtil.process(showWarnings,"python", "-V");
             pythonUsing=true;
@@ -365,11 +369,19 @@ public abstract class AbstractProcessorMojo extends AbstractMojo {
         }
 
         try {//检测 pyang
+            List<String> commandList= new ArrayList<>();
             if(pythonUsing){
-                ProcessUtil.process(showWarnings,"pyang", "-v");
+                if(linux){
+                    commandList.add("pyang");
+                }else{
+                    commandList.add("pyang");//待调整
+                }
             }else{
-                ProcessUtil.process(showWarnings,jython.getAbsolutePath(), pyang.getAbsolutePath(), "-v");
+                commandList.add(jython.getAbsolutePath());
+                commandList.add(pyang.getAbsolutePath());
             }
+            commandList.add("-v");
+            ProcessUtil.process(showWarnings,commandList);
         } catch (Exception e) {
             try {//安装pyang
                 getLog().info("pyang is not installed. Start installation");
