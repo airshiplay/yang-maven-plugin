@@ -37,7 +37,7 @@
                         </goals>
                         <configuration>
                             <outputDirectory>target/generated-sources/java</outputDirectory>
-                            <skip>true</skip>
+                            <skip>false</skip>
                             <showWarnings>false</showWarnings>
                             <packageName>com.airlenet.yang.model</packageName>
                             <excludes>

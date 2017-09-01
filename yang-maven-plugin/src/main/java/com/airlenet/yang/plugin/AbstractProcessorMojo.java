@@ -358,7 +358,7 @@ public abstract class AbstractProcessorMojo extends AbstractMojo {
                 try {//再次检测
                     ProcessUtil.process(showWarnings,jython.getAbsolutePath(), "-V");
                 } catch (Exception e1) {
-                    getLog().error("install jython fail", e1);
+                    getLog().error("install jython fail,please install python 2.7.* from https://www.python.org/downloads/", e1);
                     throw new MojoExecutionException(e1.getMessage(), e1);
                 }
             }
@@ -375,8 +375,10 @@ public abstract class AbstractProcessorMojo extends AbstractMojo {
                 getLog().info("pyang is not installed. Start installation");
                 PyangInstall.copy(jythonHome);
                 if(pythonUsing){
-                    ProcessUtil.process(showWarnings,pyangSource,jython.getAbsolutePath(), new File(pyangSource,"setup.py").getAbsolutePath(), "install");
+                    ProcessUtil.process(showWarnings,pyangSource,"python", new File(pyangSource,"setup.py").getAbsolutePath(), "install");
+                    ProcessUtil.process(showWarnings,"pyang", "-v");
                 }else{
+                    ProcessUtil.process(showWarnings,pyangSource,jython.getAbsolutePath(), new File(pyangSource,"setup.py").getAbsolutePath(), "install");
                     ProcessUtil.process(showWarnings,jython.getAbsolutePath(), pyang.getAbsolutePath(), "-v");
                 }
             } catch (Exception e1) {

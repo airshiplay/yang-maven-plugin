@@ -35,8 +35,8 @@ public class ProcessUtil {
         processBuilder.command(command);
 
         Process process = processBuilder.start();
-        String error = input2str(process.getErrorStream());
         String print = input2str(process.getInputStream());
+        String error = input2str(process.getErrorStream());
         if (!"".equals(print))
             logger.info(print);
         if (error.equals("")) {
