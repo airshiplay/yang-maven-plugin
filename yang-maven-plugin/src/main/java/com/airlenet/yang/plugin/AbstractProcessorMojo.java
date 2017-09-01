@@ -394,7 +394,7 @@ public abstract class AbstractProcessorMojo extends AbstractMojo {
             for (File f : files) {
                 yangList.add(f.getAbsolutePath());
             }
-
+            getLog().info("yang files count = "+yangList.size()+" to be converted");
             codegen.setYangList(yangList);
             codegen.setYangImportList(yangImportRoots);
             codegen.generatorCode(showWarnings,jython.getAbsolutePath(),pyang.getAbsolutePath());

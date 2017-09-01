@@ -9,22 +9,17 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>netconf-service</artifactId>
-    <packaging>war</packaging>
+    <artifactId>netconf-rest</artifactId>
+
     <dependencies>
         <dependency>
-            <groupId>com.airlenet.yang</groupId>
-            <artifactId>netconf-common</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-aspects</artifactId>
-            <version>${springframework.version}</version>
+            <groupId>com.airshiplay</groupId>
+            <artifactId>play-web</artifactId>
+            <version>1.0.0.RELEASE</version>
         </dependency>
         <dependency>
             <groupId>com.airlenet.yang</groupId>
-            <artifactId>yang-example</artifactId>
+            <artifactId>netconf-service</artifactId>
             <version>1.0.0-SNAPSHOT</version>
         </dependency>
     </dependencies>

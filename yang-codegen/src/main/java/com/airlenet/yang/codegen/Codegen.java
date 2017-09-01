@@ -28,6 +28,8 @@ public class Codegen {
         String jnc = jncHome+File.separator+"jnc.py";
         if(!new File(jncHome).exists()){
             new File(jncHome).mkdirs();
+        }
+        if(new File(jnc).exists()){
             IOUtil.cp(getClass().getClassLoader().getResourceAsStream("jnc.py"),jnc);
         }
         StringBuilder builder = new StringBuilder();

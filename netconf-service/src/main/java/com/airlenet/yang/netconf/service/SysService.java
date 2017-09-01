@@ -1,4 +1,4 @@
-package com.airlenet.yang.service;
+package com.airlenet.yang.netconf.service;
 
 import com.airlenet.yang.common.PlayNetconfDevice;
 import com.airlenet.yang.common.PlayNetconfSession;

@@ -36,15 +36,12 @@ public class PlayNetconfDevice {
     }
 
     public PlayNetconfSession getNetconfSession() throws IOException, JNCException {
-
         DeviceUser duser = new DeviceUser(this.localUser, this.remoteUser, this.password);
-
         if(device==null){
             device = new Device(this.name, duser, this.mgmt_ip, this.mgmt_port);
             device.connect(this.localUser);
             device.newSession(new PlayNotification(this),"defaultPlaySession");
         }
-
        return new PlayNetconfSession(device.getSession("defaultPlaySession"));
     }
 
