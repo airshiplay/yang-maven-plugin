@@ -10,7 +10,6 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>netconf-service</artifactId>
-    <packaging>war</packaging>
     <dependencies>
         <dependency>
             <groupId>com.airlenet.yang</groupId>

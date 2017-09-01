@@ -338,34 +338,47 @@ public abstract class AbstractProcessorMojo extends AbstractMojo {
         if (!getOutputDirectory().exists()) {
             getOutputDirectory().mkdirs();
         }
+        boolean pythonUsing=false;
 
         File jythonHome = new File(System.getProperty("user.home"), ".jython");
         File jython = new File(jythonHome, "bin/jython");
         File pyang = new File(jythonHome, "bin/pyang");
         File pyangSource = new File(jythonHome,"pyang");
 
-        //检测jython 是否安装
-        try {
-            ProcessUtil.process(showWarnings,new File(jythonHome, "/bin/jython").getAbsolutePath(), "-V");
-        } catch (Exception e) {//安装jython
-            getLog().info("Jython is not installed. Start installation");
-            Installation.main(new String[]{"-s", "-d", jythonHome.getAbsolutePath(), "-t", "standard", "-e", "demo", "doc"});
-            try {//再次检测
-                ProcessUtil.process(showWarnings,jython.getAbsolutePath(), "-V");
-            } catch (Exception e1) {
-                getLog().error("install jython fail", e1);
-                throw new MojoExecutionException(e1.getMessage(), e1);
+        try{//检测 Python
+            ProcessUtil.process(showWarnings,"python", "-V");
+            pythonUsing=true;
+        }catch (Exception ep){// 没有 Python  检测jython，使用jython代替
+            //检测jython 是否安装
+            try {
+                ProcessUtil.process(showWarnings,new File(jythonHome, "/bin/jython").getAbsolutePath(), "-V");
+            } catch (Exception e) {//安装jython
+                getLog().info("Jython is not installed. Start installation");
+                Installation.main(new String[]{"-s", "-d", jythonHome.getAbsolutePath(), "-t", "standard", "-e", "demo", "doc"});
+                try {//再次检测
+                    ProcessUtil.process(showWarnings,jython.getAbsolutePath(), "-V");
+                } catch (Exception e1) {
+                    getLog().error("install jython fail", e1);
+                    throw new MojoExecutionException(e1.getMessage(), e1);
+                }
             }
         }
 
         try {//检测 pyang
-            ProcessUtil.process(showWarnings,jython.getAbsolutePath(), pyang.getAbsolutePath(), "-v");
+            if(pythonUsing){
+                ProcessUtil.process(showWarnings,"pyang", "-v");
+            }else{
+                ProcessUtil.process(showWarnings,jython.getAbsolutePath(), pyang.getAbsolutePath(), "-v");
+            }
         } catch (Exception e) {
             try {//安装pyang
                 getLog().info("pyang is not installed. Start installation");
                 PyangInstall.copy(jythonHome);
-                ProcessUtil.process(showWarnings,pyangSource,jython.getAbsolutePath(), new File(pyangSource,"setup.py").getAbsolutePath(), "install");
-                ProcessUtil.process(showWarnings,jython.getAbsolutePath(), pyang.getAbsolutePath(), "-v");
+                if(pythonUsing){
+                    ProcessUtil.process(showWarnings,pyangSource,jython.getAbsolutePath(), new File(pyangSource,"setup.py").getAbsolutePath(), "install");
+                }else{
+                    ProcessUtil.process(showWarnings,jython.getAbsolutePath(), pyang.getAbsolutePath(), "-v");
+                }
             } catch (Exception e1) {
                 getLog().error("install pyang fail", e1);
                 throw new MojoExecutionException(e1.getMessage(), e1);
@@ -397,7 +410,7 @@ public abstract class AbstractProcessorMojo extends AbstractMojo {
             getLog().info("yang files count = "+yangList.size()+" to be converted");
             codegen.setYangList(yangList);
             codegen.setYangImportList(yangImportRoots);
-            codegen.generatorCode(showWarnings,jython.getAbsolutePath(),pyang.getAbsolutePath());
+            codegen.generatorCode(pythonUsing,showWarnings,jython.getAbsolutePath(),pyang.getAbsolutePath());
         } catch (Exception e) {
             getLog().error("execute error", e);
             throw new MojoExecutionException(e.getMessage(), e);

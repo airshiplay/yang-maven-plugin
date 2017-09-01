@@ -10,10 +10,10 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>netconf-rest</artifactId>
-
+    <packaging>war</packaging>
     <dependencies>
         <dependency>
-            <groupId>com.airshiplay</groupId>
+            <groupId>com.airlenet</groupId>
             <artifactId>play-web</artifactId>
             <version>1.0.0.RELEASE</version>
         </dependency>
