@@ -15,8 +15,8 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 
 /**
- * Created by airshiplay on 16-7-1.
- */
+* Created by airshiplay on 16-7-1.
+*/
 
 @Component
 @Aspect
@@ -25,7 +25,7 @@ public class NetconfAspect {
     private static Logger logger = LoggerFactory.getLogger(NetconfAspect.class);
 
     //更新操作
-    @Pointcut("execution(* com.airlent.yang.netconf.service.*(..))")
+    @Pointcut("execution(* com.airlenet.yang.netconf.service.*.*(..))")
     public void configPoint() {
 
     }
@@ -35,9 +35,9 @@ public class NetconfAspect {
         String methodName = joinPoint.getSignature().getName();
         Object[] inputs = joinPoint.getArgs();
         PlayNetconfDevice flexNetconfDevice = (PlayNetconfDevice) inputs[0];
-        PlayNetconfSession playNetconfSession = flexNetconfDevice.getNetconfSession();
+        PlayNetconfSession playNetconfSession = flexNetconfDevice.getDefaultNetconfSession();
 
-        playNetconfSession.setOpenTransaction(true);
+        flexNetconfDevice.setOpenTransaction(true);
         Object result = null;
         if (playNetconfSession.isCandidate()) {
             try {
@@ -50,8 +50,10 @@ public class NetconfAspect {
                 }
                 playNetconfSession.getNetconfSession().commit();//now commit them 确认提交
             } catch (IOException ioe) {
+                logger.error("aop:"+methodName);
                 throw ioe;
             } catch (Exception ioe) {
+                logger.error("aop:"+methodName);
                 throw ioe;
             } finally {
                 playNetconfSession.getNetconfSession().unlock(NetconfSession.CANDIDATE);

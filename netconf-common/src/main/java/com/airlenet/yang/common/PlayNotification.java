@@ -1,6 +1,9 @@
 package com.airlenet.yang.common;
 
+import com.tailf.jnc.Element;
 import com.tailf.jnc.IOSubscriber;
+import com.tailf.jnc.JNCException;
+import com.tailf.jnc.NodeSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,7 +30,6 @@ public class PlayNotification extends IOSubscriber {
     @Override
     public void input(String s) {
         logger.info("receive from ip:"+ this.playNetconfDevice.getMgmt_ip()+" message:"+s);
-        this.playNetconfDevice.setOpenTransaction(false);
     }
 
     /**

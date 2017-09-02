@@ -30,7 +30,19 @@
         <!--<version>3.4</version>-->
         <!--<scope>provided</scope>-->
         <!--</dependency>-->
+        <!--<dependency>-->
+            <!--<groupId>org.apache.maven</groupId>-->
+            <!--<artifactId>maven-plugin-api</artifactId>-->
+            <!--<version>3.0</version>-->
+        <!--</dependency>-->
 
+        <!--&lt;!&ndash; dependencies to annotations &ndash;&gt;-->
+        <!--<dependency>-->
+            <!--<groupId>org.apache.maven.plugin-tools</groupId>-->
+            <!--<artifactId>maven-plugin-annotations</artifactId>-->
+            <!--<version>3.4</version>-->
+            <!--<scope>provided</scope>-->
+        <!--</dependency>-->
         <dependency>
             <groupId>org.sonatype.plexus</groupId>
             <artifactId>plexus-build-api</artifactId>

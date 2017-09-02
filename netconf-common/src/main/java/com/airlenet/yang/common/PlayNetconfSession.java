@@ -1,9 +1,6 @@
 package com.airlenet.yang.common;
 
-import com.tailf.jnc.Element;
-import com.tailf.jnc.JNCException;
-import com.tailf.jnc.NetconfSession;
-import com.tailf.jnc.NodeSet;
+import com.tailf.jnc.*;
 
 import java.io.IOException;
 
@@ -12,56 +9,45 @@ import java.io.IOException;
  */
 public class PlayNetconfSession {
     private final NetconfSession netconfSession;
-    /**
-     * true service拦截，开启事物处理；false 自己开启事物处理
-     */
-    private boolean openTransaction;
-    private boolean candidate;
-    private boolean confirmedCommit;
+    private final PlayNetconfDevice playNetconfDevic;
 
-    public PlayNetconfSession(NetconfSession netconfSession) {
-        this.netconfSession = netconfSession;
+    public PlayNetconfSession(PlayNetconfDevice playNetconfDevice, NetconfSession defaultPlaySession) {
+        this.netconfSession = defaultPlaySession;
+        this.playNetconfDevic =playNetconfDevice;
     }
 
     public boolean isOpenTransaction() {
-        return openTransaction;
-    }
-
-    public void setOpenTransaction(boolean openTransaction) {
-        this.openTransaction = openTransaction;
+        return playNetconfDevic.isOpenTransaction();
     }
 
     public boolean isCandidate() {
-        return candidate;
-    }
-
-    public void setCandidate(boolean candidate) {
-        this.candidate = candidate;
+        return netconfSession.hasCapability(Capabilities.CANDIDATE_CAPABILITY);
     }
 
     public boolean isConfirmedCommit() {
-        return confirmedCommit;
+        return this.netconfSession.hasCapability(Capabilities.CONFIRMED_COMMIT_CAPABILITY);
     }
-
-    public void setConfirmedCommit(boolean confirmedCommit) {
-        this.confirmedCommit = confirmedCommit;
+    public boolean isWritableRunning(){
+        return this.netconfSession.hasCapability(Capabilities.WRITABLE_RUNNING_CAPABILITY);
     }
-
+    public long getSessionId(){
+        return this.netconfSession.sessionId;
+    }
     public void editConfig(Element configTree) throws IOException, JNCException {
-        if (openTransaction) {
-            if (candidate) {
+        if (isOpenTransaction()) {
+            if (isCandidate()) {
                 this.netconfSession.editConfig(NetconfSession.CANDIDATE, configTree);
             } else {
                 netconfSession.editConfig(configTree);
             }
         } else {
-            if (candidate) {
+            if (isCandidate()) {
                 try {
                     netconfSession.discardChanges();//现将 上次没有提交的配置 还原
                     netconfSession.lock(NetconfSession.CANDIDATE);
                     netconfSession.copyConfig(NetconfSession.RUNNING, NetconfSession.CANDIDATE);
                     this.netconfSession.editConfig(NetconfSession.CANDIDATE, configTree);
-                    if (confirmedCommit) {
+                    if (isConfirmedCommit()) {
                         netconfSession.confirmedCommit(60);// candidates are now updated 1分钟内没有确认 则还原配置
                     }
                     netconfSession.commit();//now commit them 确认提交
@@ -81,8 +67,10 @@ public class PlayNetconfSession {
     public NodeSet get(String xpath) throws IOException, JNCException {
         return this.netconfSession.get(xpath);
     }
-
+    public NodeSet getConfig(String xpath) throws IOException,JNCException{
+        return  this.netconfSession.getConfig(xpath);
+    }
     public NetconfSession getNetconfSession(){
-        return this.getNetconfSession();
+        return this.netconfSession;
     }
 }

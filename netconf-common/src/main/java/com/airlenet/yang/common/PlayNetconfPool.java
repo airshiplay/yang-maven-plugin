@@ -18,7 +18,7 @@ public class PlayNetconfPool {
     public static PlayNetconfSession getNetconfSession(PlayNetconfDevice playNetconfDevice) throws IOException, JNCException, InterruptedException {
         BlockingQueue<PlayNetconfSession> playNetconfSessions = playDeviceMap.get(playNetconfDevice);
         if(playNetconfSessions.isEmpty()){
-            playNetconfSessions.add(playNetconfDevice.getNetconfSession());
+            playNetconfSessions.add(playNetconfDevice.getDefaultNetconfSession());
         }
         return playNetconfSessions.take();
     }

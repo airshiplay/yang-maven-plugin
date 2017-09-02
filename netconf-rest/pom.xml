@@ -16,6 +16,17 @@
             <groupId>com.airlenet</groupId>
             <artifactId>play-web</artifactId>
             <version>1.0.0.RELEASE</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.airlenet</groupId>
+                    <artifactId>play-cache</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.airlenet</groupId>
+            <artifactId>play-integration-webapp</artifactId>
+            <version>1.0.0.RELEASE</version>
         </dependency>
         <dependency>
             <groupId>com.airlenet.yang</groupId>
@@ -23,4 +34,15 @@
             <version>1.0.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <configuration>
+                    <failOnMissingWebXml>false</failOnMissingWebXml>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>

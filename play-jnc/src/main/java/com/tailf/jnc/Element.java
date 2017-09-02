@@ -1675,6 +1675,88 @@ public class Element implements Serializable {
         toXMLString(0, s);
         return s.toString();
     }
+
+    public String toJSONString(){
+        final StringBuffer s = new StringBuffer();
+        toJSONString(true,false,false,0, s);
+        s.append("\n}");
+        return s.toString();
+    }
+
+    private void toJSONString(boolean first,boolean isEnd,boolean isArray,int indent, StringBuffer s){
+        final boolean flag = hasChildren();
+        boolean isArrayChild=false;
+        if(flag){
+            String  name =null;
+            for (final Element child : children) {
+                if(name!=null&&name.equals(child.qualifiedName())){
+                    isArrayChild =true;
+                    break;
+                }
+                name =child.qualifiedName();
+            }
+        }
+        final String qName = qualifiedName();
+        s.append(getIndentationSpacing(true, indent));
+        if(first){
+            if(isArray){
+                s.append("[");
+            }else{
+            s.append("{");}
+        }
+        if(!isArray)
+        {
+            s.append("\"").append(qName).append("\":");
+        }
+        // add xmlns attributes (prefixes)
+//        if (prefixes != null) {
+//            for (final Prefix p : prefixes) {
+//                s.append(" ").append(p.toXMLString());
+//            }
+//        }
+//        // add attributes
+//        if (attrs != null) {
+//            for (final Attribute attr : attrs) {
+//                s.append(" ").append(attr.toXMLString(this));
+//            }
+//        }
+        indent++;
+        // add children elements if any
+        if (flag) {
+            s.append("").append(("\n"));
+            int index=0;
+            int endIndex =children.size()-1;
+            for (final Element child : children) {
+                child.toJSONString(index==0,index==endIndex,isArrayChild,indent, s);
+                if(index!=endIndex)
+                    s.append(",");
+                s.append("\n");//.append(getIndentationSpacing(true, indent));
+                index++;
+            }
+        } else { // add value if any
+            if (value != null) {
+                s.append(("\""));
+                final String stringValue = value.toString().replaceAll("&",
+                        "&amp;");
+                s.append(getIndentationSpacing(false, indent));
+                s.append(stringValue).append(("\""));
+            } else {
+                // self-closing tag
+                s.append("null").append(("}"));
+                return;
+            }
+        }
+        if(flag){
+            if(isArrayChild ){
+                s.append(getIndentationSpacing(flag, indent)).append("]");
+            }else{
+                s.append(getIndentationSpacing(flag, indent)).append("}");
+            }
+        }
+
+        indent--;
+    }
+
     private void toXMLString(int indent, StringBuffer s) {
         final boolean flag = hasChildren();
         final String qName = qualifiedName();

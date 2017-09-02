@@ -12,13 +12,12 @@ import org.springframework.stereotype.Service;
 @Service
 public class SysService {
 
-    public String getVersion(PlayNetconfDevice playNetconfDevice) throws Exception {
-        PlayNetconfSession netconfSession = playNetconfDevice.getNetconfSession();
+    public Element getVersion(PlayNetconfDevice playNetconfDevice) throws Exception {
+        PlayNetconfSession netconfSession = playNetconfDevice.getDefaultNetconfSession();
         NodeSet nodeSet = netconfSession.get("sys-info");
         if (nodeSet != null && !nodeSet.isEmpty()) {
-            return nodeSet.toXMLString();
+            return nodeSet.get(0);
         }
-
-        return "";
+        return null;
     }
 }

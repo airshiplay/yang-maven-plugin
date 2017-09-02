@@ -22,6 +22,9 @@ public class PlayNetconfDevice {
     private String mgmt_ip;
     private int mgmt_port;
     private Device device;
+    /**
+     * true service拦截，开启事物处理；false 自己开启事物处理
+     */
     private boolean openTransaction;
 
     private List<PlayNetconfSession> playNetconfSessionList;
@@ -35,14 +38,14 @@ public class PlayNetconfDevice {
         this.mgmt_port = mgmt_port;
     }
 
-    public PlayNetconfSession getNetconfSession() throws IOException, JNCException {
+    public PlayNetconfSession getDefaultNetconfSession() throws IOException, JNCException {
         DeviceUser duser = new DeviceUser(this.localUser, this.remoteUser, this.password);
         if(device==null){
             device = new Device(this.name, duser, this.mgmt_ip, this.mgmt_port);
             device.connect(this.localUser);
             device.newSession(new PlayNotification(this),"defaultPlaySession");
         }
-       return new PlayNetconfSession(device.getSession("defaultPlaySession"));
+       return new PlayNetconfSession(this,device.getSession("defaultPlaySession"));
     }
 
     public Long getId() {
@@ -79,7 +82,5 @@ public class PlayNetconfDevice {
 
     public void setOpenTransaction(boolean openTransaction) {
         this.openTransaction = openTransaction;
-
-
     }
 }
