@@ -44,13 +44,13 @@ public class Codegen {
         for(String yangfile:yangList){
             logger.info("convert yang file "+ yangfile);
             if(pythonUsing){
-                ProcessUtil.process(showWarnings,"pyang","-f","jnc",
+                ProcessUtil.process("pyang","-f","jnc",
                         "--plugindir",jncHome,
                         "--jnc-output",outDir.getAbsolutePath()+"/"+basePkgName,
                         "-p",path,"--jnc-classpath-schema-loading",
                         yangfile);
             }else{
-                ProcessUtil.process(showWarnings,jython,pyang,"-f","jnc",
+                ProcessUtil.process(jython,pyang,"-f","jnc",
                         "--plugindir",jncHome,
                         "--jnc-output",outDir.getAbsolutePath()+"/"+basePkgName,
                         "-p",path,"--jnc-classpath-schema-loading",

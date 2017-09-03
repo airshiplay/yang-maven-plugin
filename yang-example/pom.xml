@@ -34,10 +34,12 @@
                         <id>process</id>
                         <goals>
                             <goal>process</goal>
+                            <goal>validate</goal>
                         </goals>
                         <configuration>
+                            <errorAbort>true</errorAbort>
                             <outputDirectory>target/generated-sources/java</outputDirectory>
-                            <skip>true</skip>
+                            <skip>false</skip>
                             <showWarnings>false</showWarnings>
                             <packageName>com.airlenet.yang.model</packageName>
                             <excludes>
