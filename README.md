@@ -41,23 +41,24 @@ Usage
                 <id>process</id>
                 <goals>
                     <goal>process</goal>
+                    <goal>validate</goal>
                 </goals>
                 <configuration>
+                    <errorAbort>true</errorAbort>
                     <outputDirectory>target/generated-sources/java</outputDirectory>
-                    <skip>true</skip>
+                    <skip>false</skip>
                     <showWarnings>false</showWarnings>
                     <packageName>com.airlenet.yang.model</packageName>
-                    <includes>
-                        <include>tailf/*.yang</include>
-                        <include>d*.yang</include>
-                    </includes>
                     <excludes>
-                        <exclude>tailf/tailf-netconf-*.yang</exclude>
+                        <exclude>tailf/*.yang</exclude>
+                        <exclude>ietf/*.yang</exclude>
+                        <exclude>iana/*.yang</exclude>
                     </excludes>
                 </configuration>
             </execution>
         </executions>
     </plugin>
+    <!-- add source resource: java class & resource -->
     <plugin>
        <groupId>org.codehaus.mojo</groupId>
        <artifactId>build-helper-maven-plugin</artifactId>
@@ -93,7 +94,11 @@ Usage
     </plugin>
 </plugins>
 ```
+```
+mvn package                 # generator java class from yang model,compile,package
 
+mvn yang:validate           # validate yang model
+```
  [yang-example](https://github.com/airshiplay/play-yang/tree/master/yang-example)
 
 
