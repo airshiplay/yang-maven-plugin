@@ -13,19 +13,11 @@
     <packaging>maven-plugin</packaging>
     <name>play yang maven plugin</name>
 
-    <licenses>
-        <license>
-            <name>Apache License, Version 2.0</name>
-            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-        </license>
-    </licenses>
     <properties>
         <mvn.version>2.2.1</mvn.version>
     </properties>
+
     <dependencies>
-
-
-
         <!-- dependencies to annotations -->
         <dependency>
             <groupId>org.apache.maven.plugin-tools</groupId>
@@ -75,6 +67,33 @@
             <version>${project.version}</version>
         </dependency>
     </dependencies>
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+    <developers>
+        <developer>
+            <id>airshiplay</id>
+            <name>airshiplay</name>
+            <email>airshiplay@126.com</email>
+        </developer>
+    </developers>
+    <organization>
+        <name>airlenet</name>
+        <url>http://www.airlenet.com</url>
+    </organization>
+    <scm>
+        <connection>
+            scm:git:https://github.com/airshiplay/play-yang.git
+        </connection>
+        <developerConnection>
+            https://github.com/airshiplay/play-yang.git
+        </developerConnection>
+        <url>https://github.com/airshiplay/play-yang</url>
+        <tag>HEAD</tag>
+    </scm>
     <build>
         <plugins>
             <plugin>

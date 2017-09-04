@@ -36,24 +36,25 @@ Usage
         <groupId>com.airlenet.yang</groupId>
         <artifactId>yang-maven-plugin</artifactId>
         <version>1.0.0-SNAPSHOT</version>
+        <configuration>
+            <skip>false</skip>
+            <showWarnings>false</showWarnings>
+            <errorAbort>false</errorAbort>
+            <excludes>
+                <exclude>tailf/*.yang</exclude>
+                <exclude>ietf/*.yang</exclude>
+                <exclude>iana/*.yang</exclude>
+            </excludes>
+        </configuration>
         <executions>
             <execution>
                 <id>process</id>
                 <goals>
                     <goal>process</goal>
-                    <goal>validate</goal>
                 </goals>
                 <configuration>
-                    <errorAbort>true</errorAbort>
-                    <outputDirectory>target/generated-sources/java</outputDirectory>
-                    <skip>false</skip>
-                    <showWarnings>false</showWarnings>
+                    <outputDirectory>target/generated-sources/java</outputDirectory><!-- src/main/java -->
                     <packageName>com.airlenet.yang.model</packageName>
-                    <excludes>
-                        <exclude>tailf/*.yang</exclude>
-                        <exclude>ietf/*.yang</exclude>
-                        <exclude>iana/*.yang</exclude>
-                    </excludes>
                 </configuration>
             </execution>
         </executions>

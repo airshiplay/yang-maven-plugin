@@ -1706,7 +1706,7 @@ public class Element implements Serializable {
         }
         if(!isArray)
         {
-            s.append("\"").append(qName).append("\":");
+            s.append("\n").append(getIndentationSpacing(true, indent)).append("\"").append(qName).append("\":");
         }
         // add xmlns attributes (prefixes)
 //        if (prefixes != null) {
@@ -1723,7 +1723,7 @@ public class Element implements Serializable {
         indent++;
         // add children elements if any
         if (flag) {
-            s.append("").append(("\n"));
+//            s.append("").append(("\n"));
             int index=0;
             int endIndex =children.size()-1;
             for (final Element child : children) {
