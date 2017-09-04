@@ -53,6 +53,8 @@ public class NetconfRest {
             e.printStackTrace();
         } catch (JNCException e) {
             e.printStackTrace();
+        }catch (Exception e) {
+            e.printStackTrace();
         }
         return "";
     }

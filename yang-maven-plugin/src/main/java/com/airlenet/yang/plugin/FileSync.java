@@ -62,7 +62,8 @@ public class FileSync {
         }
     }
 
-    private FileSync() {}
+    private FileSync() {
+    }
 
 
 }

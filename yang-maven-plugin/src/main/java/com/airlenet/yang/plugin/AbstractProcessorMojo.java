@@ -5,23 +5,19 @@
  */
 package com.airlenet.yang.plugin;
 
-import com.airlenet.yang.codegen.Codegen;
 import com.airlenet.yang.codegen.ProcessUtil;
 import com.airlenet.yang.codegen.PyangInstall;
 import com.google.common.base.Joiner;
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.InvalidArtifactRTException;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.util.Scanner;
-import org.codehaus.plexus.util.StringUtils;
 import org.python.util.install.Installation;
 import org.sonatype.plexus.build.incremental.BuildContext;
 
-import javax.tools.*;
-import javax.tools.Diagnostic.Kind;
-import java.io.*;
+import java.io.File;
+import java.io.FileFilter;
 import java.util.*;
 
 /**
@@ -73,7 +69,6 @@ public abstract class AbstractProcessorMojo extends AbstractMojo {
     protected Map<String, String> compilerOptions;
 
     /**
-     *
      * @parameter
      */
     protected Set<String> includes = new HashSet<String>();
@@ -89,13 +84,14 @@ public abstract class AbstractProcessorMojo extends AbstractMojo {
 
     /**
      * yang Error 是否终止
+     *
      * @parameter
      */
-    protected boolean errorAbort =false;
+    protected boolean errorAbort = false;
     /**
      * @parameter required=true
      */
-    protected String packageName="com.airlenet.yang.model";
+    protected String packageName = "com.airlenet.yang.model";
     /**
      * @parameter
      */
@@ -130,28 +126,29 @@ public abstract class AbstractProcessorMojo extends AbstractMojo {
     protected boolean ignoreDelta = true;
 
 
-    boolean pythonUsing=false;
+    boolean pythonUsing = false;
 
     File jythonHome = new File(System.getProperty("user.home"), ".jython");
     File jython = new File(jythonHome, "bin/jython");
     File pyang = new File(jythonHome, "bin/pyang");
-    File pyangSource = new File(jythonHome,"pyang");
-    String osName=System.getProperty("os.name");
-    File pythonPath=null;
+    File pyangSource = new File(jythonHome, "pyang");
+    String osName = System.getProperty("os.name");
+    File python = null;
     File pythonHome = null;
-    boolean windows =false;
+    boolean windows = false;
+
     public void checkPyang() throws MojoExecutionException {
 
-        if(osName.startsWith("Window")|| osName.startsWith("window")){
-            windows=true;
+        if (osName.startsWith("Window") || osName.startsWith("window")) {
+            windows = true;
         }
-        try{//检测 Python
+        try {//检测 Python
             ProcessUtil.process("python", "-V");
-            pythonUsing=true;
-           String envPath= System.getenv("PATH");
-            String[] envPaths = envPath.split(":");
+            pythonUsing = true;
+            String envPath = System.getenv("PATH");
+            String[] envPaths = envPath.split(System.getProperty("path.separator"));
 
-            for(String path:envPaths){
+            for (String path : envPaths) {
                 File[] pythons = new File(path).listFiles(new FileFilter() {
                     /**
                      * Tests whether or not the specified abstract pathname should be
@@ -164,17 +161,17 @@ public abstract class AbstractProcessorMojo extends AbstractMojo {
                     @Override
                     public boolean accept(File pathname) {
                         String absolutePath = pathname.getAbsolutePath();
-                        return  absolutePath.endsWith("python") || absolutePath.endsWith("python.exe");
+                        return absolutePath.endsWith("python") || absolutePath.endsWith("python.exe");
                     }
 
                 });
-                if(pythons.length==1){
-                    pythonPath =pythons[0].getParentFile();
-                    pythonHome=pythonPath.getParentFile().getParentFile();
+                if (pythons.length == 1) {
+                    python = pythons[0];
+                    pythonHome = python.getParentFile();
                     break;
                 }
             }
-        }catch (Exception ep){// 没有 Python  检测jython，使用jython代替
+        } catch (Exception ep) {// 没有 Python  检测jython，使用jython代替
             //检测jython 是否安装
             try {
                 ProcessUtil.process(new File(jythonHome, "/bin/jython").getAbsolutePath(), "-V");
@@ -191,14 +188,15 @@ public abstract class AbstractProcessorMojo extends AbstractMojo {
         }
 
         try {//检测 pyang
-            List<String> commandList= new ArrayList<>();
-            if(pythonUsing){
-                if(windows){
-                    commandList.add(new File(pythonHome,"Scripts/pyang").getAbsolutePath());
-                }else{
+            List<String> commandList = new ArrayList<>();
+            if (pythonUsing) {
+                if (windows) {
+                    commandList.add(python.getAbsolutePath());
+                    commandList.add(new File(pythonHome, "Scripts/pyang").getAbsolutePath());
+                } else {
                     commandList.add("pyang");
                 }
-            }else{
+            } else {
                 commandList.add(jython.getAbsolutePath());
                 commandList.add(pyang.getAbsolutePath());
             }
@@ -208,16 +206,16 @@ public abstract class AbstractProcessorMojo extends AbstractMojo {
             try {//安装pyang
                 getLog().info("pyang is not installed. Start installation");
                 PyangInstall.copy(jythonHome);
-                if(pythonUsing){
-                    if(windows){
-                        ProcessUtil.process(pyangSource,"python", new File(pyangSource,"setup.py").getAbsolutePath(), "install");
-                        ProcessUtil.process(new File(pythonHome,"Scripts/pyang").getAbsolutePath(), "-v");
-                    }else{
-                        ProcessUtil.process(pyangSource,"python", new File(pyangSource,"setup.py").getAbsolutePath(), "install");
+                if (pythonUsing) {
+                    if (windows) {
+                        ProcessUtil.process(pyangSource, "python", new File(pyangSource, "setup.py").getAbsolutePath(), "install");
+                        ProcessUtil.process(python.getAbsolutePath(), new File(pythonHome, "Scripts/pyang").getAbsolutePath(), "-v");
+                    } else {
+                        ProcessUtil.process(pyangSource, "python", new File(pyangSource, "setup.py").getAbsolutePath(), "install");
                         ProcessUtil.process("pyang", "-v");
                     }
-                }else{
-                    ProcessUtil.process(pyangSource,jython.getAbsolutePath(), new File(pyangSource,"setup.py").getAbsolutePath(), "install");
+                } else {
+                    ProcessUtil.process(pyangSource, jython.getAbsolutePath(), new File(pyangSource, "setup.py").getAbsolutePath(), "install");
                     ProcessUtil.process(jython.getAbsolutePath(), pyang.getAbsolutePath(), "-v");
                 }
             } catch (Exception e1) {
@@ -226,6 +224,7 @@ public abstract class AbstractProcessorMojo extends AbstractMojo {
             }
         }
     }
+
     /**
      * Filter files for apt processing based on the {@link #includes} filter and
      * also taking into account m2e {@link BuildContext} to filter-out unchanged
@@ -246,7 +245,7 @@ public abstract class AbstractProcessorMojo extends AbstractMojo {
             // support for incremental build in m2e context
             Scanner scanner = buildContext.newScanner(directory, false);
             scanner.setIncludes(filters);
-            if(excludes !=null && !excludes.isEmpty()){
+            if (excludes != null && !excludes.isEmpty()) {
                 scanner.setExcludes(excludes.toArray(new String[0]));
             }
             scanner.scan();
@@ -256,7 +255,7 @@ public abstract class AbstractProcessorMojo extends AbstractMojo {
             if (buildContext.isIncremental() && (includedFiles == null || includedFiles.length == 0)) {
                 scanner = buildContext.newDeleteScanner(directory);
                 scanner.setIncludes(filters);
-                if(excludes !=null && !excludes.isEmpty()){
+                if (excludes != null && !excludes.isEmpty()) {
                     scanner.setExcludes(excludes.toArray(new String[0]));
                 }
                 scanner.scan();
@@ -267,7 +266,7 @@ public abstract class AbstractProcessorMojo extends AbstractMojo {
             if (ignoreDelta && buildContext.isIncremental() && includedFiles != null && includedFiles.length > 0) {
                 scanner = buildContext.newScanner(directory, true);
                 scanner.setIncludes(filters);
-                if(excludes !=null && !excludes.isEmpty()){
+                if (excludes != null && !excludes.isEmpty()) {
                     scanner.setExcludes(excludes.toArray(new String[0]));
                 }
                 scanner.scan();
@@ -286,7 +285,7 @@ public abstract class AbstractProcessorMojo extends AbstractMojo {
     @SuppressWarnings("unchecked")
     protected Set<File> getSourceDirectories() {
         File outputDirectory = getOutputDirectory();
-        String outputPath = outputDirectory==null?"":outputDirectory.getAbsolutePath();
+        String outputPath = outputDirectory == null ? "" : outputDirectory.getAbsolutePath();
         Set<File> directories = new HashSet<File>();
         List<String> directoryNames = getCompileSourceRoots();
         for (String name : directoryNames) {
@@ -300,7 +299,7 @@ public abstract class AbstractProcessorMojo extends AbstractMojo {
 
     protected Set<File> getYangSourceDirectories() {
         File outputDirectory = getOutputDirectory();
-        String outputPath = outputDirectory==null?"":outputDirectory.getAbsolutePath();
+        String outputPath = outputDirectory == null ? "" : outputDirectory.getAbsolutePath();
         Set<File> directories = new HashSet<File>();
         List<String> directoryNames = Arrays.asList(getYangSourceRoot().getAbsolutePath());
         for (String name : directoryNames) {
@@ -311,7 +310,8 @@ public abstract class AbstractProcessorMojo extends AbstractMojo {
         }
         return directories;
     }
-    public List<String> getYangFileList(){
+
+    public List<String> getYangFileList() {
         List<String> yangList = new ArrayList<>();
 
         Set<File> files = filterFiles(getYangSourceDirectories());
@@ -375,6 +375,7 @@ public abstract class AbstractProcessorMojo extends AbstractMojo {
         }
         return list;
     }
+
     public void setBuildContext(BuildContext buildContext) {
         this.buildContext = buildContext;
     }
@@ -418,6 +419,7 @@ public abstract class AbstractProcessorMojo extends AbstractMojo {
     public void setPluginArtifacts(List<Artifact> pluginArtifacts) {
         this.pluginArtifacts = pluginArtifacts;
     }
+
     public File getOutputDirectory() {
         return outputDirectory;
     }

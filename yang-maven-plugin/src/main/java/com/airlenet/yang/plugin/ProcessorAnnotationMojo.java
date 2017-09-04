@@ -46,12 +46,12 @@ public class ProcessorAnnotationMojo extends AbstractProcessorMojo {
             StringBuilder builder = new StringBuilder();
             builder.append(yangSourceRoot.getAbsolutePath());
             for (String importFile : yangImportRoots) {
-                builder.append(":");
+                builder.append(System.getProperty("path.separator"));
                 builder.append(importFile);
             }
             String path = builder.toString();
 
-            getLog().info("yang files count = " + yangList.size() + " to be converted");
+            getLog().info("Total " + yangList.size() + " yang files to be converter");
 
             String jncHome = System.getProperty("user.home") + File.separator + ".jnc";
             String jnc = jncHome + File.separator + "jnc.py";
@@ -62,35 +62,34 @@ public class ProcessorAnnotationMojo extends AbstractProcessorMojo {
                 IOUtil.cp(getClass().getClassLoader().getResourceAsStream("jnc.py"), jnc);
             }
 
-
-            //logger.info("pyang -f jnc --plugindir "+jncHome+" --jnc-output "+ outDir.getAbsolutePath()+"/"+basePkgName+" -p "+path+" --jnc-classpath-schema-loading");
+            getLog().info("pyang -f jnc --plugindir " + jncHome + " --jnc-output " + getOutputDirectory().getAbsolutePath() + "/" + packageName + " -p " + path + " --jnc-classpath-schema-loading");
 
             for (String yangfile : yangList) {
                 getLog().info("convert yang file " + yangfile);
                 try {
                     if (pythonUsing) {
-                        if(windows){
-                            ProcessUtil.process( new File(pythonHome,"Scripts/pyang").getAbsolutePath(), "-f", "jnc",
+                        if (windows) {
+                            ProcessUtil.process(python.getAbsolutePath(), new File(pythonHome, "Scripts/pyang").getAbsolutePath(), "-f", "jnc",
                                     "--plugindir", jncHome,
                                     "--jnc-output", getOutputDirectory().getAbsolutePath() + "/" + packageName,
-                                    "-p", path, "--jnc-classpath-schema-loading","--lax-quote-checks",
+                                    "-p", path, "--jnc-classpath-schema-loading", "--lax-quote-checks",
                                     yangfile);
-                        }else{
-                            ProcessUtil.process( "pyang", "-f", "jnc",
+                        } else {
+                            ProcessUtil.process("pyang", "-f", "jnc",
                                     "--plugindir", jncHome,
                                     "--jnc-output", getOutputDirectory().getAbsolutePath() + "/" + packageName,
-                                    "-p", path, "--jnc-classpath-schema-loading","--lax-quote-checks",
+                                    "-p", path, "--jnc-classpath-schema-loading", "--lax-quote-checks",
                                     yangfile);
                         }
                     } else {
                         ProcessUtil.process(jython, pyang.getAbsolutePath(), "-f", "jnc",
                                 "--plugindir", jncHome,
                                 "--jnc-output", getOutputDirectory().getAbsolutePath() + "/" + packageName,
-                                "-p", path, "--jnc-classpath-schema-loading","--lax-quote-checks",
+                                "-p", path, "--jnc-classpath-schema-loading", "--lax-quote-checks",
                                 yangfile);
                     }
                 } catch (Exception e) {
-                    getLog().error("convert yang file error "+yangfile,e);
+                    getLog().error("convert yang file error " + yangfile, e);
                     if (errorAbort)
                         throw e;
                 }

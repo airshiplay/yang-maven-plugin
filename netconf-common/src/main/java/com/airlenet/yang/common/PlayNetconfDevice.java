@@ -1,9 +1,6 @@
 package com.airlenet.yang.common;
 
-import com.tailf.jnc.Device;
-import com.tailf.jnc.DeviceUser;
-import com.tailf.jnc.IOSubscriber;
-import com.tailf.jnc.JNCException;
+import com.tailf.jnc.*;
 import jdk.nashorn.internal.objects.annotations.Getter;
 
 import java.io.IOException;
@@ -40,12 +37,19 @@ public class PlayNetconfDevice {
 
     public PlayNetconfSession getDefaultNetconfSession() throws IOException, JNCException {
         DeviceUser duser = new DeviceUser(this.localUser, this.remoteUser, this.password);
+
         if(device==null){
             device = new Device(this.name, duser, this.mgmt_ip, this.mgmt_port);
             device.connect(this.localUser);
             device.newSession(new PlayNotification(this),"defaultPlaySession");
+        }else{
+            NetconfSession netconfSession = device.getSession("defaultPlaySession");
+            if(netconfSession==null){
+                device.connect(this.localUser);
+                device.newSession(new PlayNotification(this),"defaultPlaySession");
+            }
         }
-       return new PlayNetconfSession(this,device.getSession("defaultPlaySession"));
+       return new PlayNetconfSession(this, device.getSession("defaultPlaySession"));
     }
 
     public Long getId() {

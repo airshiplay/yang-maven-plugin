@@ -40,7 +40,7 @@ public class ProcessUtil {
         if (error.equals("")) {
 
         } else {
-            if (error.contains("Error") || error.contains("error") || error.contains("ERROR")) {
+            if (error.contains("Error") || error.contains("error") || error.contains("ERROR") || error.contains("Errno")) {
                 throw new Exception(error);
             }
             if (error.contains("warning") || error.contains("WARNING")) {
