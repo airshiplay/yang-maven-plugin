@@ -10,7 +10,7 @@
     </parent>
     <groupId>com.airlenet.yang</groupId>
     <artifactId>play-yang</artifactId>
-    <version>1.0.0.RELEASE</version>
+    <version>1.0.1.RELEASE</version>
     <packaging>pom</packaging>
     <name>play yang</name>
     <description>play yang</description>
@@ -20,9 +20,9 @@
         <module>yang-codegen</module>
         <module>yang-maven-plugin</module>
         <module>yang-example</module>
-        <module>netconf-service</module>
-        <module>netconf-common</module>
-        <module>netconf-rest</module>
+        <!--<module>netconf-service</module>-->
+        <!--<module>netconf-common</module>-->
+        <!--<module>netconf-rest</module>-->
     </modules>
 
     <licenses>
@@ -75,7 +75,7 @@
                         <configuration>
                             <serverId>ossrh</serverId>
                             <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-                            <autoReleaseAfterClose>false</autoReleaseAfterClose>
+                            <autoReleaseAfterClose>true</autoReleaseAfterClose>
                         </configuration>
                     </plugin>
                     <plugin>

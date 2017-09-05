@@ -58,7 +58,7 @@ public class ProcessorAnnotationMojo extends AbstractProcessorMojo {
             if (!new File(jncHome).exists()) {
                 new File(jncHome).mkdirs();
             }
-            if (new File(jnc).exists()) {
+            if (!new File(jnc).exists()) {
                 IOUtil.cp(getClass().getClassLoader().getResourceAsStream("jnc.py"), jnc);
             }
 

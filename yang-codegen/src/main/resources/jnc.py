@@ -192,9 +192,9 @@ class JNCPlugin(plugin.PyangPlugin):
                     'IDENTITY_NOT_FOUND', 'GROUPING_NOT_FOUND','UNUSED_IMPORT','XPATH_FUNCTION','ILLEGAL_ESCAPE_WARN',
                     'UNIQUE_IS_KEY','DUPLICATE_NAMESPACE','NODE_NOT_FOUND','WBAD_MODULE_NAME')):
                     print_warning(msg=(etag.lower() + ', generated class ' +
-                        'hierarchy might be incomplete.'), key=etag)
+                        'hierarchy might be incomplete.'), key=etag,ctx=ctx)
                 else:
-                    print_warning(msg=(etag.lower() + ', aborting.'), key=etag)
+                    print_warning(msg=(etag.lower() + ', aborting.'), key=etag,ctx=ctx)
                     self.fatal("%s contains errors" % epos.top.arg)
 
         # Sweep, adding included and imported modules, until no change
@@ -456,13 +456,14 @@ def print_warning(msg='', key='', ctx=None):
     """
     if ((not key or key not in outputted_warnings) and
         (not ctx or ctx.opts.debug or ctx.opts.verbose)):
-        if msg:
-            sys.stderr.write('\nWARNING: ' + msg + ' ' + key)
-            if key:
-                outputted_warnings.append(key)
-        else:
-            print_warning(('No support for type "' + key + '", defaulting ' +
-                'to string.'), key, ctx)
+        if 'none' not in ctx.opts.warnings:
+            if msg:
+                sys.stderr.write('WARNING: ' + msg + ' ' + key+'\n')
+                if key:
+                    outputted_warnings.append(key)
+            else:
+                print_warning(('No support for type "' + key + '", defaulting ' +
+                    'to string.'), key, ctx)
 
 
 def write_file(d, file_name, file_content, ctx):
@@ -1292,6 +1293,8 @@ class ClassGenerator(object):
                     access_method.return_type = f(access_method.return_type)
                     access_method.parameters = [f(x) for x in access_method.parameters]
                     access_method.body = [f(x) for x in access_method.body]
+                elif (name == self.n and isinstance(access_method, list)):
+                    print
                 elif name == self.n:
                     access_method.modifiers = [f(x) for x in access_method.modifiers]
                 add(sub.arg, access_method)

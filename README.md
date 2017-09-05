@@ -17,7 +17,7 @@ Download [the latest JAR](https://search.maven.org/remote_content?g=com.airlenet
 <dependency>
   <groupId>com.airlenet.yang</groupId>
   <artifactId>yang-maven-plugin</artifactId>
-  <version>1.0.0.RELEASE</version>
+  <version>1.0.1.RELEASE</version>
 </dependency>
 ```
 or Gradle:
