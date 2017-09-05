@@ -52,6 +52,10 @@ public class PlayNetconfDevice {
        return new PlayNetconfSession(this, device.getSession("defaultPlaySession"));
     }
 
+    public void closeDefaultNetconfSession() {
+        device.closeSession("defaultPlaySession");
+    }
+
     public Long getId() {
         return id;
     }
@@ -87,4 +91,6 @@ public class PlayNetconfDevice {
     public void setOpenTransaction(boolean openTransaction) {
         this.openTransaction = openTransaction;
     }
+
+
 }

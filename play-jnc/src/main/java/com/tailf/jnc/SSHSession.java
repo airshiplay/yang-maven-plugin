@@ -187,7 +187,7 @@ public class SSHSession implements Transport {
             ch = in.read();
             if (ch == -1) {
                 trace("end of input (-1)");
-                throw new IOException("Session closed");
+                throw new SessionClosedException("Session closed");
             }
 
             for (int i=0; i < endmarker.length(); i++) {

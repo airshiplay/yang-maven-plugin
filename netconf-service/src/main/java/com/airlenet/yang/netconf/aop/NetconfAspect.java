@@ -4,6 +4,7 @@ package com.airlenet.yang.netconf.aop;
 import com.airlenet.yang.common.PlayNetconfDevice;
 import com.airlenet.yang.common.PlayNetconfSession;
 import com.tailf.jnc.NetconfSession;
+import com.tailf.jnc.SessionClosedException;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -15,8 +16,8 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 
 /**
-* Created by airshiplay on 16-7-1.
-*/
+ * Created by airshiplay on 16-7-1.
+ */
 
 @Component
 @Aspect
@@ -49,11 +50,15 @@ public class NetconfAspect {
                     playNetconfSession.getNetconfSession().confirmedCommit(60);// candidates are now updated 1分钟内没有确认 则还原配置
                 }
                 playNetconfSession.getNetconfSession().commit();//now commit them 确认提交
+            } catch (SessionClosedException sce) {
+                flexNetconfDevice.closeDefaultNetconfSession();
+                logger.error("aop:" + methodName);
+                throw sce;
             } catch (IOException ioe) {
-                logger.error("aop:"+methodName);
+                logger.error("aop:" + methodName);
                 throw ioe;
             } catch (Exception ioe) {
-                logger.error("aop:"+methodName);
+                logger.error("aop:" + methodName);
                 throw ioe;
             } finally {
                 playNetconfSession.getNetconfSession().unlock(NetconfSession.CANDIDATE);

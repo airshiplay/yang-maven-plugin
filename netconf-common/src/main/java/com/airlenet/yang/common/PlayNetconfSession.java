@@ -6,6 +6,7 @@ import java.io.IOException;
 
 /**
  * Created by airlenet on 17/8/24.
+ * @author airlenet
  */
 public class PlayNetconfSession {
     private final NetconfSession netconfSession;
@@ -64,13 +65,24 @@ public class PlayNetconfSession {
         netconfSession.copyConfig(configTree, NetconfSession.RUNNING);
     }
 
+    public NodeSet get() throws IOException, JNCException {
+        return this.netconfSession.get();
+    }
+
     public NodeSet get(String xpath) throws IOException, JNCException {
         return this.netconfSession.get(xpath);
     }
+
     public NodeSet getConfig(String xpath) throws IOException,JNCException{
         return  this.netconfSession.getConfig(xpath);
     }
+
+    public NodeSet getConfig() throws IOException,JNCException{
+        return  this.netconfSession.getConfig();
+    }
+
     public NetconfSession getNetconfSession(){
         return this.netconfSession;
     }
+
 }
