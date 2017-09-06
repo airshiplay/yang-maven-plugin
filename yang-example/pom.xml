@@ -30,9 +30,9 @@
                 <artifactId>yang-maven-plugin</artifactId>
                 <version>${project.version}</version>
                 <configuration>
-                    <skip>true</skip>
+                    <skip>false</skip>
                     <showWarnings>false</showWarnings>
-                    <errorAbort>true</errorAbort>
+                    <errorAbort>false</errorAbort>
                     <excludes>
                         <exclude>tailf/*.yang</exclude>
                         <exclude>ietf/*.yang</exclude>
@@ -46,8 +46,8 @@
                             <goal>process</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>target/generated-sources/java</outputDirectory>
-                            <packageName>com.airlenet.yang.model</packageName>
+                            <outputDirectory>src/main/java</outputDirectory>
+                            <packageName>com.certusnet.eng.yang.model</packageName>
                         </configuration>
                     </execution>
                 </executions>
