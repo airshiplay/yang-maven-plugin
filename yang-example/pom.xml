@@ -30,13 +30,11 @@
                 <artifactId>yang-maven-plugin</artifactId>
                 <version>${project.version}</version>
                 <configuration>
-                    <skip>false</skip>
+                    <skip>true</skip>
                     <showWarnings>false</showWarnings>
                     <errorAbort>false</errorAbort>
                     <excludes>
-                        <exclude>tailf/*.yang</exclude>
-                        <exclude>ietf/*.yang</exclude>
-                        <exclude>iana/*.yang</exclude>
+                        <exclude>module/**/*.yang</exclude>
                     </excludes>
                 </configuration>
                 <executions>
