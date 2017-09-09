@@ -34,9 +34,7 @@
                     <showWarnings>false</showWarnings>
                     <errorAbort>true</errorAbort>
                     <excludes>
-                        <exclude>tailf/*.yang</exclude>
-                        <exclude>ietf/*.yang</exclude>
-                        <exclude>iana/*.yang</exclude>
+                        <exclude>module/**/*.yang</exclude>
                     </excludes>
                 </configuration>
                 <executions>
