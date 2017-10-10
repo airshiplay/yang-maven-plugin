@@ -1,5 +1,8 @@
 package com.tailf.jnc;
 
+import org.xml.sax.InputSource;
+
+import java.io.ByteArrayInputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -1005,6 +1008,17 @@ public abstract class YangElement extends Element {
     public static YangElement readFile(String filename) throws JNCException {
         final YangXMLParser p = new YangXMLParser();
         return p.readFile(filename);
+    }
+
+    /**
+     *
+     * @param xmlContent
+     * @return
+     * @throws JNCException
+     */
+    public static Element readXml(String xmlContent) throws JNCException {
+        final YangXMLParser p = new YangXMLParser();
+        return p.parse(xmlContent);
     }
 
     // cache the Tagpath and the SchemaNode
