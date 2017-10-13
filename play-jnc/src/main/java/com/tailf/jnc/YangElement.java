@@ -330,7 +330,12 @@ public abstract class YangElement extends Element {
             boolean nextIsUpper = Character.isUpperCase(next);
             boolean nextIsLetter = Character.isLetter(next);
             if (isLast) {
-                sb.append(Character.toLowerCase(c));
+                if(len>1){
+                    sb.append(c);
+                }else{
+                    sb.append(Character.toLowerCase(c));
+                }
+
             } else if (c == '-' || c == '.') {
                 sb.append(Character.toUpperCase(next));
                 i++;
