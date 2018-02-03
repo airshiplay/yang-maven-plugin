@@ -3,7 +3,7 @@ module demo {
     prefix demo;
     // yang here
     container employees {
-        list employee {
+        list user {
             key id;
             leaf id {type uint32;}
             leaf name {type string;}
@@ -12,4 +12,34 @@ module demo {
             leaf city {type string;}
         }
     }
+    container teacher{
+        list user {
+            key id;
+            leaf id {type uint32;}
+            leaf name {type string;}
+            leaf age {type uint8;}
+            leaf title {type string;}
+            leaf city {type string;}
+        }
+    }
+    container demo{
+        list user {
+                    key id;
+                    leaf id {type uint32;}
+                    leaf name {type string;}
+                    leaf age {type uint8;}
+                    leaf title {type string;}
+                    leaf city {type string;}
+                }
+    }
+
+container user{
+                    leaf ifIndex {type uint32;}
+                    leaf name {type string;}
+                    leaf age {type uint8;}
+                    leaf title {type string;}
+                    leaf city {type string;}
+
+    }
+
 }

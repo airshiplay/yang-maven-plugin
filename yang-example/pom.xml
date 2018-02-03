@@ -30,7 +30,7 @@
                 <artifactId>yang-maven-plugin</artifactId>
                 <version>${project.version}</version>
                 <configuration>
-                    <skip>true</skip>
+                    <skip>false</skip>
                     <showWarnings>false</showWarnings>
                     <errorAbort>true</errorAbort>
                     <excludes>
