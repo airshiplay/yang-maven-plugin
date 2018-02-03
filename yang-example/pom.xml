@@ -44,7 +44,7 @@
                             <goal>process</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>target/generated-sources/java</outputDirectory>
+                            <outputDirectory>src/main/java</outputDirectory>
                             <packageName>com.airlenet.yang.model</packageName>
                         </configuration>
                     </execution>
