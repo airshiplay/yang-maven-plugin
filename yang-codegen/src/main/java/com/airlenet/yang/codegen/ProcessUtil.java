@@ -25,7 +25,14 @@ public class ProcessUtil {
         process( null, commandList.toArray(new String[0]));
     }
 
-
+    public static String processResult(String... command) throws Exception {
+        ProcessBuilder processBuilder = new ProcessBuilder();
+        processBuilder.command(command);
+        Process process = processBuilder.start();
+        String print = input2str(process.getInputStream());
+        String error = input2str(process.getErrorStream());
+        return print;
+    }
     public static void process(File base, String... command) throws Exception {
         ProcessBuilder processBuilder = new ProcessBuilder();
         if (base != null)

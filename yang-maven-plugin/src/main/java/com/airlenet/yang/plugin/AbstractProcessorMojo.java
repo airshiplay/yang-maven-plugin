@@ -8,6 +8,7 @@ package com.airlenet.yang.plugin;
 import com.airlenet.yang.codegen.ProcessUtil;
 import com.airlenet.yang.codegen.PyangInstall;
 import com.google.common.base.Joiner;
+import org.apache.commons.io.FileUtils;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -165,15 +166,24 @@ public abstract class AbstractProcessorMojo extends AbstractMojo {
                     }
 
                 });
-                if (pythons.length == 1) {
+                if (pythons!=null && pythons.length == 1) {
                     python = pythons[0];
                     pythonHome = python.getParentFile();
                     break;
                 }
             }
+            if(python ==null){
+                String result = ProcessUtil.processResult("which","python");
+                File file = new File(result);
+                if(file.exists()){
+                    pythonHome = file;
+                }
+            }
+
         } catch (Exception ep) {// 没有 Python  检测jython，使用jython代替
             //检测jython 是否安装
             try {
+                FileUtils.forceDelete(jythonHome);
                 ProcessUtil.process(new File(jythonHome, "/bin/jython").getAbsolutePath(), "-V");
             } catch (Exception e) {//安装jython
                 getLog().info("Jython is not installed. Start installation");
