@@ -183,7 +183,6 @@ public abstract class AbstractProcessorMojo extends AbstractMojo {
         } catch (Exception ep) {// 没有 Python  检测jython，使用jython代替
             //检测jython 是否安装
             try {
-                FileUtils.forceDelete(jythonHome);
                 ProcessUtil.process(new File(jythonHome, "/bin/jython").getAbsolutePath(), "-V");
             } catch (Exception e) {//安装jython
                 getLog().info("Jython is not installed. Start installation");
