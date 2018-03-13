@@ -520,7 +520,7 @@ public class Device implements Serializable {
     private SessionTree removeTreeData(String sessionName) {
         for (int i = 0; i < trees.size(); i++) {
             final SessionTree t = trees.get(i);
-            if (sessionName.equals(t.sessionName)) {
+            if (t!=null && sessionName.equals(t.sessionName)) {
                 trees.remove(i);
                 return t;
             }
