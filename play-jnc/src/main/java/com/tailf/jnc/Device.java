@@ -275,6 +275,7 @@ public class Device implements Serializable {
             }
         }
         clearConfig(sessionName);
+        removeTreeData(sessionName);
     }
 
     /**
@@ -294,6 +295,7 @@ public class Device implements Serializable {
             final SessionTree t = trees.get(i);
             t.configTree = null;
         }
+        trees = new ArrayList<SessionTree>();
         // we keep the named config trees
         if (con != null) {
             con.close();
@@ -498,7 +500,7 @@ public class Device implements Serializable {
 
     private SessionTree getTreeData(String sessionName) {
         for (final SessionTree t : trees) {
-            if (t.sessionName.equals(sessionName)) {
+            if (t!=null && t.sessionName.equals(sessionName)) {
                 return t;
             }
         }
@@ -515,7 +517,16 @@ public class Device implements Serializable {
         }
         return null;
     }
-
+    private SessionTree removeTreeData(String sessionName) {
+        for (int i = 0; i < trees.size(); i++) {
+            final SessionTree t = trees.get(i);
+            if (t.sessionName.equals(sessionName)) {
+                trees.remove(i);
+                return t;
+            }
+        }
+        return null;
+    }
     private void auth(DeviceUser currentUser)
             throws IOException, JNCException {
         if (currentUser.getPassword() != null) {
