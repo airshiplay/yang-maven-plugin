@@ -491,7 +491,7 @@ public class Device implements Serializable {
 
     private SessionConnData getConnData(String sessionName) {
         for (final SessionConnData p : connSessions) {
-            if (p.sessionName.equals(sessionName)) {
+            if (sessionName.equals(p.sessionName)) {
                 return p;
             }
         }
@@ -500,7 +500,7 @@ public class Device implements Serializable {
 
     private SessionTree getTreeData(String sessionName) {
         for (final SessionTree t : trees) {
-            if (t!=null && t.sessionName.equals(sessionName)) {
+            if ( t!=null && sessionName.equals(t.sessionName)) {
                 return t;
             }
         }
@@ -510,7 +510,7 @@ public class Device implements Serializable {
     private SessionConnData removeConnData(String sessionName) {
         for (int i = 0; i < connSessions.size(); i++) {
             final SessionConnData p = connSessions.get(i);
-            if (p.sessionName.equals(sessionName)) {
+            if (sessionName.equals(p.sessionName)) {
                 connSessions.remove(i);
                 return p;
             }
@@ -520,7 +520,7 @@ public class Device implements Serializable {
     private SessionTree removeTreeData(String sessionName) {
         for (int i = 0; i < trees.size(); i++) {
             final SessionTree t = trees.get(i);
-            if (t.sessionName.equals(sessionName)) {
+            if (sessionName.equals(t.sessionName)) {
                 trees.remove(i);
                 return t;
             }
