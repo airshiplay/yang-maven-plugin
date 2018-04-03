@@ -370,7 +370,11 @@ public class Device implements Serializable {
         con = new SSHConnection(mgmt_ip, mgmt_port, connectTimeout);
         auth(u);
     }
-
+    public boolean isConnect(){
+        if(con == null ||con.isClose())
+            return false;
+        return true;
+    }
     /**
      * This method is mostly interesting if we want to use the backlog
      * functionality. A typical sequence towards a device is connect(),

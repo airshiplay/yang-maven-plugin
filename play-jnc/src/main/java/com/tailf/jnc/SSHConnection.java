@@ -21,7 +21,7 @@ import ch.ethz.ssh2.Connection;
 public class SSHConnection {
 
     Connection connection = null;
-
+    private boolean isClose=false;
     /**
      * By default we connect to the IANA registered port for NETCONF which is
      * 830
@@ -158,7 +158,12 @@ public class SSHConnection {
      * Closes the SSH session/connection.
      */
     public void close() {
+        isClose= true;
         connection.close();
+    }
+
+    public boolean isClose(){
+        return isClose;
     }
 
 }
