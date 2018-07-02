@@ -6,6 +6,8 @@ import java.io.ByteArrayInputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * The YangElement is a configuration sub-tree like the
@@ -253,7 +255,7 @@ public abstract class YangElement extends Element {
      * Static list of packages.
      * 
      */
-    static ArrayList<Package> packages = new ArrayList<Package>();
+    static List<Package> packages = new ArrayList<Package>();
 
     /**
      * Locate package from Namespace.
@@ -264,9 +266,11 @@ public abstract class YangElement extends Element {
         if (packages == null) {
             return null;
         }
-        for (final Package p : packages) {
-            if (p.ns.equals(ns)) {
-                return p.pkg;
+        synchronized (packages) {
+            for (final Package p : packages) {
+                if (p != null && p.ns.equals(ns)) {
+                    return p.pkg;
+                }
             }
         }
         return null;
@@ -290,11 +294,13 @@ public abstract class YangElement extends Element {
         if (packages == null) {
             return;
         }
-        for (int i = 0; i < packages.size(); i++) {
-            final Package p = packages.get(i);
-            if (p.ns.equals(ns)) {
-                packages.remove(i);
-                return;
+        synchronized (packages){
+            for (int i = 0; i < packages.size(); i++) {
+                final Package p = packages.get(i);
+                if (p!=null && p.ns.equals(ns)) {
+                    packages.remove(i);
+                    return;
+                }
             }
         }
     }
