@@ -164,7 +164,7 @@ public class JNCException extends Exception {
         case ELEMENT_MISSING:
             return "Element does not exists: " + opaqueData;
         case NOTIFICATION_ERROR:
-            return "Notification error: " + opaqueData;
+            return "Notification error: " + ((opaqueData instanceof Element)?(((Element) opaqueData).toXMLString()):opaqueData);
         case TIMEOUT_ERROR:
             return "Timeout error: " + opaqueData;
         case REVISION_ERROR:
