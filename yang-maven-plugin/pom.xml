@@ -5,7 +5,7 @@
     <parent>
         <artifactId>play-yang</artifactId>
         <groupId>com.airlenet.yang</groupId>
-        <version>1.1.0-SNAPSHOT</version>
+        <version>1.1.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -75,9 +75,9 @@
     </licenses>
     <developers>
         <developer>
-            <id>airshiplay</id>
-            <name>airshiplay</name>
-            <email>airshiplay@126.com</email>
+            <id>airlenet</id>
+            <name>airlenet</name>
+            <email>airlenet@163.com</email>
         </developer>
     </developers>
     <organization>

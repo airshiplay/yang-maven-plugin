@@ -3,14 +3,9 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <parent>
-        <groupId>com.airlenet</groupId>
-        <artifactId>play-parent</artifactId>
-        <version>1.0.0.RELEASE</version>
-    </parent>
     <groupId>com.airlenet.yang</groupId>
     <artifactId>play-yang</artifactId>
-    <version>1.1.0-SNAPSHOT</version>
+    <version>1.1.0</version>
     <packaging>pom</packaging>
     <name>play yang</name>
     <description>play yang</description>
@@ -20,11 +15,22 @@
         <module>yang-codegen</module>
         <module>yang-maven-plugin</module>
         <module>yang-example</module>
-        <!--<module>netconf-service</module>-->
-        <!--<module>netconf-common</module>-->
-        <!--<module>netconf-rest</module>-->
     </modules>
-
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <java.version>1.7</java.version>
+        <maven.compiler.source>1.7</maven.compiler.source>
+        <maven.compiler.target>1.7</maven.compiler.target>
+        <encoding>UTF-8</encoding>
+    </properties>
+    <dependencies>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.7.25</version>
+            <optional>true</optional>
+        </dependency>
+    </dependencies>
     <licenses>
         <license>
             <name>The Apache License, Version 2.0</name>
