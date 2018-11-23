@@ -2,6 +2,7 @@ package com.tailf.jnc;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.Socket;
 
 import ch.ethz.ssh2.Connection;
 
@@ -54,11 +55,24 @@ public class SSHConnection {
      */
     public SSHConnection(String host, int port, int connectTimeout)
             throws IOException, JNCException {
-
-        connection = new Connection(host, port);
-        connection.connect(null, connectTimeout, 0);
+        this(host,port,null,connectTimeout);
     }
 
+    /**
+     *
+     * @param host
+     * @param port 0表示CallHome
+     * @param socket
+     * @param connectTimeout
+     * @throws IOException
+     * @throws JNCException
+     */
+    public SSHConnection(String host, int port,Socket socket, int connectTimeout)
+            throws IOException, JNCException {
+
+        connection = new Connection(host, port,socket);
+        connection.connect(null, connectTimeout, 0);
+    }
     /**
      * This method establishes an SSH connection to a host, once the connection
      * is established it must be authenticated.

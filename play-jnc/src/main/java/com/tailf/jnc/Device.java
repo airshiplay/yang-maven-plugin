@@ -2,6 +2,7 @@ package com.tailf.jnc;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.net.Socket;
 import java.util.ArrayList;
 
 /**
@@ -117,17 +118,33 @@ public class Device implements Serializable {
      */
     protected int defaultReadTimeout = 0;
 
+    protected Socket socket;
     /**
      * Constructor for the Device with on initial user. We need at least one
      * DeviceUser in order to be able to connect.
      */
     public Device(String name, DeviceUser user, String mgmt_ip, int mgmt_port) {
+        this.name = name;
+        users = new ArrayList<DeviceUser>();
+        users.add(user);
+        this.mgmt_ip = mgmt_ip;//Direct connection
+        this.mgmt_port = mgmt_port;
+        backlog = new ArrayList<Element>();
+        connSessions = new ArrayList<SessionConnData>();
+        trees = new ArrayList<SessionTree>();
+    }
 
+    public Device(String name, DeviceUser user, Socket socket) {
+        this(name,user,null,socket);
+    }
+
+    public Device(String name, DeviceUser user, String mgmt_ip, Socket socket) {
         this.name = name;
         users = new ArrayList<DeviceUser>();
         users.add(user);
         this.mgmt_ip = mgmt_ip;
-        this.mgmt_port = mgmt_port;
+        this.mgmt_port = 0;//CallHome
+        this.socket = socket;
         backlog = new ArrayList<Element>();
         connSessions = new ArrayList<SessionConnData>();
         trees = new ArrayList<SessionTree>();
@@ -367,7 +384,11 @@ public class Device implements Serializable {
             throw new JNCException(JNCException.AUTH_FAILED, "No such user: "
                     + localUser);
         }
-        con = new SSHConnection(mgmt_ip, mgmt_port, connectTimeout);
+        if(mgmt_port ==0){
+            con = new SSHConnection(mgmt_ip,mgmt_port,socket, connectTimeout);
+        }else{
+            con = new SSHConnection(mgmt_ip, mgmt_port, connectTimeout);
+        }
         auth(u);
     }
     public boolean isConnect(){

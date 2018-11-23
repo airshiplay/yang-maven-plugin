@@ -5,6 +5,7 @@ import java.io.CharArrayWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.security.SecureRandom;
 import java.util.Vector;
@@ -92,6 +93,8 @@ public class Connection
 
 	private final int port;
 
+	private final Socket socket;
+
 	private TransportManager tm;
 
 	private boolean tcpNoDelay = false;
@@ -124,10 +127,21 @@ public class Connection
 	 */
 	public Connection(String hostname, int port)
 	{
-		this.hostname = hostname;
-		this.port = port;
+		this(hostname,port,null);
 	}
 
+	/**
+	 *
+	 * @param hostname
+	 * @param port 0 CallHome,other Direct connection
+	 * @param socket
+	 */
+	public Connection(String hostname, int port,Socket socket)
+	{
+		this.hostname = hostname;
+		this.port = port;
+		this.socket = socket;
+	}
 	/**
 	 * After a successful connect, one has to authenticate oneself. This method
 	 * is based on DSA (it uses DSA to sign a challenge sent by the server).
@@ -591,8 +605,11 @@ public class Connection
 			throw new IllegalArgumentException("kexTimeout must be non-negative!");
 
 		final TimeoutState state = new TimeoutState();
-
-		tm = new TransportManager(hostname, port);
+		if(port ==0){
+			tm = new TransportManager(socket);
+		} else {
+			tm = new TransportManager(hostname, port);
+		}
 
 		tm.setConnectionMonitors(connectionMonitors);
 

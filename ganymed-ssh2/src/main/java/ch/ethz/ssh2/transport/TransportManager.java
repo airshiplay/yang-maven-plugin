@@ -123,7 +123,7 @@ public class TransportManager
 
 	String hostname;
 	int port;
-	final Socket sock = new Socket();
+	final Socket sock;
 
 	Object connectionSemaphore = new Object();
 
@@ -207,8 +207,14 @@ public class TransportManager
 	{
 		this.hostname = host;
 		this.port = port;
+		this.sock = new Socket();
 	}
 
+	public TransportManager(Socket socket) throws IOException
+	{
+		this.sock = socket;
+		this.port = 0;
+	}
 	public int getPacketOverheadEstimate()
 	{
 		return tc.getPacketOverheadEstimate();
@@ -336,8 +342,10 @@ public class TransportManager
 
 		if (proxyData == null)
 		{
-			InetAddress addr = createInetAddress(hostname);
-			sock.connect(new InetSocketAddress(addr, port), connectTimeout);
+			if(port !=0){
+				InetAddress addr = createInetAddress(hostname);
+				sock.connect(new InetSocketAddress(addr, port), connectTimeout);
+			}
 			sock.setSoTimeout(0);
 			return;
 		}
@@ -347,9 +355,10 @@ public class TransportManager
 			HTTPProxyData pd = (HTTPProxyData) proxyData;
 
 			/* At the moment, we only support HTTP proxies */
-
-			InetAddress addr = createInetAddress(pd.proxyHost);
-			sock.connect(new InetSocketAddress(addr, pd.proxyPort), connectTimeout);
+			if(port !=0){
+			    InetAddress addr = createInetAddress(pd.proxyHost);
+			    sock.connect(new InetSocketAddress(addr, pd.proxyPort), connectTimeout);
+			}
 			sock.setSoTimeout(0);
 
 			/* OK, now tell the proxy where we actually want to connect to */
