@@ -1,5 +1,7 @@
 package com.tailf.jnc;
 
+import ch.ethz.ssh2.ServerHostKeyVerifier;
+
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.Socket;
@@ -360,7 +362,7 @@ public class Device implements Serializable {
      * prior to establishing any sessions (channels)
      */
     public void connect(String localUser) throws IOException, JNCException {
-        connect(localUser, 0);
+        connect(localUser,null, 0);
     }
 
     /**
@@ -371,6 +373,11 @@ public class Device implements Serializable {
      * @param localUser The name of a local (for the EMS) user
      */
     public void connect(String localUser, int connectTimeout)
+            throws IOException, JNCException{
+        connect(localUser,null,connectTimeout);
+    }
+
+    public void connect(String localUser, ServerHostKeyVerifier keyVerifier, int connectTimeout)
             throws IOException, JNCException {
         DeviceUser u = null;
         for (int i = 0; i < users.size(); i++) {
@@ -384,11 +391,9 @@ public class Device implements Serializable {
             throw new JNCException(JNCException.AUTH_FAILED, "No such user: "
                     + localUser);
         }
-        if(mgmt_port ==0){
-            con = new SSHConnection(mgmt_ip,mgmt_port,socket, connectTimeout);
-        }else{
-            con = new SSHConnection(mgmt_ip, mgmt_port, connectTimeout);
-        }
+
+        con = new SSHConnection(mgmt_ip, mgmt_port,socket,keyVerifier, connectTimeout);
+
         auth(u);
     }
     public boolean isConnect(){

@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.Socket;
 
 import ch.ethz.ssh2.Connection;
+import ch.ethz.ssh2.ServerHostKeyVerifier;
 
 /**
  * A SSH NETCONF connection class. Can be used whenever {@link NetconfSession}
@@ -55,7 +56,7 @@ public class SSHConnection {
      */
     public SSHConnection(String host, int port, int connectTimeout)
             throws IOException, JNCException {
-        this(host,port,null,connectTimeout);
+        this(host,port,null,null,connectTimeout);
     }
 
     /**
@@ -67,11 +68,11 @@ public class SSHConnection {
      * @throws IOException
      * @throws JNCException
      */
-    public SSHConnection(String host, int port,Socket socket, int connectTimeout)
+    public SSHConnection(String host, int port, Socket socket, ServerHostKeyVerifier keyVerifier, int connectTimeout)
             throws IOException, JNCException {
 
         connection = new Connection(host, port,socket);
-        connection.connect(null, connectTimeout, 0);
+        connection.connect(keyVerifier, connectTimeout, 0);
     }
     /**
      * This method establishes an SSH connection to a host, once the connection

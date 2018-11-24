@@ -7,7 +7,7 @@ import java.io.InputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-public class SockerServerTest {
+public class NetconfCallhomeServerTest {
 
     public static void main(String args[]) {
         ServerSocket serverSocket = null;
