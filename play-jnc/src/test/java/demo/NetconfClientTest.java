@@ -11,7 +11,7 @@ import java.io.IOException;
 
 public class NetconfClientTest {
     public static void main(String args[]) throws IOException, JNCException {
-        Device device = new Device("admin", new DeviceUser("admin", "root", "123456"), "172.19.200.203", 22);
+        Device device = new Device("admin", new DeviceUser("admin", "admin", "cErtusnEt@2018"), "172.19.200.203", 22);
 
         device.connect("admin", new ServerHostKeyVerifier() {
             @Override

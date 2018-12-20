@@ -136,6 +136,9 @@ public class Device implements Serializable {
         trees = new ArrayList<SessionTree>();
     }
 
+    public Device(String name, DeviceUser user) {
+        this(name,user,null,null);
+    }
     public Device(String name, DeviceUser user, Socket socket) {
         this(name,user,null,socket);
     }
@@ -305,7 +308,8 @@ public class Device implements Serializable {
         for (int i = 0; i < connSessions.size(); i++) {
             final SessionConnData d = connSessions.get(i);
             try {
-                d.session.closeSession();
+//              d.session.closeSession();
+                d.sshSession.close();
             } catch (final Exception e) {
             }
         }
@@ -322,6 +326,21 @@ public class Device implements Serializable {
         }
     }
 
+    /**
+     * close Connection
+     */
+    public void closeConnection(){
+        if (con != null) {
+            con.close();
+            con = null;
+        }
+        connSessions = new ArrayList<SessionConnData>();
+        for (int i = 0; i < trees.size(); i++) {
+            final SessionTree t = trees.get(i);
+            t.configTree = null;
+        }
+        trees = new ArrayList<SessionTree>();
+    }
     /**
      * Checks if this device has any sessions with specified name.
      */
@@ -365,6 +384,9 @@ public class Device implements Serializable {
         connect(localUser,null, 0);
     }
 
+    public void connect(String localUser,Socket socket,ServerHostKeyVerifier keyVerifier) throws IOException, JNCException {
+        connect(localUser,keyVerifier, 0);
+    }
     /**
      * This connect() method has an additional timeout paramater. This is not
      * the same thing as the readTimeout. The connectTimeout only applies to
@@ -396,6 +418,11 @@ public class Device implements Serializable {
 
         auth(u);
     }
+
+    public void connect(ServerHostKeyVerifier keyVerifier, int connectTimeout) throws IOException, JNCException {
+        con = new SSHConnection(mgmt_ip, mgmt_port,socket,keyVerifier, connectTimeout);
+    }
+
     public boolean isConnect(){
         if(con == null ||con.isClose())
             return false;
