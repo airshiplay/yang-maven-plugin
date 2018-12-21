@@ -70,8 +70,11 @@ public class SSHConnection {
      */
     public SSHConnection(String host, int port, Socket socket, ServerHostKeyVerifier keyVerifier, int connectTimeout)
             throws IOException, JNCException {
-
-        connection = new Connection(host, port,socket);
+        if (socket ==null){
+            connection = new Connection(host, port);
+        }else{
+            connection = new Connection(host, port,socket);
+        }
         connection.connect(keyVerifier, connectTimeout, 0);
     }
     /**
