@@ -202,7 +202,9 @@ public class Device implements Serializable {
      */
     public void clearConfig(String sessionName) {
         final SessionTree t = getTreeData(sessionName);
-        t.configTree = null;
+        if(t!=null){
+            t.configTree = null;
+        }
     }
 
     /**
