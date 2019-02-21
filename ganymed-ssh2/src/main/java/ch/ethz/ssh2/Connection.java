@@ -1142,6 +1142,19 @@ public class Connection
 			tm.setTcpNoDelay(enable);
 	}
 
+	public synchronized void setSoTimeout(int timeout) throws IOException
+	{
+		if (tm != null)
+			tm.setSoTimeout(timeout);
+	}
+
+	public Socket getSocket(){
+		if (tm != null)
+			return tm.getSocket();
+		else
+			return null;
+	}
+
 	/**
 	 * Used to tell the library that the connection shall be established through a proxy server.
 	 * It only makes sense to call this method before calling the {@link #connect() connect()}

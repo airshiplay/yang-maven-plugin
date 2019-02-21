@@ -383,11 +383,11 @@ public class Device implements Serializable {
      * prior to establishing any sessions (channels)
      */
     public void connect(String localUser) throws IOException, JNCException {
-        connect(localUser,null, 0);
+        connect(localUser,null, 0,0);
     }
 
-    public void connect(String localUser,Socket socket,ServerHostKeyVerifier keyVerifier) throws IOException, JNCException {
-        connect(localUser,keyVerifier, 0);
+    public void connect(String localUser,ServerHostKeyVerifier keyVerifier) throws IOException, JNCException {
+        connect(localUser,keyVerifier, 0,0);
     }
     /**
      * This connect() method has an additional timeout paramater. This is not
@@ -398,10 +398,13 @@ public class Device implements Serializable {
      */
     public void connect(String localUser, int connectTimeout)
             throws IOException, JNCException{
-        connect(localUser,null,connectTimeout);
+        connect(localUser,null,connectTimeout,0);
+    }
+    public void connect(String localUser,ServerHostKeyVerifier keyVerifier, int connectTimeout) throws IOException, JNCException {
+        connect(localUser,keyVerifier, connectTimeout,0);
     }
 
-    public void connect(String localUser, ServerHostKeyVerifier keyVerifier, int connectTimeout)
+    public void connect(String localUser, ServerHostKeyVerifier keyVerifier, int connectTimeout,int kexTimeout)
             throws IOException, JNCException {
         DeviceUser u = null;
         for (int i = 0; i < users.size(); i++) {
@@ -416,13 +419,21 @@ public class Device implements Serializable {
                     + localUser);
         }
 
-        con = new SSHConnection(mgmt_ip, mgmt_port,socket,keyVerifier, connectTimeout);
+        con = new SSHConnection(mgmt_ip, mgmt_port,socket,keyVerifier, connectTimeout,kexTimeout);
 
         auth(u);
     }
 
+    public Socket getSocket(){
+        return con.getSocket();
+    }
+
+    public synchronized void setSoTimeout(int timeout) throws IOException{
+        con.setSoTimeout(timeout);
+    }
+
     public void connect(ServerHostKeyVerifier keyVerifier, int connectTimeout) throws IOException, JNCException {
-        con = new SSHConnection(mgmt_ip, mgmt_port,socket,keyVerifier, connectTimeout);
+        con = new SSHConnection(mgmt_ip, mgmt_port,socket,keyVerifier, connectTimeout,0);
     }
 
     public boolean isConnect(){

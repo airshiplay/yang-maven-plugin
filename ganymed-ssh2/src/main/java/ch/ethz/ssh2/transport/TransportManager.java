@@ -220,6 +220,10 @@ public class TransportManager
 		return tc.getPacketOverheadEstimate();
 	}
 
+	public Socket getSocket(){
+		return this.sock;
+	}
+
 	public void setTcpNoDelay(boolean state) throws IOException
 	{
 		sock.setTcpNoDelay(state);
@@ -346,6 +350,7 @@ public class TransportManager
 				InetAddress addr = createInetAddress(hostname);
 				sock.connect(new InetSocketAddress(addr, port), connectTimeout);
 			}
+			sock.setKeepAlive(true);
 			sock.setSoTimeout(0);
 			return;
 		}
@@ -359,6 +364,7 @@ public class TransportManager
 			    InetAddress addr = createInetAddress(pd.proxyHost);
 			    sock.connect(new InetSocketAddress(addr, pd.proxyPort), connectTimeout);
 			}
+			sock.setKeepAlive(true);
 			sock.setSoTimeout(0);
 
 			/* OK, now tell the proxy where we actually want to connect to */

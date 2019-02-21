@@ -56,9 +56,13 @@ public class SSHConnection {
      */
     public SSHConnection(String host, int port, int connectTimeout)
             throws IOException, JNCException {
-        this(host,port,null,null,connectTimeout);
+        this(host,port,null,null,connectTimeout,0);
     }
 
+    public SSHConnection(String host, int port, Socket socket, ServerHostKeyVerifier keyVerifier, int connectTimeout)
+            throws IOException, JNCException{
+        this(host,port,socket,keyVerifier,connectTimeout,0);
+    }
     /**
      *
      * @param host
@@ -68,15 +72,24 @@ public class SSHConnection {
      * @throws IOException
      * @throws JNCException
      */
-    public SSHConnection(String host, int port, Socket socket, ServerHostKeyVerifier keyVerifier, int connectTimeout)
+    public SSHConnection(String host, int port, Socket socket, ServerHostKeyVerifier keyVerifier, int connectTimeout,int kexTimeout)
             throws IOException, JNCException {
         if (socket ==null){
             connection = new Connection(host, port);
         }else{
             connection = new Connection(host, port,socket);
         }
-        connection.connect(keyVerifier, connectTimeout, 0);
+        connection.connect(keyVerifier, connectTimeout, kexTimeout);
     }
+
+    public Socket getSocket(){
+        return connection.getSocket();
+    }
+
+    public synchronized void setSoTimeout(int timeout) throws IOException{
+        connection.setSoTimeout(timeout);
+    }
+
     /**
      * This method establishes an SSH connection to a host, once the connection
      * is established it must be authenticated.
