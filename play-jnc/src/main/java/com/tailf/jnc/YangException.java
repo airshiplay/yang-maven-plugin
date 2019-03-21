@@ -11,7 +11,9 @@ public class YangException extends JNCException {
     public YangException(int errorCode, Object opaqueData) {
         super(errorCode, opaqueData);
     }
-
+    public YangException(int errorCode, Object opaqueData, Throwable cause) {
+        super(errorCode, opaqueData,cause);
+    }
     public static final int ELEMENT_MISSING = -1025;
     public static final int BAD_VALUE = -1026;
     public static final int BAD_SESSION_NAME = -1032;

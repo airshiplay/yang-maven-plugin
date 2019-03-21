@@ -50,7 +50,7 @@ public class YangXMLParser extends XMLParser {
             parser.parse(is);
             return handler.top;
         } catch (final Exception e) {
-            e.printStackTrace();
+//            e.printStackTrace();
             throw new JNCException(JNCException.PARSER_ERROR, "parse error: "
                     + e);
         }

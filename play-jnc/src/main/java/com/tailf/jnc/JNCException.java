@@ -34,6 +34,29 @@ public class JNCException extends Exception {
         }
     }
 
+    public JNCException(int errorCode, Object opaqueData, Throwable cause) {
+        super(cause);
+        this.errorCode = errorCode;
+        this.opaqueData = opaqueData;
+        if (errorCode == RPC_REPLY_ERROR) {
+            // set rpcErrors array to the returned errors
+            final Element t = (Element) opaqueData;
+            try {
+                final NodeSet errors = t.get("self::rpc-reply/rpc-error");
+                if (errors != null) {
+                    rpcErrors = new RpcError[errors.size()];
+                    for (int i = 0; i < errors.size(); i++) {
+                        rpcErrors[i] = new RpcError(errors.get(i));
+                    }
+                }
+            } catch (final Exception e) {
+                System.err.println("rpc-error can't be parsed: "
+                        + t.toXMLString());
+                e.printStackTrace();
+            }
+        }
+    }
+
     /**
      * An error code indicating what went wrong. This field may take any of
      * these values:
@@ -141,38 +164,38 @@ public class JNCException extends Exception {
     @Override
     public String toString() {
         switch (errorCode) {
-        case AUTH_FAILED:
-            return "Authentication failed";
-        case PATH_ERROR:
-            return "Error in path: " + opaqueData;
-        case PATH_CREATE_ERROR:
-            return "Error in create path: " + opaqueData;
-        case PARSER_ERROR:
-            return "Parse error: " + opaqueData;
-        case RPC_REPLY_ERROR:
-            if (opaqueData != null) {
-                Element rpc = (Element) opaqueData;
-                return "rpc-reply error: " + rpc.toXMLString();
-            } else {
-                return "rpc-reply error";
-            }
-        case SESSION_ERROR:
-            return "Session error: " + opaqueData;
-        case ELEMENT_ALREADY_IN_USE:
-            return "Element has already been used: "
-                    + ((Element) opaqueData).name;
-        case ELEMENT_MISSING:
-            return "Element does not exists: " + opaqueData;
-        case NOTIFICATION_ERROR:
-            return "Notification error: " + ((opaqueData instanceof Element)?(((Element) opaqueData).toXMLString()):opaqueData);
-        case TIMEOUT_ERROR:
-            return "Timeout error: " + opaqueData;
-        case REVISION_ERROR:
-            return "Revision error: " + opaqueData;
-        case MESSAGE_ID_MISMATCH:
-            return "Message ID mismatch: " + opaqueData;
-        default:
-            return "Internal error: " + errorCode;
+            case AUTH_FAILED:
+                return "Authentication failed";
+            case PATH_ERROR:
+                return "Error in path: " + opaqueData;
+            case PATH_CREATE_ERROR:
+                return "Error in create path: " + opaqueData;
+            case PARSER_ERROR:
+                return "Parse error: " + opaqueData;
+            case RPC_REPLY_ERROR:
+                if (opaqueData != null) {
+                    Element rpc = (Element) opaqueData;
+                    return "rpc-reply error: " + rpc.toXMLString();
+                } else {
+                    return "rpc-reply error";
+                }
+            case SESSION_ERROR:
+                return "Session error: " + opaqueData;
+            case ELEMENT_ALREADY_IN_USE:
+                return "Element has already been used: "
+                        + ((Element) opaqueData).name;
+            case ELEMENT_MISSING:
+                return "Element does not exists: " + opaqueData;
+            case NOTIFICATION_ERROR:
+                return "Notification error: " + ((opaqueData instanceof Element) ? (((Element) opaqueData).toXMLString()) : opaqueData);
+            case TIMEOUT_ERROR:
+                return "Timeout error: " + opaqueData;
+            case REVISION_ERROR:
+                return "Revision error: " + opaqueData;
+            case MESSAGE_ID_MISMATCH:
+                return "Message ID mismatch: " + opaqueData;
+            default:
+                return "Internal error: " + errorCode;
         }
     }
 }

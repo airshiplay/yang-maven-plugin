@@ -176,9 +176,9 @@ public class SchemaParser {
         try {
             readFile(new InputSource(schemaUrl.openStream()), h);
         } catch (IOException e) {
-            e.printStackTrace();
+//            e.printStackTrace();
             throw new JNCException(JNCException.PARSER_ERROR, "Unable to open" +
-            		" file: " + schemaUrl + ": " + e);
+            		" file: " + schemaUrl + ": " + e,e);
         }
     }
 
@@ -189,9 +189,9 @@ public class SchemaParser {
             parser.setContentHandler(handler);
             parser.parse(inputSource);
         } catch (final Exception e) {
-            e.printStackTrace();
+//            e.printStackTrace();
             throw new JNCException(JNCException.PARSER_ERROR, "parse file: "
-                    + inputSource + " error: " + e);
+                    + inputSource + " error: " + e,e);
         }
     }
 
