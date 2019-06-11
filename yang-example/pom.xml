@@ -45,7 +45,7 @@
                         </goals>
                         <configuration>
                             <outputDirectory>src/main/java</outputDirectory>
-                            <packageName>com.certusnet.eng.yang.model</packageName>
+                            <packageName>com.airlenet.yang.model</packageName>
                         </configuration>
                     </execution>
                 </executions>
