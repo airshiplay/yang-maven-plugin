@@ -83,6 +83,10 @@ class JNCPlugin(plugin.PyangPlugin):
                 dest='directory',
                 help='Generate output to DIRECTORY.'),
             optparse.make_option(
+                '--jnc-prefix',
+                dest='prefix',
+                help='set Prefix subfix.'),
+            optparse.make_option(
                 '--jnc-help',
                 dest='jnc_help',
                 action='store_true',
@@ -684,15 +688,15 @@ def get_types(yang_type, ctx):
                            'instance-identifier', 'identityref'):
         primitive = 'String'
     elif yang_type.arg in ('bits',):  # uint64 handled below
-        primitive = 'BigInteger'
+        primitive = 'java.math.BigInteger'
     elif yang_type.arg == 'decimal64':
-        primitive = 'BigDecimal'
+        primitive = 'java.math.BigDecimal'
     elif yang_type.arg in ('int8', 'int16', 'int32', 'int64', 'uint8',
             'uint16', 'uint32', 'uint64'):
         integer_type = ['long', 'int', 'short', 'byte']
         if yang_type.arg[:1] == 'u':  # Unsigned
             integer_type.pop()
-            integer_type.insert(0, 'BigInteger')
+            integer_type.insert(0, 'java.math.BigInteger')
             jnc = 'com.tailf.jnc.YangUI' + yang_type.arg[2:]
         if yang_type.arg[-2:] == '64':
             primitive = integer_type[0]
@@ -822,6 +826,9 @@ def search_one(stmt, keyword, arg=None):
             return search(stmt, keyword)[0]
         except IndexError:
             return None
+    if keyword == 'prefix' and stmt.i_ctx.opts.prefix is not None and  stmt.i_ctx.opts.prefix != '':
+        if bool(1-res.arg.endswith(stmt.i_ctx.opts.prefix)):
+            res.arg = res.arg+stmt.i_ctx.opts.prefix
     return res
 
 
@@ -1076,7 +1083,10 @@ class ClassGenerator(object):
 
             type_stmt = search_one(stmt, 'type')
             super_type = get_types(type_stmt, self.ctx)[0]
-            java_class.superclass = super_type.rpartition('.')[2]
+            if java_class.filename == super_type.rpartition('.')[2]+'.java':
+                java_class.superclass = super_type
+            else:
+                java_class.superclass = super_type.rpartition('.')[2]
             java_class.imports.add(super_type)
             if super_type == 'com.tailf.jnc.YangDecimal64':
                 java_class.imports.add('java.math.BigDecimal')
@@ -1169,8 +1179,11 @@ class ClassGenerator(object):
                 print_warning(warn_msg, warn_msg, self.ctx)
             else:
                 target = stmt.i_target_node
-                target_module = get_module(target)
-                augmented_modules[target_module.arg] = target_module
+                if target is None:
+                    return
+                else:
+                    target_module = get_module(target)
+                    augmented_modules[target_module.arg] = target_module
             return  # XXX: Do not generate a class for the augment statement
 
         fields = OrderedSet()
@@ -1279,7 +1292,10 @@ class ClassGenerator(object):
             child_gen = MethodGenerator(sub, self.ctx)
             if sub.keyword in ('container', 'notification'):
                 field = sub.arg
-                self.java_class.add_field(child_gen.child_field())
+                c_field = child_gen.child_field();
+                if field == self.n2:
+                    field =''.join(c_field.imports)
+                self.java_class.add_field(c_field)
             else:
                 field = ''
             for access_method in child_gen.parent_access_methods():
@@ -1822,21 +1838,29 @@ class JavaMethod(JavaValue):
         self.exact = exact
         self.default_modifiers = True
 
-    def set_return_type(self, return_type):
+    def set_return_type(self, return_type,dep=None):
         """Sets the type of the return value of this method"""
         retval = None if not return_type else self.add_dependency(return_type)
-        self._set_instance_data('return_type', retval)
+        if dep is None:
+            self._set_instance_data('return_type', retval)
+        else:
+            self._set_instance_data('return_type', return_type)
 
-    def add_parameter(self, param_type, param_name):
+    def add_parameter(self, param_type, param_name,dep=None):
         """Adds a parameter to this method. The argument type is added to list
         of dependencies.
 
         param_type -- String representation of the argument type
         param_name -- String representation of the argument name
         """
-        self._set_instance_data('parameters',
+        if dep is None or dep is True:
+            self._set_instance_data('parameters',
                                 ' '.join([self.add_dependency(param_type),
                                           param_name]))
+        else:
+            self._set_instance_data('parameters',
+                                    ' '.join([(param_type),
+                                              param_name]))
 
     def add_exception(self, exception):
         """Adds exception to method"""
@@ -1860,7 +1884,10 @@ class JavaMethod(JavaValue):
             header = self.modifiers[:]
             if self.return_type is not None:
                 header.append(self.return_type)
-            header.append(self.name)
+            if self.name == 'getValues' and ''.join(self.parameters).startswith( 'String'):
+                header.append(self.name+('ByStr'))
+            else:
+                header.append(self.name)
             signature = [self.indent]
             signature.append(' '.join(header))
             signature.append('(')
@@ -1893,6 +1920,8 @@ class MethodGenerator(object):
         self.module_stmt = get_module(stmt)
         prefix = search_one(self.module_stmt, 'prefix')
         self.root = normalize(prefix.arg)
+
+        self.parent_n = normalize(stmt.parent.arg)
 
         self.pkg = get_package(stmt, ctx)
         self.basepkg = self.pkg.partition('.')[0]
@@ -2125,7 +2154,13 @@ class MethodGenerator(object):
             fields = OrderedSet()
         cond = ''
         for field in fields:  # could do reversed(fields) to preserve order
-            add_child.add_line(''.join([cond, 'if (child instanceof ',
+            index =field.rfind('.')
+            if index != - 1:
+                add_child.add_line(''.join([cond, 'if (child instanceof ',
+                    (field), ') ', camelize(field[index+1:len(field)]), ' = (',
+                    (field), ')child;']))
+            else:
+                add_child.add_line(''.join([cond, 'if (child instanceof ',
                     normalize(field), ') ', camelize(field), ' = (',
                     normalize(field), ')child;']))
             add_child.add_dependency(normalize(field))
@@ -2208,7 +2243,7 @@ class MethodGenerator(object):
                     param_type, _ = get_types(key_stmt, self.ctx)
                     if i == 2:
                         param_type = 'String'
-                    method.add_parameter(param_type, key_arg)
+                    method.add_parameter(param_type, key_arg,False)
                 new_child = [self.n, ' ', self.n2, ' = new ', self.n, '(']
                 keys = [camelize(s.arg) + 'Value' for s in self.gen.key_stmts]
                 new_child.append(', '.join(keys))
@@ -2300,7 +2335,10 @@ class LeafMethodGenerator(MethodGenerator):
         """get<Identifier>Value method generator."""
         assert self.is_leaf
         method = JavaMethod()
-        method.set_return_type(self.type_str[0])
+
+        method.set_return_type(self.type_str[0],False);
+
+        # method.set_return_type(self.type_str[0])
         method.set_name('get' + self.n + 'Value')
         method.add_exception('JNCException')
 
@@ -2323,7 +2361,7 @@ class LeafMethodGenerator(MethodGenerator):
                                      self.stmt.arg, '");']))
             method.add_line('if (' + self.n2 + ' == null) {')
             newValue = ['    ', self.n2, ' = new ', method.return_type, '("',
-                        self.default_value]
+                        self.default_value.replace('\\','\\\\')]
             if self.type_str[0] == 'com.tailf.jnc.YangUnion':
                 newValue.append('", new String[] {  // default\n')
                 for type_stmt in search(self.base_type, 'type'):
@@ -2403,8 +2441,13 @@ class LeafMethodGenerator(MethodGenerator):
                 l = [name, '(new ', method.add_dependency(value_type), '());']
                 method.add_line(''.join(l))
             else:
-                line = [name, '(new ', method.add_dependency(value_type),
-                        '(', param_names[0]]
+                # if(self.n != self.parent_n):
+                #     line = [name, '(new ', method.add_dependency(value_type),
+                #         '(', param_names[0]]
+                # else:
+                # method.add_dependency(value_type)
+                line = [name, '(new ', (value_type),
+                            '(', param_names[0]]
                 if not self.is_string and i == 1:
                     param_types = [self.type_str[1]]
                     method.add_javadoc('using Java primitive values.')
@@ -2456,7 +2499,7 @@ class LeafMethodGenerator(MethodGenerator):
                 method.add_line(''.join(line))
 
             for param_type, param_name in zip(param_types, param_names):
-                method.add_parameter(param_type, param_name)
+                method.add_parameter(param_type, param_name,False)
                 method.add_javadoc(' '.join(['@param', param_name,
                                              'used during instantiation.']))
             self.fix_imports(method, child=True)
@@ -2726,7 +2769,10 @@ class ContainerMethodGenerator(MethodGenerator):
         res.add_javadoc(' '.join(['Field for child', self.stmt.keyword,
                                   '"' + self.stmt.arg + '".']))
         res.add_modifier('public')
-        res.add_modifier(self.n)
+        if self.parent_n == self.n :
+            res.add_modifier(self.pkg+"."+self.n)
+        else:
+            res.add_modifier(self.n)
         res.add_dependency(self.n)
         return self.fix_imports(res, child=True)
 
@@ -2799,8 +2845,8 @@ class ListMethodGenerator(MethodGenerator):
             for key in self.key_stmts:
                 key_arg = camelize(key.arg)
                 key_type = search_one(key, 'type')
-                jnc, primitive = get_types(key_type, self.ctx)
-                jnc = constructor.add_dependency(jnc)
+                jnc1, primitive = get_types(key_type, self.ctx)
+                jnc = constructor.add_dependency(jnc1)
                 javadoc = ['@param ', key_arg, 'Value Key argument of child.']
                 constructor.add_javadoc(''.join(javadoc))
                 newLeaf = ['Leaf ', key_arg, ' = new Leaf']
@@ -2810,12 +2856,12 @@ class ListMethodGenerator(MethodGenerator):
                 setValue = [key_arg, '.setValue(']
                 if i == 0:
                     # Default constructor
-                    param_type = jnc
+                    param_type = jnc1
                     setValue.extend([key_arg, 'Value);'])
                     constructor.add_line(''.join(setValue))
                 else:
                     # String or primitive constructor
-                    setValue.extend(['new ', jnc, '(', key_arg, 'Value'])
+                    setValue.extend(['new ', jnc1, '(', key_arg, 'Value'])
                     if jnc == 'YangUnion':
                         setValue.append(', new String [] {')
                         for type_stmt in search(key_type, 'type'):
@@ -2848,7 +2894,7 @@ class ListMethodGenerator(MethodGenerator):
                         imap.append('}')
                         constructor.add_line(''.join(['    new BigInteger("',
                                                       str(mask), '"),']))
-                        constructor.add_dependency('BigInteger')
+                        constructor.add_dependency('java.math.BigInteger')
                         constructor.add_line(''.join(smap))
                         constructor.add_line(''.join(imap))
                         constructor.add_line('));')
@@ -2866,7 +2912,7 @@ class ListMethodGenerator(MethodGenerator):
                     else:
                         param_type = primitive
 
-                constructor.add_parameter(param_type, key_arg + 'Value')
+                constructor.add_parameter(param_type, key_arg + 'Value',self.n2 !=key_arg )
 
                 insertChild = ['insertChild(', key_arg, ', childrenNames());']
                 constructor.add_line(''.join(insertChild))
@@ -2913,7 +2959,7 @@ class ListMethodGenerator(MethodGenerator):
                 param_type = 'String'
                 if i == 0:
                     param_type, _ = get_types(key, self.ctx)
-                method.add_parameter(param_type, key_arg + 'Value')
+                method.add_parameter(param_type, key_arg + 'Value',False )
                 path.extend(['[', key_arg, '=\'" + ',key_arg, 'Value + "\']'])
             path.append('";')
 

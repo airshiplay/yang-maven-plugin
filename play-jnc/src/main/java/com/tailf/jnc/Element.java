@@ -103,6 +103,9 @@ public class Element implements Serializable {
     public Element(String ns, String name) {
         namespace = ns;
         this.name = name;
+        final PrefixMap prefixMap = new PrefixMap();
+        prefixMap.add(new Prefix("", namespace));
+        setPrefix(prefixMap);
     }
 
     public Element getRootElement() {

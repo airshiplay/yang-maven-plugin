@@ -58,11 +58,13 @@ public class ProcessorAnnotationMojo extends AbstractProcessorMojo {
             if (!new File(jncHome).exists()) {
                 new File(jncHome).mkdirs();
             }
-            if (!new File(jnc).exists()) {
-                IOUtil.cp(getClass().getClassLoader().getResourceAsStream("jnc.py"), jnc);
+            if (new File(jnc).exists()) {
+                new File(jnc).delete();
+                new File(jncHome + File.separator + "jnc.pyc").delete();
             }
+            IOUtil.cp(getClass().getClassLoader().getResourceAsStream("jnc.py"), jnc);
 
-            getLog().info("pyang -f jnc --plugindir " + jncHome + " --jnc-output " + getOutputDirectory().getAbsolutePath() + "/" + packageName + " -p " + path + " --jnc-classpath-schema-loading");
+            getLog().info("pyang -f jnc --plugindir " + jncHome + " --jnc-output " + getOutputDirectory().getAbsolutePath() + "/" + packageName +" --jnc-prefix "+prefix+ " -p " + path + " --jnc-classpath-schema-loading");
 
             for (String yangfile : yangList) {
                 getLog().info("convert yang file " + yangfile);
@@ -72,12 +74,14 @@ public class ProcessorAnnotationMojo extends AbstractProcessorMojo {
                             ProcessUtil.process(python.getAbsolutePath(), new File(pythonHome, "Scripts/pyang").getAbsolutePath(), "-f", "jnc",
                                     "--plugindir", jncHome,
                                     "--jnc-output", getOutputDirectory().getAbsolutePath() + "/" + packageName,
+                                    "--jnc-prefix",prefix,
                                     "-p", path, "--jnc-classpath-schema-loading", "--lax-quote-checks",
                                     yangfile);
                         } else {
                             ProcessUtil.process("pyang", "-f", "jnc",
                                     "--plugindir", jncHome,
                                     "--jnc-output", getOutputDirectory().getAbsolutePath() + "/" + packageName,
+                                    "--jnc-prefix",prefix,
                                     "-p", path, "--jnc-classpath-schema-loading", "--lax-quote-checks",
                                     yangfile);
                         }
@@ -85,6 +89,7 @@ public class ProcessorAnnotationMojo extends AbstractProcessorMojo {
                         ProcessUtil.process(jython, pyang.getAbsolutePath(), "-f", "jnc",
                                 "--plugindir", jncHome,
                                 "--jnc-output", getOutputDirectory().getAbsolutePath() + "/" + packageName,
+                                "--jnc-prefix",prefix,
                                 "-p", path, "--jnc-classpath-schema-loading", "--lax-quote-checks",
                                 yangfile);
                     }

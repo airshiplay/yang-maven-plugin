@@ -19,14 +19,14 @@
             <version>${project.version}</version>
         </dependency>
         <!--<dependency>-->
-            <!--<groupId>org.python</groupId>-->
-            <!--<artifactId>jython</artifactId>-->
-            <!--<version>2.7.1b3</version>-->
+        <!--<groupId>org.python</groupId>-->
+        <!--<artifactId>jython</artifactId>-->
+        <!--<version>2.7.1b3</version>-->
         <!--</dependency>-->
         <!--<dependency>-->
-            <!--<groupId>org.python</groupId>-->
-            <!--<artifactId>jython-standalone</artifactId>-->
-            <!--<version>2.7.1</version>-->
+        <!--<groupId>org.python</groupId>-->
+        <!--<artifactId>jython-standalone</artifactId>-->
+        <!--<version>2.7.1</version>-->
         <!--</dependency>-->
         <dependency>
             <groupId>org.python</groupId>
@@ -40,4 +40,18 @@
             <version>2.4</version>
         </dependency>
     </dependencies>
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <includes>
+                    <include>jnc.py</include>
+                </includes>
+                <excludes>
+                    <exclude>JNC/**/*.*</exclude>
+                    <exclude>pyang/**/*.*</exclude>
+                </excludes>
+            </resource>
+        </resources>
+    </build>
 </project>
