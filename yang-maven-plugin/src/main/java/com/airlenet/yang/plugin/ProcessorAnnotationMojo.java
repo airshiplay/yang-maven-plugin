@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2009 Mysema Ltd.
  * All rights reserved.
- * 
+ *
  */
 package com.airlenet.yang.plugin;
 
@@ -10,6 +10,7 @@ import com.airlenet.yang.codegen.ProcessUtil;
 import org.apache.maven.plugin.MojoExecutionException;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -64,35 +65,42 @@ public class ProcessorAnnotationMojo extends AbstractProcessorMojo {
             }
             IOUtil.cp(getClass().getClassLoader().getResourceAsStream("jnc.py"), jnc);
 
-            getLog().info("pyang -f jnc --plugindir " + jncHome + " --jnc-output " + getOutputDirectory().getAbsolutePath() + "/" + packageName +" --jnc-prefix "+prefix+ " -p " + path + " --jnc-classpath-schema-loading");
+            getLog().info("pyang -f jnc --plugindir " + jncHome + " --jnc-output " + getOutputDirectory().getAbsolutePath() + "/" + packageName + " --jnc-prefix " + prefix + " -p " + path + " --jnc-classpath-schema-loading");
 
             for (String yangfile : yangList) {
                 getLog().info("convert yang file " + yangfile);
                 try {
+                    List<String> command = new ArrayList<>();
                     if (pythonUsing) {
+                        jython = null;
                         if (windows) {
-                            ProcessUtil.process(python.getAbsolutePath(), new File(pythonHome, "Scripts/pyang").getAbsolutePath(), "-f", "jnc",
-                                    "--plugindir", jncHome,
-                                    "--jnc-output", getOutputDirectory().getAbsolutePath() + "/" + packageName,
-                                    "--jnc-prefix",prefix,
-                                    "-p", path, "--jnc-classpath-schema-loading", "--lax-quote-checks",
-                                    yangfile);
+                            command.add(python.getAbsolutePath());
+                            command.add(new File(pythonHome, "Scripts/pyang").getAbsolutePath());
                         } else {
-                            ProcessUtil.process("pyang", "-f", "jnc",
-                                    "--plugindir", jncHome,
-                                    "--jnc-output", getOutputDirectory().getAbsolutePath() + "/" + packageName,
-                                    "--jnc-prefix",prefix,
-                                    "-p", path, "--jnc-classpath-schema-loading", "--lax-quote-checks",
-                                    yangfile);
+                            command.add("pyang");
                         }
                     } else {
-                        ProcessUtil.process(jython, pyang.getAbsolutePath(), "-f", "jnc",
-                                "--plugindir", jncHome,
-                                "--jnc-output", getOutputDirectory().getAbsolutePath() + "/" + packageName,
-                                "--jnc-prefix",prefix,
-                                "-p", path, "--jnc-classpath-schema-loading", "--lax-quote-checks",
-                                yangfile);
+                        command.add(pyang.getAbsolutePath());
                     }
+                    command.add("-f");
+                    command.add("jnc");
+                    command.add("--plugindir");
+                    command.add(jncHome);
+                    command.add("--jnc-output");
+                    command.add(getOutputDirectory().getAbsolutePath() + "/" + packageName);
+                    command.add("--jnc-prefix");
+                    command.add(prefix);
+                    if(ignoreErrors)
+                    command.add("--ignore-errors");
+                    if(extraCommands!=null){
+                        command.addAll(extraCommands);
+                    }
+                    command.add("-p");
+                    command.add(path);
+                    command.add("--jnc-classpath-schema-loading");
+                    command.add("--lax-quote-checks");
+                    command.add(yangfile);
+                    ProcessUtil.process(jython, command);
                 } catch (Exception e) {
                     getLog().error("convert yang file error " + yangfile, e);
                     if (errorAbort)

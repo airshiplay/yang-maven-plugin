@@ -1059,10 +1059,10 @@ class ClassGenerator(object):
             description = ''.join(['This class represents an element from ',
                                    '\n * the namespace ', self.ns,
                                    '\n * generated to "',
-                                   self.path, os.sep, stmt.arg,
+                                   self.path[self.path.find('src/main'):], os.sep, stmt.arg,
                                    '"\n * <p>\n * See line ',
                                    str(stmt.pos.line), ' in\n * ',
-                                   stmt.pos.ref])
+                                   stmt.pos.ref[stmt.pos.ref.find('src/main'):]])
             java_class = JavaClass(filename=name + '.java',
                                         package=self.package,
                                         description=description,
@@ -1196,10 +1196,10 @@ class ClassGenerator(object):
                 description=''.join(['This class represents an element from ',
                                      '\n * the namespace ', self.ns,
                                      '\n * generated to "',
-                                     self.path, os.sep, stmt.arg,
+                                     self.path[self.path.find('src/main'):], os.sep, stmt.arg,
                                      '"\n * <p>\n * See line ',
                                      str(stmt.pos.line), ' in\n * ',
-                                     stmt.pos.ref]),
+                                     stmt.pos.ref[stmt.pos.ref.find('src/main'):]]),
                 source=self.src,
                 superclass='YangElement')
 

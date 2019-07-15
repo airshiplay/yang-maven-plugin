@@ -22,7 +22,7 @@ public class ProcessUtil {
     }
 
     public static void process(List<String> commandList) throws Exception {
-        process( null, commandList.toArray(new String[0]));
+        process( null, commandList.toArray(new String[commandList.size()]));
     }
 
     public static String processResult(String... command) throws Exception {
@@ -32,6 +32,9 @@ public class ProcessUtil {
         String print = input2str(process.getInputStream());
         String error = input2str(process.getErrorStream());
         return print;
+    }
+    public static void process(File base, List<String> commandList) throws Exception {
+        process( base, commandList.toArray(new String[commandList.size()]));
     }
     public static void process(File base, String... command) throws Exception {
         ProcessBuilder processBuilder = new ProcessBuilder();

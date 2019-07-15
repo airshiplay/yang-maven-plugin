@@ -1039,8 +1039,8 @@ public abstract class YangElement extends Element {
             if (n == null) {
                 n = SchemaTree.lookup(actualNamespace, tp);
             }
-            final String rev = capas.getRevision(actualNamespace);
-            if (n.revInfo != null) {
+            if (n != null && n.revInfo != null) {
+                final String rev = capas.getRevision(actualNamespace);
                 for (int i = 0; i < n.revInfo.length; i++) {
                     final RevisionInfo r = n.revInfo[i];
                     if (r.introduced.compareTo(rev) > 0) {

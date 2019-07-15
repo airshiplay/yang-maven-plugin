@@ -89,6 +89,21 @@ public abstract class AbstractProcessorMojo extends AbstractMojo {
      * @parameter
      */
     protected boolean errorAbort = false;
+
+    /**
+     * 忽略yang文件格式错误
+     *
+     * @parameter
+     */
+    protected boolean ignoreErrors = false;
+
+    /**
+     * 额外命令
+     *
+     * @parameter
+     */
+    protected List<String> extraCommands;
+
     /**
      * @parameter required=true
      */

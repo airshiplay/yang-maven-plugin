@@ -30,8 +30,8 @@ public class Leaf extends Element {
             if (n == null) {
                 n = SchemaTree.lookup(namespace, tp);
             }
-            final String rev = capas.getRevision(namespace);
             if (n != null && n.revInfo != null) {
+                final String rev = capas.getRevision(namespace);
                 for (final RevisionInfo r : n.revInfo) {
                     if (r.introduced.compareTo(rev) > 0) {
                         // This node was somehow modified
