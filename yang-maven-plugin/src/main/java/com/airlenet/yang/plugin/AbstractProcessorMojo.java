@@ -112,7 +112,7 @@ public abstract class AbstractProcessorMojo extends AbstractMojo {
     /**
      * @parameter required=true
      */
-    protected String prefix = "Prefix";
+    protected String prefix = "";
     /**
      * @parameter
      */

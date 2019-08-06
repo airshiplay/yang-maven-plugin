@@ -828,6 +828,7 @@ def search_one(stmt, keyword, arg=None):
             return None
     if keyword == 'prefix' and stmt.i_ctx.opts.prefix is not None and  stmt.i_ctx.opts.prefix != '':
         if bool(1-res.arg.endswith(stmt.i_ctx.opts.prefix)):
+            res.argPrefix = True
             res.arg = res.arg+stmt.i_ctx.opts.prefix
     return res
 
@@ -1121,7 +1122,10 @@ class ClassGenerator(object):
         root_fields[0].set_name('NAMESPACE')
         root_fields[1].set_name('PREFIX')
         root_fields[0].value = '"' + ns_arg + '"'
-        root_fields[1].value = '"' + prefix.arg + '"'
+        if self.ctx.opts.prefix is not None and (prefix.argPrefix is not None and prefix.argPrefix == True):
+            root_fields[1].value = '"' + prefix.arg[:prefix.arg.find(self.ctx.opts.prefix)] + '"'
+        else:
+            root_fields[1].value = '"' + prefix.arg + '"'
         for root_field in root_fields:
             for modifier in ('public', 'static', 'final', 'String'):
                 root_field.add_modifier(modifier)
@@ -1329,6 +1333,7 @@ class ClassGenerator(object):
                 add(sub.arg, child_gen.adders())
             else:  # sub.keyword == 'leaf-list':
                 add(sub.arg, child_gen.child_iterator())
+                add(sub.arg, child_gen.child_list())
                 for setter in child_gen.setters():
                     add(sub.arg, setter)
                 for deleter in child_gen.deleters():
@@ -1766,6 +1771,10 @@ class JavaValue(object):
                 declaration.append('=')
                 declaration.append(self.value)
             self.exact.append(''.join([self.indent, ' '.join(declaration), ';']))
+            if 'static' not in self.modifiers:
+                self.exact.append(self.indent + ' '.join(self.modifiers+[''.join(['get',self.name[:1].upper(),self.name[1:],'()'])]) +' {')
+                self.exact.append(self.indent + self.indent + 'return this.'+self.name +';')
+                self.exact.append(self.indent + '}')
         return self.exact
 
 
@@ -2305,7 +2314,39 @@ class MethodGenerator(object):
         return_stmt.extend(['Iterator(children, "', self.stmt.arg, '");'])
         res.add_line(''.join(return_stmt))
         return self.fix_imports(res)
-
+    def child_list(self):
+        """Returns a java list method"""
+        if not(self.is_leaflist or self.is_list):
+            return None
+        res = JavaMethod(name=('get'+self.n + 'List'))
+        res.add_javadoc(''.join(['List method for the ', self.stmt.keyword,
+                                 ' "', self.stmt.arg, '".']))
+        res.add_javadoc(''.join(['@return An List for the ',
+                                 self.stmt.keyword, '.']))
+        res.imports.add('java.util.ArrayList')
+        res.imports.add('java.util.List')
+        self.stmt_type = search_one(self.stmt, 'type')
+        if self.stmt_type is None:
+            value_type = self.n
+        else:
+            self.base_type = get_base_type(self.stmt_type)
+            self.type_str = get_types(self.stmt_type, self.ctx)
+            value_type = self.type_str[0]
+        res.set_return_type('List<'+value_type+'>','')
+        res.add_line('List<'+value_type+'> list = new ArrayList<>();')
+        if self.is_leaflist:
+            res.add_line('ElementLeafListValueIterator iterator = '+(self.n2 + 'Iterator')+'();')
+        else:  # List
+            res.add_line('ElementChildrenIterator iterator = '+(self.n2 + 'Iterator')+'();')
+        res.add_line('if(iterator==null){')
+        res.add_line(' '*4+'return null;')
+        res.add_line('}')
+        res.add_line('while (iterator.hasNext()){')
+        res.add_line(' '*4+value_type+' next =('+value_type+') iterator.next();')
+        res.add_line(' '*4+'list.add(next);')
+        res.add_line('}')
+        res.add_line('return list;')
+        return self.fix_imports(res)
     def parent_access_methods(self):
         assert self.gen is not self, 'Avoid infinite recursion'
         if self.is_container or self.is_list:
@@ -2539,7 +2580,7 @@ class LeafMethodGenerator(MethodGenerator):
             if i == 0:
                 param_type = self.type_str[0]
             method.add_parameter(param_type, self.n2 + 'Value')
-            path = ['String path = "', self.n2, '[', self.n2, 'Value]";']
+            path = ['String path = "', self.stmt.arg, '[', self.n2, 'Value]";']
             method.add_line(''.join(path))
             if method_type == 'delete':
                 method.add_line('delete(path);')
@@ -2584,7 +2625,7 @@ class LeafMethodGenerator(MethodGenerator):
         for i, mark_method in enumerate(mark_methods):
             mark_method.set_name('mark' + self.n + normalize(op))
             mark_method.add_exception('JNCException')
-            path = self.n2
+            path = self.stmt.arg
             mark_method.add_javadoc(''.join(['Marks the ', self.stmt.keyword,
                                              ' "', self.stmt.arg,
                                              '" with operation "', op, '".']))
@@ -2960,7 +3001,7 @@ class ListMethodGenerator(MethodGenerator):
                 if i == 0:
                     param_type, _ = get_types(key, self.ctx)
                 method.add_parameter(param_type, key_arg + 'Value',False )
-                path.extend(['[', key_arg, '=\'" + ',key_arg, 'Value + "\']'])
+                path.extend(['[', key.arg, '=\'" + ',key_arg, 'Value + "\']'])
             path.append('";')
 
             method.add_javadoc(''.join(javadoc1))
@@ -2996,6 +3037,7 @@ class ListMethodGenerator(MethodGenerator):
         res.append(self.access_methods_comment())
         res.extend(self.getters())
         res.append(self.child_iterator())
+        res.append(self.child_list())
         res.extend(self.adders())
         res.extend(self.deleters())
         return res
