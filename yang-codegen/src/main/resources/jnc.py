@@ -1077,8 +1077,31 @@ class ClassGenerator(object):
             for constructor in gen.constructors():
                 java_class.add_constructor(constructor)
 
+            if  hasattr(stmt,'enumerationStmt'):
+                innerClassBody=[]
+                innerClassBody.append(' ' * 4 + 'public static class Enumeration extends com.tailf.jnc.YangEnumeration{')
+                innerClassBody.append(' ' * 8 + 'private static final long serialVersionUID = 1L;')
+
+                innerClassBody.append(' ' * 8 + 'public Enumeration(String value) throws YangException {')
+                innerClassBody.append(' ' * 8 + 'super(value,')
+                innerClassBody.append(' ' * 8 + '    new String[] {')
+                for enum in search(stmt.enumerationStmt, 'enum'):
+                    innerClassBody.append(' ' * 16 + '"' + enum.arg + '",')
+                innerClassBody.append(' ' * 8 + '    }')
+                innerClassBody.append(' ' * 12 + ');')
+                innerClassBody.append(' ' * 12 + 'check();')
+                innerClassBody.append(' ' * 8 + '}')
+                innerClassBody.append(' ' * 8 + ' public void setValue(String value) throws YangException {')
+                innerClassBody.append(' ' * 12 + ' super.setValue(value);')
+                innerClassBody.append(' ' * 8 + '}')
+                innerClassBody.append(' ' * 8 + 'public void check() throws YangException {')
+                innerClassBody.append(' ' * 12 + 'super.check();')
+                innerClassBody.append(' ' * 8 + '}')
+                innerClassBody.append(' ' * 4 + '}')
+                java_class.innerClassBody = innerClassBody
             for i, method in enumerate(gen.setters()):
                 java_class.append_access_method(str(i), method)
+
 
             java_class.append_access_method('check', gen.checker())
 
@@ -1526,6 +1549,8 @@ class JavaClass(object):
                 else:
                     self.body.append(method)
                 self.body.append('')
+            if hasattr(self,'innerClassBody'):
+                self.body.extend(self.innerClassBody)
             self.body.append('}')
         return self.body
 
@@ -2695,7 +2720,14 @@ class TypedefMethodGenerator(MethodGenerator):
                 constructor.add_line('super(value,')
                 constructor.add_line('    new String[] {')
                 for member in search(self.type, 'type'):
-                    line = ''.join(['        "',
+                    if member.arg == 'enumeration':
+                        self.stmt.enumerationStmt = member
+                        line = ''.join(['        "',
+                                        self.pkg+'.'+self.n+'$Enumeration',
+                                        '",'])
+
+                    else:
+                        line = ''.join(['        "',
                                     get_types(member, self.ctx)[0],
                                     '",'])
                     constructor.add_line(line)
