@@ -2,6 +2,8 @@ package com.tailf.jnc;
 
 import org.xml.sax.InputSource;
 
+import java.io.ByteArrayInputStream;
+
 /**
  * A SAX parser, for parsing for example NETCONF messages, into a simple
  * {@link YangElement YangElement} tree.
@@ -36,10 +38,23 @@ public class YangXMLParser extends XMLParser {
         }
     }
 
+    public Element parse(String str) throws JNCException {
+        final ByteArrayInputStream istream = new ByteArrayInputStream(
+                str.getBytes());
+        final InputSource is = new InputSource(istream);
+        try {
+            Element parse = parse(is);
+            return parse;
+        } catch (JNCException e) {
+            throw new JNCException(JNCException.PARSER_ERROR, "parse error: "
+                    + str, e);
+        }
+    }
+
     /**
      * Parses an XML string returning a configuration tree from it,
      * instantiating an ElementHandler to use as content handler.
-     * 
+     *
      * @param is Input source (byte stream) where the XML text is read from
      */
     @Override
@@ -52,7 +67,7 @@ public class YangXMLParser extends XMLParser {
         } catch (final Exception e) {
 //            e.printStackTrace();
             throw new JNCException(JNCException.PARSER_ERROR, "parse error: "
-                    + e,e);
+                    + e, e);
         }
     }
 
