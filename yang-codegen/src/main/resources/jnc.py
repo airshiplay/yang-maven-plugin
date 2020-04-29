@@ -273,7 +273,7 @@ class JNCPlugin(plugin.PyangPlugin):
             schema_nodes.append('</schema>')
 
             name = normalize(search_one(module, 'prefix').arg)
-            write_file(d, name + '.schema', '\n'.join(schema_nodes), self.ctx)
+            write_file(d, name + '.schema', schema_nodes, self.ctx)
 
         if not self.ctx.opts.no_pkginfo:
             # Generate package-info.java for javadoc
@@ -2456,7 +2456,7 @@ class LeafMethodGenerator(MethodGenerator):
                     position += 1
                 smap.append('},')
                 imap.append('}')
-                line = [' ' * 8, 'new BigInteger("', str(mask), '"),']
+                line = [' ' * 8, 'new java.math.BigInteger("', str(mask), '"),']
                 method.add_line(''.join(line))
                 method.add_line(''.join(smap))
                 method.add_line(''.join(imap))
@@ -2552,7 +2552,7 @@ class LeafMethodGenerator(MethodGenerator):
                         position += 1
                     smap.append('},')
                     imap.append('}')
-                    method.add_line(''.join(['    new BigInteger("',
+                    method.add_line(''.join(['    new java.math.BigInteger("',
                                                   str(mask), '"),']))
                     method.add_line(''.join(smap))
                     method.add_line(''.join(imap))
@@ -2765,7 +2765,7 @@ class TypedefMethodGenerator(MethodGenerator):
                     position += 1
                 smap.append('},')
                 imap.append('}')
-                constructor.add_line(''.join(['    new BigInteger("',
+                constructor.add_line(''.join(['    new java.math.BigInteger("',
                                               str(mask), '"),']))
                 constructor.add_line(''.join(smap))
                 constructor.add_line(''.join(imap))
@@ -2965,7 +2965,7 @@ class ListMethodGenerator(MethodGenerator):
                             position += 1
                         smap.append('},')
                         imap.append('}')
-                        constructor.add_line(''.join(['    new BigInteger("',
+                        constructor.add_line(''.join(['    new java.math.BigInteger("',
                                                       str(mask), '"),']))
                         constructor.add_dependency('java.math.BigInteger')
                         constructor.add_line(''.join(smap))

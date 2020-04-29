@@ -35,6 +35,15 @@ public abstract class AbstractProcessorMojo extends AbstractMojo {
      */
     private File outputDirectory;
     /**
+     * @parameter
+     */
+    protected File pyangFilePath;
+
+    /**
+     * @parameter
+     */
+    protected File jncHomeDirectory;
+    /**
      * @component
      */
     protected BuildContext buildContext;
@@ -159,7 +168,9 @@ public abstract class AbstractProcessorMojo extends AbstractMojo {
     boolean windows = false;
 
     public void checkPyang() throws MojoExecutionException {
-
+        if(pyangFilePath!=null && pyangFilePath.exists()){
+            return;
+        }
         if (osName.startsWith("Window") || osName.startsWith("window")) {
             windows = true;
         }

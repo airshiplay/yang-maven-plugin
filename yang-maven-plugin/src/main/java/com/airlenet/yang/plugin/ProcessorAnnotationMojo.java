@@ -11,7 +11,9 @@ import org.apache.maven.plugin.MojoExecutionException;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * ProcessorAnnotationMojo calls APT processors for code generation
@@ -53,35 +55,47 @@ public class ProcessorAnnotationMojo extends AbstractProcessorMojo {
             String path = builder.toString();
 
             getLog().info("Total " + yangList.size() + " yang files to be converter");
-
-            String jncHome = System.getProperty("user.home") + File.separator + ".jnc";
-            String jnc = jncHome + File.separator + "jnc.py";
-            if (!new File(jncHome).exists()) {
-                new File(jncHome).mkdirs();
+            String jncHome = null;
+            if(jncHomeDirectory==null){
+                jncHome = System.getProperty("user.home") + File.separator + ".jnc";
+                String jnc = jncHome + File.separator + "jnc.py";
+                if (!new File(jncHome).exists()) {
+                    new File(jncHome).mkdirs();
+                }
+                if (new File(jnc).exists()) {
+                    new File(jnc).delete();
+                    new File(jncHome + File.separator + "jnc.pyc").delete();
+                }
+                IOUtil.cp(getClass().getClassLoader().getResourceAsStream("jnc.py"), jnc);
+            }else{
+                jncHome = jncHomeDirectory.getAbsolutePath();
             }
-            if (new File(jnc).exists()) {
-                new File(jnc).delete();
-                new File(jncHome + File.separator + "jnc.pyc").delete();
-            }
-            IOUtil.cp(getClass().getClassLoader().getResourceAsStream("jnc.py"), jnc);
-
             getLog().info("pyang -f jnc --plugindir " + jncHome + " --jnc-output " + getOutputDirectory().getAbsolutePath() + "/" + packageName + " --jnc-prefix " + prefix + " -p " + path + " --jnc-classpath-schema-loading");
-
+            int count =yangList.size();
+            getLog().info("total yang file "+ count);
+            int i=0;
             for (String yangfile : yangList) {
-                getLog().info("convert yang file " + yangfile);
+                getLog().info("convert yang file ("+(++i)+"/"+count+")" + yangfile);
                 try {
                     List<String> command = new ArrayList<>();
-                    if (pythonUsing) {
+                    if(pyangFilePath!=null && pyangFilePath.exists()){
                         jython = null;
-                        if (windows) {
-                            command.add(python.getAbsolutePath());
-                            command.add(new File(pythonHome, "Scripts/pyang").getAbsolutePath());
+                        command.add("python");
+                        command.add(pyangFilePath.getAbsolutePath());
+                    }else{
+                        if (pythonUsing) {
+                            jython = null;
+                            if (windows) {
+                                command.add(python.getAbsolutePath());
+                                command.add(new File(pythonHome, "Scripts/pyang").getAbsolutePath());
+                            } else {
+                                command.add("pyang");
+                            }
                         } else {
-                            command.add("pyang");
+                            command.add(pyang.getAbsolutePath());
                         }
-                    } else {
-                        command.add(pyang.getAbsolutePath());
                     }
+
                     command.add("-f");
                     command.add("jnc");
                     command.add("--plugindir");
@@ -98,11 +112,13 @@ public class ProcessorAnnotationMojo extends AbstractProcessorMojo {
                     command.add("-p");
                     command.add(path);
                     command.add("--jnc-classpath-schema-loading");
-                    command.add("--lax-quote-checks");
+//                    command.add("--lax-quote-checks");
                     command.add(yangfile);
+                    getLog().debug(command.stream().collect(Collectors.joining(" ")));
+//                    getLog().debug(String.join(" ", command));
                     ProcessUtil.process(jython, command);
                 } catch (Exception e) {
-                    getLog().error("convert yang file error " + yangfile, e);
+                    getLog().error("convert yang file error  ("+i+"/"+count+")" + yangfile, e);
                     if (errorAbort)
                         throw e;
                 }
