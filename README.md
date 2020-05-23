@@ -17,12 +17,12 @@ Download [the latest JAR](https://search.maven.org/remote_content?g=com.airlenet
 <dependency>
   <groupId>com.airlenet.yang</groupId>
   <artifactId>yang-maven-plugin</artifactId>
-  <version>1.1.0</version>
+  <version>1.2.0-SNAPSHOT</version>
 </dependency>
 ```
 or Gradle:
 ```groovy
-compile 'com.airlenet.yang:yang-maven-plugin:1.1.0'
+compile 'com.airlenet.yang:yang-maven-plugin:1.2.0-SNAPSHOT'
 ```
 
 Snapshots of the development version are available in [Sonatype's `snapshots` repository](https://oss.sonatype.org/content/repositories/snapshots/com/airlenet/yang/yang-maven-plugin).
@@ -35,7 +35,7 @@ Usage
     <plugin>
         <groupId>com.airlenet.yang</groupId>
         <artifactId>yang-maven-plugin</artifactId>
-        <version>1.1.0</version>
+        <version>1.2.0-SNAPSHOT</version>
         <configuration>
             <skip>false</skip>
             <showWarnings>false</showWarnings>

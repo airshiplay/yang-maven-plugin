@@ -33,9 +33,19 @@
                     <skip>true</skip>
                     <showWarnings>false</showWarnings>
                     <errorAbort>true</errorAbort>
+                    <prefix>Prefix</prefix>
+                    <includes>
+                        <include>**/*.yang</include>
+                    </includes>
                     <excludes>
                         <exclude>module/**/*.yang</exclude>
                     </excludes>
+                    <extraCommands>
+                        <extraCommand>--jnc-no-pkginfo</extraCommand>
+                        <!--<extraCommand>&#45;&#45;jnc-no-classes</extraCommand>-->
+                        <!--<extraCommand>&#45;&#45;jnc-no-schema</extraCommand>-->
+                        <!--<extraCommand>&#45;&#45;ignore-errors</extraCommand>-->
+                    </extraCommands>
                 </configuration>
                 <executions>
                     <execution>
