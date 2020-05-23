@@ -841,7 +841,7 @@ public class Path {
             }
         } catch (final Exception e) {
             final int errorCode = JNCException.PATH_ERROR;
-            throw new JNCException(errorCode, "parse error: " + e);
+            throw new JNCException(errorCode, "parse error: " + e,e);
         }
         trace("parse() -> " + steps);
         return steps;
@@ -879,7 +879,7 @@ public class Path {
                     }
                 } catch (final Exception e) {
                     throw new JNCException(JNCException.PATH_ERROR,
-                            "unmatched '[' in expression");
+                            "unmatched '[' in expression",e);
                 }
                 if (step.predicates == null) {
                     step.predicates = new ArrayList<Expr>();

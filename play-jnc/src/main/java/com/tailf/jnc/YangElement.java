@@ -450,6 +450,16 @@ public abstract class YangElement extends Element {
         }
     }
 
+    protected void markLeafRemove(String path) throws JNCException {
+        final NodeSet nodes = get(path);
+
+        if (nodes.isEmpty()) {
+            throw new YangException(YangException.ELEMENT_MISSING,
+                    getElementPath(path));
+        } else {
+            nodes.first().markRemove();
+        }
+    }
     /**
      *
      */

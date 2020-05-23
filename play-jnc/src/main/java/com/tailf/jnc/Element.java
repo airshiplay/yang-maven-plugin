@@ -43,6 +43,7 @@ public class Element implements Serializable {
 
     public static final String CREATE = "create";
     public static final String DELETE = "delete";
+    public static final String REMOVE = "remove";
     public static final String REPLACE = "replace";
     public static final String MERGE = "merge";
 
@@ -1320,7 +1321,29 @@ public class Element implements Serializable {
             }
         }
     }
+    /**
+     * Marks a node with operation delete.
+     */
+    public void markRemove() {
+        setMark(REMOVE);
+    }
 
+    /**
+     * Marks node(s) with operation delete.
+     * <p>
+     * See {@link Path} for more information about path expressions.
+     *
+     * @param pathStr Path string to find nodes
+     */
+    public void markRemove(String pathStr) throws JNCException {
+        final Path path = new Path(pathStr);
+        final NodeSet nodeSet = path.eval(this);
+        if (nodeSet != null) {
+            for (int i = 0; i < nodeSet.size(); i++) {
+                nodeSet.getElement(i).markRemove();
+            }
+        }
+    }
     /**
      * Marks a node with operation delete.
      */

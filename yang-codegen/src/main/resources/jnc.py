@@ -2638,12 +2638,12 @@ class LeafMethodGenerator(MethodGenerator):
 
     def markers(self):
         res = []
-        for op in ('replace', 'merge', 'create', 'delete'):
+        for op in ('replace', 'merge', 'create', 'delete', 'remove'):
             res.append(self.mark(op))
         return res
 
     def mark(self, op):
-        assert op in ('replace', 'merge', 'create', 'delete')
+        assert op in ('replace', 'merge', 'create', 'delete', 'remove')
         mark_methods = [JavaMethod()]
         if not self.is_string and self.is_leaflist:
             mark_methods.append(JavaMethod())
