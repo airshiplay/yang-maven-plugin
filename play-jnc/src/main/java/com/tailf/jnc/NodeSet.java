@@ -138,6 +138,13 @@ public class NodeSet extends ArrayList<Element> {
         return s.toString();
     }
 
+    public String toCLIString() {
+        StringBuffer s = new StringBuffer();
+        for (final Element elem : this) {
+            s.append(elem.toCLIString());
+        }
+        return s.toString();
+    }
     /**
      * Encode to XML and send the sequence of elements to the provided stream.
      * 

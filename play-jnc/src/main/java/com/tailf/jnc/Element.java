@@ -1301,11 +1301,11 @@ public class Element implements Serializable {
      * <code>setAttr(Element.NETCONF_NAMESPACE,"operation",operation);</code> see @setAttr
      */
     public void setMark(String operation) {
-        Element that = this;
-        while (that!=null&&that.prefixes==null){
-            that = that.getParent();
-        }
-        that.prefixes.merge(defaultPrefixes);
+//        Element that = this;
+//        while (that!=null&&that.prefixes==null){
+//            that = that.getParent();
+//        }
+//        that.prefixes.merge(defaultPrefixes);
         setAttr(NETCONF_NAMESPACE, OPERATION, operation);
     }
 
@@ -1702,6 +1702,107 @@ public class Element implements Serializable {
         return s.toString();
     }
 
+
+    private void toXMLString(int indent, StringBuffer s) {
+        final boolean flag = hasChildren();
+        final String qName = qualifiedName();
+        s.append(new String(new char[indent * 2]).replace("\0", " "));
+        s.append("<").append(qName);
+        // add xmlns attributes (prefixes)
+        if (prefixes != null) {
+            for (final Prefix p : prefixes) {
+                Prefix pPrefix= parent==null?null:parent.prefixes==null?null: parent.prefixes.lookup(p.name);
+                if(pPrefix== null || !pPrefix.value.equals(p.value)){
+                    s.append(" ").append(p.toXMLString());
+                }
+            }
+        }
+        // add attributes
+        if (attrs != null) {
+            for (final Attribute attr : attrs) {
+                s.append(" ").append(attr.toXMLString(this));
+            }
+        }
+        indent++;
+        // add children elements if any
+        if (flag) {
+            s.append(">").append(("\n"));
+            for (final Element child : children) {
+                child.toXMLString(indent, s);
+            }
+        } else { // add value if any
+            if (value != null) {
+                s.append(">").append((""));
+                final String stringValue = value.toString().replaceAll("&",
+                        "&amp;");
+                s.append(getIndentationSpacing(false, indent));
+                s.append(stringValue).append((""));
+            } else {
+             // self-closing tag
+             s.append("/>").append((""));
+             return;
+            }
+        }
+        indent--;
+        s.append(getIndentationSpacing(flag, indent)).append("</").append(qName).append(">\n");
+    }
+
+    public String toCLIString() {
+        final StringBuffer s = new StringBuffer();
+        toCLIString(0, s);
+        return s.toString();
+    }
+
+    protected void toCLIString(int indent, StringBuffer s) {
+        final boolean flag = hasChildren();
+        final String qName = qualifiedName();
+
+        s.append(new String(new char[indent * 2]).replace("\0", " "));
+        s.append("").append(qName);
+        // add xmlns attributes (prefixes)
+//        if (prefixes != null) {
+//            for (final Prefix p : prefixes) {
+//                s.append(" ").append(p.toXMLString());
+//            }
+//        }
+        // add attributes
+//        if (attrs != null) {
+//            for (final Attribute attr : attrs) {
+//                s.append(" ").append(attr.toXMLString(this));
+//            }
+//        }
+        indent++;
+        // add children elements if any
+        if (flag) {
+            s.append("").append(("\n"));
+            for (final Element child : children) {
+                child.toCLIString(indent, s);
+            }
+
+        } else { // add value if any
+            if (value != null) {
+                s.append(" ").append((""));
+                final String stringValue = value.toString().replaceAll("&",
+                        "&amp;");
+                s.append(getIndentationSpacing(false, indent));
+                s.append(stringValue).append((""));
+            } else {
+                // self-closing tag
+                s.append("").append((""));
+                return;
+            }
+        }
+        indent--;
+
+        s.append(getIndentationSpacing(flag, indent)).append("").append("");
+//        if(this instanceof  Leaf){
+//
+//        }else{
+//            s.append(getIndentationSpacing(flag, indent)).append("exit").append("\n");
+//        }
+
+    }
+
     public String toJSONString(){
         final StringBuffer s = new StringBuffer();
         toJSONString(true,false,false,0, s);
@@ -1728,7 +1829,7 @@ public class Element implements Serializable {
             if(isArray){
                 s.append("[");
             }else{
-            s.append("{");}
+                s.append("{");}
         }
         if(!isArray)
         {
@@ -1782,47 +1883,6 @@ public class Element implements Serializable {
 
         indent--;
     }
-
-    private void toXMLString(int indent, StringBuffer s) {
-        final boolean flag = hasChildren();
-        final String qName = qualifiedName();
-        s.append(new String(new char[indent * 2]).replace("\0", " "));
-        s.append("<").append(qName);
-        // add xmlns attributes (prefixes)
-        if (prefixes != null) {
-            for (final Prefix p : prefixes) {
-                s.append(" ").append(p.toXMLString());
-            }
-        }
-        // add attributes
-        if (attrs != null) {
-            for (final Attribute attr : attrs) {
-                s.append(" ").append(attr.toXMLString(this));
-            }
-        }
-        indent++;
-        // add children elements if any
-        if (flag) {
-            s.append(">").append(("\n"));
-            for (final Element child : children) {
-                child.toXMLString(indent, s);
-            }
-        } else { // add value if any
-            if (value != null) {
-                s.append(">").append((""));
-                final String stringValue = value.toString().replaceAll("&",
-                        "&amp;");
-                s.append(getIndentationSpacing(false, indent));
-                s.append(stringValue).append((""));
-            } else {
-             // self-closing tag
-             s.append("/>").append((""));
-             return;
-            }
-        }
-        indent--;
-        s.append(getIndentationSpacing(flag, indent)).append("</").append(qName).append(">\n");
-    }
     /**
      * Gets indentation spacing for any given indent level.
      * 
@@ -1831,7 +1891,7 @@ public class Element implements Serializable {
      * @return A string with indent * 2 number of spaces if shouldIndent is
      *         <code>true</code>; otherwise an empty string.
      */
-    private String getIndentationSpacing(boolean shouldIndent, int indent) {
+    protected String getIndentationSpacing(boolean shouldIndent, int indent) {
         if (shouldIndent) {
             return new String(new char[indent * 2]).replace("\0", " ");
         }
@@ -1902,8 +1962,11 @@ public class Element implements Serializable {
         // add xmlns attributes (prefixes)
         if (prefixes != null) {
             for (final Prefix p : prefixes) {
-                out.print(" ");
-                p.encode(out);
+                Prefix pPrefix= parent==null?null:parent.prefixes==null?null: parent.prefixes.lookup(p.name);
+                if(pPrefix== null || !pPrefix.value.equals(p.value)){ // 优化prefix，父级存在的，当前级别移除
+                    out.print(" ");
+                    p.encode(out);
+                }
             }
         }
         // add attributes
