@@ -1,0 +1,150 @@
+/*
+ * Copyright 2016-present Open Networking Foundation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.airlenet.yang.compiler.parser.impl.listeners;
+
+/*
+ * Reference: RFC6020 and YANG ANTLR Grammar
+ *
+ * ABNF grammar as per RFC6020
+ * type-body-stmts     = numerical-restrictions /
+ *                       decimal64-specification /
+ *                       string-restrictions /
+ *                       enum-specification /
+ *                       leafref-specification /
+ *                       identityref-specification /
+ *                       instance-identifier-specification /
+ *                       bits-specification /
+ *                       union-specification
+ *
+ * decimal64-specification = fraction-digits-stmt [range-stmt stmtsep]
+ *
+ * fraction-digits-stmt = fraction-digits-keyword sep
+ *                         fraction-digits-arg-str stmtend
+ *
+ * fraction-digits-arg-str = < a string that matches the rule
+ *                             fraction-digits-arg >
+ *
+ * fraction-digits-arg = ("1" ["0" / "1" / "2" / "3" / "4" /
+ *                              "5" / "6" / "7" / "8"])
+ *                        / "2" / "3" / "4" / "5" / "6" / "7" / "8" / "9"
+ *
+ * range-stmt          = range-keyword sep range-arg-str optsep
+ *                        (";" /
+ *                         "{" stmtsep
+ *                             ;; these stmts can appear in any order
+ *                             [error-message-stmt stmtsep]
+ *                             [error-app-tag-stmt stmtsep]
+ *                             [description-stmt stmtsep]
+ *                             [reference-stmt stmtsep]
+ *                          "}")
+ * ANTLR grammar rule
+ *
+ * typeBodyStatements : numericalRestrictions | decimal64Specification | stringRestrictions | enumSpecification
+ *                     | leafrefSpecification | identityrefSpecification | instanceIdentifierSpecification
+ *                     | bitsSpecification | unionSpecification;
+ *
+ * decimal64Specification : fractionDigitStatement rangeStatement?;
+ *
+ * fractionDigitStatement : FRACTION_DIGITS_KEYWORD fraction STMTEND;
+ *
+ * fraction : string;
+ */
+
+import com.airlenet.yang.compiler.datamodel.YangDecimal64;
+import com.airlenet.yang.compiler.datamodel.YangRangeRestriction;
+import com.airlenet.yang.compiler.datamodel.YangType;
+import com.airlenet.yang.compiler.datamodel.exceptions.DataModelException;
+import com.airlenet.yang.compiler.datamodel.utils.Parsable;
+import com.airlenet.yang.compiler.parser.exceptions.ParserException;
+import com.airlenet.yang.compiler.parser.impl.TreeWalkListener;
+import com.airlenet.yang.compiler.parser.impl.parserutils.ListenerErrorLocation;
+import com.airlenet.yang.compiler.parser.impl.parserutils.ListenerErrorMessageConstruction;
+import com.airlenet.yang.compiler.parser.impl.parserutils.ListenerErrorType;
+import com.airlenet.yang.compiler.parser.impl.parserutils.ListenerValidation;
+import com.airlenet.yang.compiler.parser.antlrgencode.GeneratedYangParser.Decimal64SpecificationContext;
+
+import static com.airlenet.yang.compiler.datamodel.utils.YangConstructType.DECIMAL64_DATA;
+
+
+/**
+ * Represents listener based call back function corresponding to the "decimal64" rule
+ * defined in ANTLR grammar file for corresponding ABNF rule in RFC 6020.
+ */
+public final class Decimal64Listener {
+
+    /**
+     * Creates a new Decimal64 listener.
+     */
+    private Decimal64Listener() {
+    }
+
+    /**
+     * It is called when parser enters grammar rule (decimal64), it perform
+     * validations and updates the data model tree.
+     *
+     * @param listener listener's object
+     * @param ctx      context object of the grammar rule
+     */
+    public static void processDecimal64Entry(TreeWalkListener listener,
+                                             Decimal64SpecificationContext ctx) {
+
+        // Check for stack to be non empty.
+        ListenerValidation.checkStackIsNotEmpty(listener, ListenerErrorType.MISSING_HOLDER, DECIMAL64_DATA, "", ListenerErrorLocation.ENTRY);
+
+        Parsable tmpNode = listener.getParsedDataStack().peek();
+        if (tmpNode instanceof YangType) {
+            YangType<YangDecimal64<YangRangeRestriction>> typeNode =
+                    (YangType<YangDecimal64<YangRangeRestriction>>) tmpNode;
+            YangDecimal64 decimal64Node = new YangDecimal64();
+            typeNode.setDataTypeExtendedInfo(decimal64Node);
+
+            decimal64Node.setLineNumber(ctx.getStart().getLine());
+            decimal64Node.setCharPosition(ctx.getStart().getCharPositionInLine());
+            decimal64Node.setFileName(listener.getFileName());
+        } else {
+            throw new ParserException(ListenerErrorMessageConstruction.constructListenerErrorMessage(ListenerErrorType.INVALID_HOLDER, DECIMAL64_DATA, "", ListenerErrorLocation.ENTRY));
+        }
+    }
+
+    /**
+     * Performs validation and updates the data model tree.
+     * It is called when parser exits from grammar rule (decimal64).
+     *
+     * @param listener listener's object
+     * @param ctx      context object of the grammar rule
+     */
+    public static void processDecimal64Exit(TreeWalkListener listener,
+                                            Decimal64SpecificationContext ctx) {
+
+        // Check for stack to be non empty.
+        ListenerValidation.checkStackIsNotEmpty(listener, ListenerErrorType.MISSING_HOLDER, DECIMAL64_DATA, "", ListenerErrorLocation.EXIT);
+
+        Parsable tmpNode = listener.getParsedDataStack().peek();
+        if (tmpNode instanceof YangType) {
+            YangType<YangDecimal64<YangRangeRestriction>> typeNode =
+                    (YangType<YangDecimal64<YangRangeRestriction>>) tmpNode;
+            YangDecimal64<YangRangeRestriction> decimal64Node = typeNode.getDataTypeExtendedInfo();
+            try {
+                decimal64Node.validateRange();
+            } catch (DataModelException e) {
+                throw new ParserException(e);
+            }
+        } else {
+            throw new ParserException(ListenerErrorMessageConstruction.constructListenerErrorMessage(ListenerErrorType.INVALID_HOLDER, DECIMAL64_DATA, "", ListenerErrorLocation.EXIT));
+        }
+    }
+}

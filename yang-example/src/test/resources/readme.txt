@@ -1,0 +1,3 @@
+
+
+~/.local/bin/pyang -f jnc --plugindir /home/lig/Downloads/yang-maven-plugin/yang-jnc/src/main/resources --jnc-output /home/lig/Downloads/yang-maven-plugin/yang-example/src/main/java/com.airlenet.yang.model --jnc-prefix Prefix -p /home/lig/Downloads/yang-maven-plugin/yang-example/src/main/yang:/home/lig/Downloads/yang-maven-plugin/yang-example/src/main/yang:/home/lig/Downloads/yang-maven-plugin/yang-example/src/main/yang/module/tailf:/home/lig/Downloads/yang-maven-plugin/yang-example/src/main/yang/module/iana:/home/lig/Downloads/yang-maven-plugin/yang-example/src/main/yang/module/ietf:/home/lig/Downloads/yang-maven-plugin/yang-example/src/main/yang/module --jnc-classpath-schema-loading

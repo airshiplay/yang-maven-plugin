@@ -1,5 +1,0 @@
-submodule usub {
-  belongs-to u {
-    prefix us;
-  }
-}

@@ -1,3 +1,0 @@
-module: x
-    +--rw foo
-       +--rw bar {x}?

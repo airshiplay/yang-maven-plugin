@@ -38,95 +38,95 @@ module tailf-rest-error {
       "RFC XXXX: [sec. 5.3.1.1 ABNF For Data Resource Identifiers]";
   }
 
-  tailf:structure errors {
-    container errors {
-      description
-        "Represents an error report returned by the server if
-         a request results in an error.";
-
-      list error {
-        description
-          "An entry containing information about one
-           specific error that occurred while processing
-           a RESTCONF request.";
-        reference "RFC 6241, Section 4.3";
-
-        leaf error-type {
-          type enumeration {
-            enum transport {
-              description "The transport layer";
-            }
-            enum rpc {
-              description "The rpc or notification layer";
-            }
-            enum protocol {
-              description "The protocol operation layer";
-            }
-            enum application {
-              description "The server application layer";
-            }
-          }
-          mandatory true;
-          description
-            "The protocol layer where the error occurred.";
-        }
-
-        leaf error-tag {
-          type string;
-          mandatory true;
-          description
-            "The enumerated error tag.";
-        }
-
-        leaf error-app-tag {
-          type string;
-          description
-            "The application-specific error tag.";
-        }
-
-        choice error-node {
-          description
-            "The server will return the location of the error node
-             in a format that is appropriate for the protocol.
-             If no specific node within the request message body
-             caused the error then this choice will not be present.";
-
-          leaf error-path {
-            type instance-identifier;
-            description
-              "The YANG instance identifier associated
-               with the error node. This leaf will only be
-               present if the error node is not a data resource,
-               e.g., the error node is an input parameter
-               for an operation resource.";
-          }
-
-          leaf error-urlpath {
-            type data-resource-identifier;
-            description
-              "The target data resource identifier associated
-               with the error node.  This leaf will only be
-               present if the error node is associated with
-               a data resource (either within the server or
-               in the request message).";
-          }
-        }
-
-        leaf error-message {
-          type string;
-          description
-            "A message describing the error.";
-        }
-
-        /* CURRENTLY NOT USED */
-        /* Actually defined as:  anyxml error-info { ... */
-        container error-info {
-          description
-            "Arbitrary XML that represents a container
-             of additional information for the error report.";
-        }
-
-      }
-    }
-  }
+  //tailf:structure errors {
+  //  container errors {
+  //    description
+  //      "Represents an error report returned by the server if
+  //       a request results in an error.";
+  //
+  //    list error {
+  //      description
+  //        "An entry containing information about one
+  //         specific error that occurred while processing
+  //         a RESTCONF request.";
+  //      reference "RFC 6241, Section 4.3";
+  //      config false;
+  //      leaf error-type {
+  //        type enumeration {
+  //         enum transport {
+  //            description "The transport layer";
+  //          }
+  //          enum rpc {
+  //            description "The rpc or notification layer";
+  //          }
+  //          enum protocol {
+  //            description "The protocol operation layer";
+  //          }
+  //          enum application {
+  //            description "The server application layer";
+  //          }
+  //        }
+  //        mandatory true;
+  //        description
+  //          "The protocol layer where the error occurred.";
+  //      }
+  //
+  //      leaf error-tag {
+  //        type string;
+  //        mandatory true;
+  //        description
+  //          "The enumerated error tag.";
+  //      }
+  //
+  //      leaf error-app-tag {
+  //        type string;
+  //        description
+  //          "The application-specific error tag.";
+  //      }
+  //
+  //      choice error-node {
+  //        description
+  //          "The server will return the location of the error node
+  //           in a format that is appropriate for the protocol.
+  //           If no specific node within the request message body
+  //           caused the error then this choice will not be present.";
+  //
+  //        leaf error-path {
+  //          type instance-identifier;
+  //          description
+  //            "The YANG instance identifier associated
+  //             with the error node. This leaf will only be
+  //             present if the error node is not a data resource,
+  //             e.g., the error node is an input parameter
+  //             for an operation resource.";
+  //        }
+  //
+  //        leaf error-urlpath {
+  //          type data-resource-identifier;
+  //          description
+  //            "The target data resource identifier associated
+  //             with the error node.  This leaf will only be
+  //             present if the error node is associated with
+  //             a data resource (either within the server or
+  //             in the request message).";
+  //        }
+  //      }
+  //
+  //      leaf error-message {
+  //        type string;
+  //        description
+  //          "A message describing the error.";
+  //      }
+  //
+  //      /* CURRENTLY NOT USED */
+  //      /* Actually defined as:  anyxml error-info { ... */
+  //      container error-info {
+  //        description
+  //          "Arbitrary XML that represents a container
+  //           of additional information for the error report.";
+  //      }
+  //
+  //    }
+  //  }
+  //}
 }

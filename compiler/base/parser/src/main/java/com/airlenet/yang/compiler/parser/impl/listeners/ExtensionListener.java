@@ -1,0 +1,118 @@
+/*
+ * Copyright 2016-present Open Networking Foundation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.airlenet.yang.compiler.parser.impl.listeners;
+
+import com.airlenet.yang.compiler.datamodel.YangExtension;
+import com.airlenet.yang.compiler.datamodel.YangModule;
+import com.airlenet.yang.compiler.datamodel.YangSubModule;
+import com.airlenet.yang.compiler.datamodel.utils.Parsable;
+import com.airlenet.yang.compiler.parser.exceptions.ParserException;
+import com.airlenet.yang.compiler.parser.impl.TreeWalkListener;
+import com.airlenet.yang.compiler.parser.impl.parserutils.*;
+
+import static com.airlenet.yang.compiler.datamodel.utils.YangConstructType.EXTENSION_DATA;
+import static com.airlenet.yang.compiler.parser.antlrgencode.GeneratedYangParser.ExtensionStatementContext;
+
+/*
+ * Reference: RFC6020 and YANG ANTLR Grammar
+ *
+ * ABNF grammar as per RFC6020
+ * extension-stmt      = extension-keyword sep identifier-arg-str optsep
+ *                       (";" /
+ *                        "{" stmtsep
+ *                            ;; these stmts can appear in any order
+ *                            [argument-stmt stmtsep]
+ *                            [status-stmt stmtsep]
+ *                            [description-stmt stmtsep]
+ *                            [reference-stmt stmtsep]
+ *                        "}")
+ *
+ * ANTLR grammar rule
+ * extensionStatement : EXTENSION_KEYWORD identifier (STMTEND | LEFT_CURLY_BRACE extensionBody RIGHT_CURLY_BRACE);
+ */
+
+/**
+ * Represents listener based call back function corresponding to the "extension"
+ * rule defined in ANTLR grammar file for corresponding ABNF rule in RFC 6020.
+ */
+public final class ExtensionListener {
+
+    /**
+     * Creates a new extension listener.
+     */
+    private ExtensionListener() {
+    }
+
+    /**
+     * Performs validation and updates the data model tree. It is called when parser
+     * receives an input matching the grammar rule (extension).
+     *
+     * @param listener listener's object
+     * @param ctx      context object of the grammar rule
+     */
+    public static void processExtensionEntry(TreeWalkListener listener,
+                                             ExtensionStatementContext ctx) {
+
+        // Check for stack to be non empty.
+        ListenerValidation.checkStackIsNotEmpty(listener, ListenerErrorType.MISSING_HOLDER, EXTENSION_DATA, ctx.identifier().getText(), ListenerErrorLocation.ENTRY);
+
+        String identifier = ListenerUtil.getValidIdentifier(ctx.identifier().getText(), EXTENSION_DATA, ctx);
+
+        YangExtension extension = new YangExtension();
+
+        extension.setLineNumber(ctx.getStart().getLine());
+        extension.setCharPosition(ctx.getStart().getCharPositionInLine());
+        extension.setFileName(listener.getFileName());
+        extension.setName(identifier);
+
+        Parsable curData = listener.getParsedDataStack().peek();
+        switch (curData.getYangConstructType()) {
+            case MODULE_DATA:
+                YangModule module = ((YangModule) curData);
+                module.addExtension(extension);
+                break;
+            case SUB_MODULE_DATA:
+                YangSubModule subModule = ((YangSubModule) curData);
+                subModule.addExtension(extension);
+                break;
+            default:
+                throw new ParserException(ListenerErrorMessageConstruction.constructListenerErrorMessage(ListenerErrorType.INVALID_HOLDER, EXTENSION_DATA,
+                                                                        ctx.identifier().getText(), ListenerErrorLocation.ENTRY));
+        }
+        listener.getParsedDataStack().push(extension);
+    }
+
+    /**
+     * Performs validation and updates the data model tree. It is called when parser exits
+     * from grammar rule(extension).
+     *
+     * @param listener listener's object
+     * @param ctx      context object of the grammar rule
+     */
+    public static void processExtensionExit(TreeWalkListener listener,
+                                            ExtensionStatementContext ctx) {
+
+        // Check for stack to be non empty.
+        ListenerValidation.checkStackIsNotEmpty(listener, ListenerErrorType.MISSING_HOLDER, EXTENSION_DATA, ctx.identifier().getText(), ListenerErrorLocation.EXIT);
+
+        if (!(listener.getParsedDataStack().peek() instanceof YangExtension)) {
+            throw new ParserException(ListenerErrorMessageConstruction.constructListenerErrorMessage(ListenerErrorType.MISSING_CURRENT_HOLDER, EXTENSION_DATA,
+                                                                    ctx.identifier().getText(), ListenerErrorLocation.EXIT));
+        }
+        listener.getParsedDataStack().pop();
+    }
+}
