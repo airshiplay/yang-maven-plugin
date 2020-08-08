@@ -430,6 +430,21 @@ public abstract class YangList
         return pathList;
     }
 
+
+    public List<YangLeaf>   getListOfKeyLeaf(){
+
+        List<YangLeaf> keys = new ArrayList<>();
+        for (String key :  this.keyList) {
+            for (YangLeaf yangLeaf: listOfLeaf){
+                if(key.equals(yangLeaf.getName())){
+                    keys.add(yangLeaf);
+                }
+            }
+        }
+        return  keys;
+    }
+
+
     /**
      * Returns the list of leaves.
      *

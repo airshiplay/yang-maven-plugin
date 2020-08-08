@@ -98,7 +98,6 @@ public class YangJavaGroupingTranslator
         tempFileHandle = fileHandle;
     }
 
-
     @Override
     public void generateCodeEntry(YangPluginConfig yangPlugin)
             throws TranslatorException {

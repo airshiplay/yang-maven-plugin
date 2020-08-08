@@ -23,7 +23,11 @@ import com.airlenet.yang.compiler.translator.tojava.JavaCodeGenerator;
 import com.airlenet.yang.compiler.translator.tojava.JavaCodeGeneratorInfo;
 import com.airlenet.yang.compiler.translator.tojava.JavaFileInfoTranslator;
 import com.airlenet.yang.compiler.translator.tojava.TempJavaCodeFragmentFiles;
+import com.airlenet.yang.compiler.translator.tojava.jnc.JavaClass;
+import com.airlenet.yang.compiler.translator.tojava.jnc.JavaField;
+import com.airlenet.yang.compiler.translator.tojava.jnc.JavaMethod;
 import com.airlenet.yang.compiler.utils.io.YangPluginConfig;
+import com.tailf.jnc.YangElement;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -32,16 +36,13 @@ import static com.airlenet.yang.compiler.datamodel.utils.DataModelUtils.isRpcChi
 import static com.airlenet.yang.compiler.translator.tojava.GeneratedJavaFileType.GENERATE_ALL_EVENT_CLASS_MASK;
 import static com.airlenet.yang.compiler.translator.tojava.GeneratedJavaFileType.GENERATE_INTERFACE_WITH_BUILDER;
 import static com.airlenet.yang.compiler.translator.tojava.GeneratedJavaFileType.GENERATE_SERVICE_AND_MANAGER;
-import static com.airlenet.yang.compiler.translator.tojava.YangJavaModelUtils.generateCodeOfRootNode;
-import static com.airlenet.yang.compiler.translator.tojava.YangJavaModelUtils.generateInterfaceFileForNonDataNodes;
-import static com.airlenet.yang.compiler.translator.tojava.YangJavaModelUtils.isRootNodesCodeGenRequired;
+import static com.airlenet.yang.compiler.translator.tojava.YangJavaModelUtils.*;
 import static com.airlenet.yang.compiler.translator.tojava.utils.JavaIdentifierSyntax.getRootPackage;
 import static com.airlenet.yang.compiler.translator.tojava.utils.TranslatorErrorType.FAIL_AT_ENTRY;
 import static com.airlenet.yang.compiler.translator.tojava.utils.TranslatorErrorType.FAIL_AT_EXIT;
 import static com.airlenet.yang.compiler.translator.tojava.utils.TranslatorUtils.getErrorMsg;
 import static com.airlenet.yang.compiler.utils.UtilConstants.SBI;
-import static com.airlenet.yang.compiler.utils.io.impl.YangIoUtils.removeEmptyDirectory;
-import static com.airlenet.yang.compiler.utils.io.impl.YangIoUtils.searchAndDeleteTempDir;
+import static com.airlenet.yang.compiler.utils.io.impl.YangIoUtils.*;
 
 /**
  * Represents module information extended to support java code generation.
@@ -125,22 +126,52 @@ public class YangJavaModuleTranslator
         String modulePkg = getRootPackage(getVersion(), getModuleName(),
                                           getRevision(),
                                           yangPlugin.getConflictResolver());
+        updateJNCPackageInfo(this, yangPlugin, modulePkg);
 
-        /*if (isNotificationChildNodePresent(this)) {
-            getJavaFileInfo().setGeneratedFileTypes(
-                    getJavaFileInfo().getGeneratedFileTypes()
-                            | GENERATE_ALL_EVENT_CLASS_MASK);
-        }*/
+        JavaFileInfoTranslator fileInfo = this.getJavaFileInfo();
+
+        String classname=  this.getPrefixClassName();
+        String absoluteDirPath = getAbsolutePackagePath(fileInfo.getBaseCodeGenPath(),
+                fileInfo.getPackageFilePath());
+
+        JavaClass javaClass = new JavaClass(classname, modulePkg, "The root class for namespace"+this.getModuleNamespace());
+
+        javaClass.addField(new JavaField("NAMESPACE",this.getModuleNamespace(), "public" ,"static" ,"final", "String"),
+                new JavaField("PREFIX",this.getPrefix(), "public" ,"static" ,"final", "String"));
+        JavaMethod enabler = new JavaMethod("enable","void")
+                .setExceptions(new String[]{"JNCException"}).addDependency("com.tailf.jnc.JNCException")
+                .addJavadoc("Enable the elements in this namespace to be aware")
+                .addJavadoc("of the data model and use the generated classes.");
+        enabler.setModifiers (new String[]{ "public", "static"});
+        enabler.addLine("YangElement.setPackage(NAMESPACE, \""+modulePkg+"\");");
+        enabler.addDependency("com.tailf.jnc.YangElement");
+        enabler.addLine("//"+classname + ".registerSchema();");
+        javaClass.addMethod(enabler);
+
+
+        JavaMethod  reg = new JavaMethod("registerSchema","void");
+        reg.setExceptions (new String []{"JNCException"});
+        reg.addDependency("com.tailf.jnc.JNCException");
+        reg.setModifiers (new String[]{ "public", "static"});
+        reg.addJavadoc("Register the schema for this namespace in the global");
+        reg.addJavadoc("schema table (CsTree) making it possible to lookup");
+        reg.addJavadoc("CsNode entries for all tagpaths");
+        reg.addLine("SchemaParser parser = new SchemaParser();");
+        reg.addDependency("com.tailf.jnc.SchemaParser");
+        reg.addLine("HashMap<Tagpath, SchemaNode> h = SchemaTree.create(NAMESPACE);");
+        reg.addDependency("java.util.HashMap");
+        reg.addDependency("com.tailf.jnc.Tagpath");
+        reg.addDependency("com.tailf.jnc.SchemaNode");
+        reg.addDependency("com.tailf.jnc.SchemaTree");
+        reg.addLine("parser.findAndReadFile(\"" + classname + ".schema\", h, " + classname + ".class);");
+        javaClass.addMethod(reg);
+
         try {
-            generateCodeOfRootNode(this, yangPlugin, modulePkg);
-            //Add augmented rpc name
-            if (isRpcChildNodePresent(this)) {
-                tempFileHandle.getServiceTempFiles().addAugmentedRpcMethod(this);
-            }
+            javaClass.write(absoluteDirPath);
         } catch (IOException e) {
-            throw new TranslatorException(getErrorMsg(FAIL_AT_ENTRY, this,
-                                                      e.getLocalizedMessage()));
+            throw new TranslatorException(e);
         }
+
     }
 
     /**
@@ -158,43 +189,43 @@ public class YangJavaModuleTranslator
          *
          * The manager class needs to extend the "ListenerRegistry".
          */
-        try {
-            if ((getJavaFileInfo().getGeneratedFileTypes() &
-                    GENERATE_ALL_EVENT_CLASS_MASK) != 0) {
-                getTempJavaCodeFragmentFiles().generateJavaFile(
-                        GENERATE_ALL_EVENT_CLASS_MASK, this);
-            }
-
-            if (!isRootNodesCodeGenRequired(this)) {
-                if (getChild() != null) {
-                    generateInterfaceFileForNonDataNodes(this);
-                }
-            } else {
-                getTempJavaCodeFragmentFiles()
-                        .generateJavaFile(GENERATE_INTERFACE_WITH_BUILDER, this);
-                if (getJavaFileInfo().getPluginConfig()
-                        .getCodeGenerateForSbi() == null ||
-                        !getJavaFileInfo().getPluginConfig()
-                                .getCodeGenerateForSbi().equals(SBI)) {
-                    if (isRpcChildNodePresent(this)) {
-                        getTempJavaCodeFragmentFiles()
-                                .generateJavaFile(GENERATE_SERVICE_AND_MANAGER, this);
-                        // TODO : code generation for rpc at module level
-                        /*getTempJavaCodeFragmentFiles()
-                                .generateJavaFile(GENERATE_ALL_RPC_CLASS_MASK, this);
-                         */
-                    }
-                }
-            }
-
-            searchAndDeleteTempDir(getJavaFileInfo().getBaseCodeGenPath() +
-                                           getJavaFileInfo().getPackageFilePath());
-            removeEmptyDirectory(getJavaFileInfo().getBaseCodeGenPath() +
-                                         getJavaFileInfo().getPackageFilePath());
-        } catch (IOException e) {
-            throw new TranslatorException(getErrorMsg(FAIL_AT_EXIT, this,
-                                                      e.getLocalizedMessage()));
-        }
+//        try {
+//            if ((getJavaFileInfo().getGeneratedFileTypes() &
+//                    GENERATE_ALL_EVENT_CLASS_MASK) != 0) {
+//                getTempJavaCodeFragmentFiles().generateJavaFile(
+//                        GENERATE_ALL_EVENT_CLASS_MASK, this);
+//            }
+//
+//            if (!isRootNodesCodeGenRequired(this)) {
+//                if (getChild() != null) {
+//                    generateInterfaceFileForNonDataNodes(this);
+//                }
+//            } else {
+//                getTempJavaCodeFragmentFiles()
+//                        .generateJavaFile(GENERATE_INTERFACE_WITH_BUILDER, this);
+//                if (getJavaFileInfo().getPluginConfig()
+//                        .getCodeGenerateForSbi() == null ||
+//                        !getJavaFileInfo().getPluginConfig()
+//                                .getCodeGenerateForSbi().equals(SBI)) {
+//                    if (isRpcChildNodePresent(this)) {
+//                        getTempJavaCodeFragmentFiles()
+//                                .generateJavaFile(GENERATE_SERVICE_AND_MANAGER, this);
+//                        // TODO : code generation for rpc at module level
+//                        /*getTempJavaCodeFragmentFiles()
+//                                .generateJavaFile(GENERATE_ALL_RPC_CLASS_MASK, this);
+//                         */
+//                    }
+//                }
+//            }
+//
+//            searchAndDeleteTempDir(getJavaFileInfo().getBaseCodeGenPath() +
+//                                           getJavaFileInfo().getPackageFilePath());
+//            removeEmptyDirectory(getJavaFileInfo().getBaseCodeGenPath() +
+//                                         getJavaFileInfo().getPackageFilePath());
+//        } catch (IOException e) {
+//            throw new TranslatorException(getErrorMsg(FAIL_AT_EXIT, this,
+//                                                      e.getLocalizedMessage()));
+//        }
     }
 
     /**
@@ -210,7 +241,7 @@ public class YangJavaModuleTranslator
      * Checks if there is any notification node present.
      *
      * @param rootNode root node of the data model
-     * @return status of notification's existence
+     * @return status of notification"s existence
      */
     private boolean isNotificationChildNodePresent(YangNode rootNode) {
         YangNode childNode = rootNode.getChild();

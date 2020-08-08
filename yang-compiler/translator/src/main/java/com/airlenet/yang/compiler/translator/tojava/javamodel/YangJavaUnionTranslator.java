@@ -15,6 +15,10 @@
  */
 package com.airlenet.yang.compiler.translator.tojava.javamodel;
 
+import com.airlenet.yang.compiler.datamodel.YangNode;
+import com.airlenet.yang.compiler.datamodel.YangType;
+import com.airlenet.yang.compiler.datamodel.javadatamodel.YangJavaType;
+import com.airlenet.yang.compiler.datamodel.javadatamodel.YangJavaTypeDef;
 import com.airlenet.yang.compiler.datamodel.javadatamodel.YangJavaUnion;
 import com.airlenet.yang.compiler.translator.exception.InvalidNodeForTranslatorException;
 import com.airlenet.yang.compiler.translator.exception.TranslatorException;
@@ -22,13 +26,19 @@ import com.airlenet.yang.compiler.translator.tojava.JavaCodeGenerator;
 import com.airlenet.yang.compiler.translator.tojava.JavaCodeGeneratorInfo;
 import com.airlenet.yang.compiler.translator.tojava.JavaFileInfoTranslator;
 import com.airlenet.yang.compiler.translator.tojava.TempJavaCodeFragmentFiles;
+import com.airlenet.yang.compiler.translator.tojava.jnc.JavaClass;
+import com.airlenet.yang.compiler.translator.tojava.jnc.JavaMethod;
 import com.airlenet.yang.compiler.utils.io.YangPluginConfig;
+import com.tailf.jnc.YangElement;
+import com.tailf.jnc.YangException;
+import com.tailf.jnc.YangUnion;
 
 import java.io.IOException;
+import java.util.stream.Collectors;
 
 import static com.airlenet.yang.compiler.translator.tojava.GeneratedJavaFileType.GENERATE_UNION_CLASS;
-import static com.airlenet.yang.compiler.translator.tojava.YangJavaModelUtils.generateCodeOfNode;
-import static com.airlenet.yang.compiler.translator.tojava.YangJavaModelUtils.generateJava;
+import static com.airlenet.yang.compiler.translator.tojava.YangJavaModelUtils.*;
+import static com.airlenet.yang.compiler.utils.io.impl.YangIoUtils.getAbsolutePackagePath;
 
 /**
  * Represents union information extended to support java code generation.
@@ -109,18 +119,23 @@ public class YangJavaUnionTranslator
      */
     @Override
     public void generateCodeEntry(YangPluginConfig yangPlugin) throws TranslatorException {
-        try {
+        updateJNCPackageInfo(this,yangPlugin);
+//        try {
             if (getReferredSchema() != null) {
                 throw new InvalidNodeForTranslatorException();
             }
-            generateCodeOfNode(this, yangPlugin);
-        } catch (IOException e) {
-            throw new TranslatorException(
-                    "Failed to prepare generate code entry for union node " + getName() + " in " +
-                            getLineNumber() + " at " +
-                            getCharPosition()
-                            + " in " + getFileName() + " " + e.getLocalizedMessage());
-        }
+            this.getTypeList().forEach(yangType -> {
+                ((YangJavaTypeTranslator) yangType).updateJavaQualifiedInfo(yangPlugin.getConflictResolver());
+            });
+//            generateCodeOfNode(this, yangPlugin);
+//        } catch (IOException e) {
+//            throw new TranslatorException(
+//                    "Failed to prepare generate code entry for union node " + getName() + " in " +
+//                            getLineNumber() + " at " +
+//                            getCharPosition()
+//                            + " in " + getFileName() + " " + e.getLocalizedMessage());
+//        }
+
     }
 
     /**
@@ -130,13 +145,54 @@ public class YangJavaUnionTranslator
      */
     @Override
     public void generateCodeExit() throws TranslatorException {
-        try {
-            generateJava(GENERATE_UNION_CLASS, this);
-        } catch (IOException e) {
-            throw new TranslatorException("Failed to generate code for union node " + getName() + " in " +
-                                                  getLineNumber() + " at " +
-                                                  getCharPosition()
-                                                  + " in " + getFileName() + " " + e.getLocalizedMessage());
+
+        String classname= YangElement.normalize(this.getName().replaceAll("_","-"));
+        JavaFileInfoTranslator fileInfo = this.getJavaFileInfo();
+
+        String absoluteDirPath = getAbsolutePackagePath(fileInfo.getBaseCodeGenPath(),
+                fileInfo.getPackageFilePath());
+//        YangJavaModule yangJavaModule = (YangJavaModule)this.getRoot();
+        if(this.getParent()!=null && this.getParent() instanceof YangJavaTypeDef){
+            return;
         }
+
+        JavaClass javaClass = new JavaClass(classname, fileInfo.getPackage(), fileInfo.getYangFileName()+";"+fileInfo.getLineNumber());
+        javaClass.setExtend(YangUnion.class.getName());
+
+        javaClass.addMethod(new JavaMethod(classname,"")
+                .setModifiers("public")
+                .setExceptions(YangException.class.getName())
+                .addParameter("String","value")
+                .addLine("super(value,").addLine("\tnew String[] {")
+
+                .addLine(
+                        this.getTypeList().stream()
+                                .map( yangType -> "\""+((YangJavaType)yangType).getJavaQualifiedInfo().getPkgInfo()+"."+ ((YangJavaType)yangType).getJavaQualifiedInfo().getClassInfo()+"\"").collect(Collectors.joining(","))
+                )
+                .addLine("}").addLine(");").addLine("check();")
+        );
+
+        javaClass.addMethod(new JavaMethod("setValue","void").setModifiers("public").setExceptions(YangException.class.getName())
+                .addParameter("String","value")
+                .addLine("super.setValue(value);")
+                .addLine("check();")
+        );
+        javaClass.addMethod(new JavaMethod("check","void").setModifiers("public").setExceptions(YangException.class.getName())
+                .addLine("super.check();")
+        );
+
+        try {
+            javaClass.write(absoluteDirPath);
+        } catch (IOException e) {
+            throw new TranslatorException(e);
+        }
+//        try {
+//            generateJava(GENERATE_UNION_CLASS, this);
+//        } catch (IOException e) {
+//            throw new TranslatorException("Failed to generate code for union node " + getName() + " in " +
+//                                                  getLineNumber() + " at " +
+//                                                  getCharPosition()
+//                                                  + " in " + getFileName() + " " + e.getLocalizedMessage());
+//        }
     }
 }

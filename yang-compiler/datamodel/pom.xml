@@ -34,6 +34,12 @@
             <artifactId>yang-compiler-utils</artifactId>
             <version>${project.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>com.airlenet.yang</groupId>
+            <artifactId>yang-jnc</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
 </project>

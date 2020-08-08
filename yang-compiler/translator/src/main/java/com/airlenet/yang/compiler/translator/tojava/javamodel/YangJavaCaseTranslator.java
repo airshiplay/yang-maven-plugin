@@ -16,6 +16,7 @@
 package com.airlenet.yang.compiler.translator.tojava.javamodel;
 
 import com.airlenet.yang.compiler.datamodel.javadatamodel.YangJavaCase;
+import com.airlenet.yang.compiler.datamodel.javadatamodel.YangJavaType;
 import com.airlenet.yang.compiler.translator.exception.TranslatorException;
 import com.airlenet.yang.compiler.translator.tojava.JavaCodeGenerator;
 import com.airlenet.yang.compiler.translator.tojava.JavaCodeGeneratorInfo;
@@ -26,8 +27,7 @@ import com.airlenet.yang.compiler.utils.io.YangPluginConfig;
 import java.io.IOException;
 
 import static com.airlenet.yang.compiler.translator.tojava.GeneratedJavaFileType.GENERATE_INTERFACE_WITH_BUILDER;
-import static com.airlenet.yang.compiler.translator.tojava.YangJavaModelUtils.generateCodeOfAugmentableNode;
-import static com.airlenet.yang.compiler.translator.tojava.YangJavaModelUtils.generateJava;
+import static com.airlenet.yang.compiler.translator.tojava.YangJavaModelUtils.*;
 
 /**
  * Represents case information extended to support java code generation.
@@ -109,19 +109,21 @@ public class YangJavaCaseTranslator
      */
     @Override
     public void generateCodeEntry(YangPluginConfig yangPlugin) throws TranslatorException {
-        try {
-            if (getReferredSchema() != null) {
-                return;
-            }
-            generateCodeOfAugmentableNode(this, yangPlugin);
-        } catch (IOException e) {
-            throw new TranslatorException(
-                    "Failed to prepare generate code entry for case node " +
-                            getName() + " in " +
-                            getLineNumber() + " at " +
-                            getCharPosition()
-                            + " in " + getFileName() + " " + e.getLocalizedMessage());
-        }
+        updateJNCPackageInfo(this,yangPlugin);
+        this.getListOfLeaf().forEach( yangLeaf -> ((YangJavaLeafTranslator)yangLeaf).updateJavaQualifiedInfo());
+//        try {
+//            if (getReferredSchema() != null) {
+//                return;
+//            }
+//            generateCodeOfAugmentableNode(this, yangPlugin);
+//        } catch (IOException e) {
+//            throw new TranslatorException(
+//                    "Failed to prepare generate code entry for case node " +
+//                            getName() + " in " +
+//                            getLineNumber() + " at " +
+//                            getCharPosition()
+//                            + " in " + getFileName() + " " + e.getLocalizedMessage());
+//        }
     }
 
     /**
@@ -129,14 +131,14 @@ public class YangJavaCaseTranslator
      */
     @Override
     public void generateCodeExit() throws TranslatorException {
-        try {
-            generateJava(GENERATE_INTERFACE_WITH_BUILDER, this);
-        } catch (IOException e) {
-            throw new TranslatorException("Failed to generate code for case node " +
-                                                  getName() + " in " +
-                                                  getLineNumber() + " at " +
-                                                  getCharPosition()
-                                                  + " in " + getFileName() + " " + e.getLocalizedMessage());
-        }
+//        try {
+//            generateJava(GENERATE_INTERFACE_WITH_BUILDER, this);
+//        } catch (IOException e) {
+//            throw new TranslatorException("Failed to generate code for case node " +
+//                                                  getName() + " in " +
+//                                                  getLineNumber() + " at " +
+//                                                  getCharPosition()
+//                                                  + " in " + getFileName() + " " + e.getLocalizedMessage());
+//        }
     }
 }

@@ -239,6 +239,13 @@ public abstract class YangNode
         this.parent = parent;
     }
 
+    public  YangNode getRoot(){
+        YangNode root =this;
+        while (root.getParent()!=null){
+            root=root.getParent();
+        }
+        return root;
+    }
     /**
      * Returns the first child of node.
      *

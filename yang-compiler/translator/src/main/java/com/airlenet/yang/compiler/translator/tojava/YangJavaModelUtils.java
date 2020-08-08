@@ -122,7 +122,24 @@ public final class YangJavaModelUtils {
         }
         updateCommonPackageInfo(translator, info, config);
     }
+    public static void updateJNCPackageInfo(JavaCodeGeneratorInfo info,
+                                         YangPluginConfig config) {
 
+        JavaFileInfoTranslator translator = info.getJavaFileInfo();
+
+        if (info instanceof YangJavaAugmentTranslator) {
+            updatePackageForAugmentInfo(info, config);
+        } else {
+            setNodeJavaName(info, config);
+            translator.setJavaAttributeName(info.getJavaFileInfo()
+                    .getJavaName());
+            translator.setLineNumber(info.getLineNumber());
+            if(info.getFileName()!=null &&config.getYangFilesDir()!=null)
+                translator.setYangFileName(info.getFileName().substring(config.getYangFilesDir().length()+1));
+            translator.setPackage(getCurNodePackage((YangNode) info));
+        }
+        updateCommonPackageInfo(translator, info, config);
+    }
     /**
      * The java name for input, output is prefixed with rpc name and other
      * nodes are set by taking its own name from YANG.
@@ -196,7 +213,7 @@ public final class YangJavaModelUtils {
      * @param info   YANG java file info node
      * @param config YANG plugin config
      */
-    private static void updatePackageInfo(JavaCodeGeneratorInfo info,
+    public static void updatePackageInfo(JavaCodeGeneratorInfo info,
                                           YangPluginConfig config,
                                           String pkg) {
         String name = ((YangNode) info).getName();
@@ -215,7 +232,25 @@ public final class YangJavaModelUtils {
 
         updateCommonPackageInfo(translator, info, config);
     }
+    public static void updateJNCPackageInfo(JavaCodeGeneratorInfo info,
+                                         YangPluginConfig config,
+                                         String pkg) {
+        String name = ((YangNode) info).getName();
+        JavaFileInfoTranslator translator = info.getJavaFileInfo();
+        if (info instanceof ConflictResolveNode && ((ConflictResolveNode)
+                info).isNameConflict()) {
+            name = name + ((ConflictResolveNode) info).getSuffix();
+        }
+        translator.setJavaName(getCamelCase(name,
+                config.getConflictResolver()));
+        translator.setPackage(pkg);
+        translator.setLineNumber(info.getLineNumber());
+        if(info.getFileName()!=null && config.getYangFilesDir()!=null){
+            translator.setYangFileName(info.getFileName().substring(config.getYangFilesDir().length()+1));
+        }
 
+        updateCommonPackageInfo(translator, info, config);
+    }
     /**
      * Updates common package information.
      *

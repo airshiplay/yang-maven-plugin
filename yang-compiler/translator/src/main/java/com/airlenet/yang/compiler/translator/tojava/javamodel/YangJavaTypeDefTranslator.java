@@ -15,24 +15,31 @@
  */
 package com.airlenet.yang.compiler.translator.tojava.javamodel;
 
+import com.airlenet.yang.compiler.datamodel.YangBit;
 import com.airlenet.yang.compiler.datamodel.YangDerivedInfo;
 import com.airlenet.yang.compiler.datamodel.YangType;
-import com.airlenet.yang.compiler.datamodel.javadatamodel.YangJavaTypeDef;
+import com.airlenet.yang.compiler.datamodel.javadatamodel.*;
 import com.airlenet.yang.compiler.translator.exception.InvalidNodeForTranslatorException;
 import com.airlenet.yang.compiler.translator.exception.TranslatorException;
 import com.airlenet.yang.compiler.translator.tojava.JavaCodeGenerator;
 import com.airlenet.yang.compiler.translator.tojava.JavaCodeGeneratorInfo;
 import com.airlenet.yang.compiler.translator.tojava.JavaFileInfoTranslator;
 import com.airlenet.yang.compiler.translator.tojava.TempJavaCodeFragmentFiles;
+import com.airlenet.yang.compiler.translator.tojava.jnc.JavaClass;
+import com.airlenet.yang.compiler.translator.tojava.jnc.JavaMethod;
 import com.airlenet.yang.compiler.utils.io.YangPluginConfig;
+import com.tailf.jnc.*;
 
 import java.io.IOException;
+import java.math.BigInteger;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
-import static com.airlenet.yang.compiler.datamodel.utils.builtindatatype.YangDataTypes.DERIVED;
-import static com.airlenet.yang.compiler.datamodel.utils.builtindatatype.YangDataTypes.LEAFREF;
+import static com.airlenet.yang.compiler.datamodel.utils.builtindatatype.YangDataTypes.*;
 import static com.airlenet.yang.compiler.translator.tojava.GeneratedJavaFileType.GENERATE_TYPEDEF_CLASS;
-import static com.airlenet.yang.compiler.translator.tojava.YangJavaModelUtils.generateCodeOfNode;
-import static com.airlenet.yang.compiler.translator.tojava.YangJavaModelUtils.generateJava;
+import static com.airlenet.yang.compiler.translator.tojava.YangJavaModelUtils.*;
+import static com.airlenet.yang.compiler.utils.io.impl.YangIoUtils.getAbsolutePackagePath;
 
 /**
  * Represents type define information extended to support java code generation.
@@ -133,15 +140,25 @@ public class YangJavaTypeDefTranslator
         } else if (typeInTypeDef.getDataType() == LEAFREF) {
             throw exception;
         }
-        try {
-            generateCodeOfNode(this, yangPlugin);
-        } catch (IOException e) {
-            throw new TranslatorException(
-                    "Failed to prepare generate code entry for typedef node " + getName()
-                            + " in " + getLineNumber() +
-                            " at " + getCharPosition() +
-                            " in " + getFileName(), e);
+        updateJNCPackageInfo(this,yangPlugin);
+
+        if(typeInTypeDef.getDataType() == DERIVED){
+
+            this.getTypeList().forEach(yangType -> {
+                ((YangJavaTypeTranslator)yangType).updateJavaQualifiedInfo(yangPlugin.getConflictResolver());
+            });
         }
+        ((YangJavaTypeTranslator)typeInTypeDef).updateJavaQualifiedInfo(yangPlugin.getConflictResolver());
+
+//        try {
+//            generateCodeOfNode(this, yangPlugin);
+//        } catch (IOException e) {
+//            throw new TranslatorException(
+//                    "Failed to prepare generate code entry for typedef node " + getName()
+//                            + " in " + getLineNumber() +
+//                            " at " + getCharPosition() +
+//                            " in " + getFileName(), e);
+//        }
     }
 
     /**
@@ -151,14 +168,190 @@ public class YangJavaTypeDefTranslator
      */
     @Override
     public void generateCodeExit() throws TranslatorException {
-        try {
-            generateJava(GENERATE_TYPEDEF_CLASS, this);
-        } catch (IOException e) {
-            throw new TranslatorException(
-                    "Failed to prepare generate code for typedef node " + getName()
-                            + " in " + getLineNumber() +
-                            " at " + getCharPosition() +
-                            " in " + getFileName(), e);
+        String classname= YangElement.normalize(this.getName());
+        JavaFileInfoTranslator fileInfo = this.getJavaFileInfo();
+        JavaClass javaClass = new JavaClass(classname, fileInfo.getPackage(), fileInfo.getYangFileName()+""+fileInfo.getLineNumber());
+        String absoluteDirPath = getAbsolutePackagePath(fileInfo.getBaseCodeGenPath(),
+                fileInfo.getPackageFilePath());
+//        YangJavaModule yangJavaModule = (YangJavaModule)this.getRoot();
+
+        YangType typeInTypeDef = this.getTypeDefBaseType();
+
+
+        if(typeInTypeDef.getDataType() == ENUMERATION){
+            javaClass.setExtend(YangEnumeration.class.getName());
+
+            javaClass.addMethod(new JavaMethod(classname,"")
+                    .setModifiers("public")
+                    .setExceptions(YangException.class.getName())
+                    .addParameter("String","value")
+                    .addLine("super(value,").addLine("\tnew String[] {")
+                    .addLine(((YangJavaEnumeration)this.getTypeList().get(0).getDataTypeExtendedInfo()).getEnumSet().stream().map(yangEnum ->"\t\t\""+ yangEnum.getNamedValue()+"\"").collect(Collectors.joining(",\n\t\t")))
+                    .addLine("\t}").addLine(");").addLine("check();")
+            );
+
+            javaClass.addMethod(new JavaMethod("setValue","void").setModifiers("public").setExceptions(YangException.class.getName())
+                    .addParameter("String","value")
+                    .addLine("\tsuper.setValue(value);")
+                    .addLine("\tcheck();")
+            );
+            javaClass.addMethod(new JavaMethod("check","void").setModifiers("public").setExceptions(YangException.class.getName())
+                    .addLine("\tsuper.check();")
+            );
+        }else if(typeInTypeDef.getDataType() == UINT8||typeInTypeDef.getDataType() == UINT16||typeInTypeDef.getDataType() == UINT32 ||typeInTypeDef.getDataType() == UINT64){
+            String extend=null;
+            String type =null;
+            switch (typeInTypeDef.getDataType()){
+                case UINT8:
+                    extend= YangUInt8.class.getName();
+                    type ="short";
+                    break;
+                case UINT16:
+                    extend= YangUInt16.class.getName();
+                    type ="int";
+                    break;
+                case UINT32:
+                    extend= YangUInt32.class.getName();
+                    type ="long";
+                    break;
+                case UINT64:
+                    extend= YangUInt64.class.getName();
+                    type ="long";
+                    break;
+            }
+            javaClass.setExtend(extend);
+            javaClass.addMethod(new JavaMethod(classname,"")
+                    .setModifiers("public")
+                    .setExceptions(YangException.class.getName())
+                    .addParameter("String","value")
+                    .addLine("super(value);")
+                    .addLine("check();")
+            );
+            javaClass.addMethod(new JavaMethod(classname,"")
+                    .setModifiers("public")
+                    .setExceptions(YangException.class.getName())
+                    .addParameter(type,"value")
+                    .addLine("super(value);")
+                    .addLine("check();")
+            );
+
+            javaClass.addMethod(new JavaMethod("setValue","void").setModifiers("public").setExceptions(YangException.class.getName())
+                    .addParameter("String","value")
+                    .addLine("super.setValue(value);")
+                    .addLine("check();")
+            );
+            javaClass.addMethod(new JavaMethod("setValue","void").setModifiers("public").setExceptions(YangException.class.getName())
+                    .addParameter(type,"value")
+                    .addLine("super.setValue(value);")
+                    .addLine("check();")
+            );
+            javaClass.addMethod(new JavaMethod("check","void").setModifiers("public").setExceptions(YangException.class.getName())
+                    .addLine("super.check();")
+            );
+        }else if(typeInTypeDef.getDataType() == UNION){
+            javaClass.setExtend(YangUnion.class.getName());
+
+            javaClass.addMethod(new JavaMethod(classname,"")
+                    .setModifiers("public")
+                    .setExceptions(YangException.class.getName())
+                    .addParameter("String","value")
+                    .addLine("super(value,").addLine("\tnew String[] {")
+
+                    .addLine(
+                            ((YangJavaUnion)((YangJavaType)this.getTypeList().get(0)).getDataTypeExtendedInfo()).getTypeList().stream()
+                                    .map( yangType -> "\""+((YangJavaType)yangType).getJavaQualifiedInfo().getPkgInfo()+"."+ ((YangJavaType)yangType).getJavaQualifiedInfo().getClassInfo()+"\"").collect(Collectors.joining(","))
+                    )
+                    .addLine("}").addLine(");").addLine("check();")
+            );
+
+            javaClass.addMethod(new JavaMethod("setValue","void").setModifiers("public").setExceptions(YangException.class.getName())
+                    .addParameter("String","value")
+                    .addLine("super.setValue(value);")
+                    .addLine("check();")
+            );
+            javaClass.addMethod(new JavaMethod("check","void").setModifiers("public").setExceptions(YangException.class.getName())
+                    .addLine("super.check();")
+            );
+        }else if(typeInTypeDef.getDataType() == STRING){
+            javaClass.setExtend(YangString.class.getName());
+
+            javaClass.addMethod(new JavaMethod(classname,"")
+                    .setModifiers("public")
+                    .setExceptions(YangException.class.getName())
+                    .addParameter("String","value")
+                    .addLine("super(value);").addLine("check();")
+            );
+
+            javaClass.addMethod(new JavaMethod("setValue","void").setModifiers("public").setExceptions(YangException.class.getName())
+                    .addParameter("String","value")
+                    .addLine("super.setValue(value);")
+                    .addLine("check();")
+            );
+            javaClass.addMethod(new JavaMethod("check","void").setModifiers("public").setExceptions(YangException.class.getName())
+                    .addLine("super.check();")
+            );
+        }else if(typeInTypeDef.getDataType() == DERIVED){
+            JavaQualifiedTypeInfo javaQualifiedInfo = ((YangJavaTypeTranslator) this.getTypeList().get(0)).getJavaQualifiedInfo();
+            javaClass.setExtend(javaQualifiedInfo.getPkgInfo()+"."+javaQualifiedInfo.getClassInfo());
+            javaClass.addMethod(new JavaMethod(classname,"")
+                    .setModifiers("public")
+                    .setExceptions(YangException.class.getName())
+                    .addParameter("String","value")
+                    .addLine("super(value);").addLine("check();")
+            );
+
+            javaClass.addMethod(new JavaMethod("setValue","void").setModifiers("public").setExceptions(YangException.class.getName())
+                    .addParameter("String","value")
+                    .addLine("super.setValue(value);")
+                    .addLine("check();")
+            );
+            javaClass.addMethod(new JavaMethod("check","void").setModifiers("public").setExceptions(YangException.class.getName())
+                    .addLine("super.check();")
+            );
+        }else if(typeInTypeDef.getDataType() == BITS){
+            javaClass.setExtend(YangBits.class.getName());
+            Set<Map.Entry<Integer, YangBit>> entries = ((com.airlenet.yang.compiler.datamodel.YangBits) typeInTypeDef.getDataTypeExtendedInfo()).getBitPositionMap().entrySet();
+
+            javaClass.addMethod(new JavaMethod(classname,"")
+                    .setModifiers("public")
+                    .setExceptions(YangException.class.getName())
+                    .addParameter("String","value")
+                    .addLine("super(value,")
+                    .addLine("\tnew java.math.BigInteger(\"31\"),")
+                    .addLine("\tnew String[] {"+entries.stream().map(entry->"\""+entry.getValue().getBitName()+"\"").collect(Collectors.joining(","))+" },")
+                    .addLine("\tnew int[] {"+entries.stream().map(entry->entry.getKey().intValue()+"").collect(Collectors.joining(","))+" }")
+                    .addLine(");")
+                    .addLine("check();")
+            );
+
+            javaClass.addMethod(new JavaMethod("setValue","void").setModifiers("public").setExceptions(YangException.class.getName())
+                    .addParameter("String","value")
+                    .addLine("super.setValue(value);")
+                    .addLine("check();")
+            );
+            javaClass.addMethod(new JavaMethod("setValue","void").setModifiers("public").setExceptions(YangException.class.getName())
+                    .addParameter(BigInteger.class.getName(),"value")
+                    .addLine("super.setValue(value);")
+                    .addLine("check();")
+            );
+            javaClass.addMethod(new JavaMethod("check","void").setModifiers("public").setExceptions(YangException.class.getName())
+                    .addLine("super.check();")
+            );
         }
+
+        try {
+            javaClass.write(absoluteDirPath);
+        } catch (IOException e) {
+            throw new TranslatorException(e);
+        }
+//        try {
+//            generateJava(GENERATE_TYPEDEF_CLASS, this);
+//        } catch (IOException e) {
+//            throw new TranslatorException(
+//                    "Failed to prepare generate code for typedef node " + getName()
+//                            + " in " + getLineNumber() +
+//                            " at " + getCharPosition() +
+//                            " in " + getFileName(), e);
+//        }
     }
 }

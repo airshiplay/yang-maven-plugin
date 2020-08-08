@@ -26,8 +26,7 @@ import com.airlenet.yang.compiler.utils.io.YangPluginConfig;
 import java.io.IOException;
 
 import static com.airlenet.yang.compiler.translator.tojava.GeneratedJavaFileType.INTERFACE_MASK;
-import static com.airlenet.yang.compiler.translator.tojava.YangJavaModelUtils.generateCodeAndUpdateInParent;
-import static com.airlenet.yang.compiler.translator.tojava.YangJavaModelUtils.generateJava;
+import static com.airlenet.yang.compiler.translator.tojava.YangJavaModelUtils.*;
 
 /**
  * Represents choice information extended to support java code generation.
@@ -109,16 +108,17 @@ public class YangJavaChoiceTranslator
      */
     @Override
     public void generateCodeEntry(YangPluginConfig yangPlugin) throws TranslatorException {
-        try {
-            generateCodeAndUpdateInParent(this, yangPlugin, false);
-        } catch (IOException e) {
-            throw new TranslatorException(
-                    "Failed to prepare generate code entry for choice node " +
-                            getName() + " in " +
-                            getLineNumber() + " at " +
-                            getCharPosition()
-                            + " in " + getFileName() + " " + e.getLocalizedMessage());
-        }
+        updateJNCPackageInfo(this,yangPlugin);
+//        try {
+//            generateCodeAndUpdateInParent(this, yangPlugin, false);
+//        } catch (IOException e) {
+//            throw new TranslatorException(
+//                    "Failed to prepare generate code entry for choice node " +
+//                            getName() + " in " +
+//                            getLineNumber() + " at " +
+//                            getCharPosition()
+//                            + " in " + getFileName() + " " + e.getLocalizedMessage());
+//        }
     }
 
     /**
@@ -126,14 +126,14 @@ public class YangJavaChoiceTranslator
      */
     @Override
     public void generateCodeExit() throws TranslatorException {
-        try {
-            generateJava(INTERFACE_MASK, this);
-        } catch (IOException e) {
-            throw new TranslatorException("Failed to generate code for choice node " +
-                                                  getName() + " in " +
-                                                  getLineNumber() + " at " +
-                                                  getCharPosition()
-                                                  + " in " + getFileName() + " " + e.getLocalizedMessage());
-        }
+//        try {
+//            generateJava(INTERFACE_MASK, this);
+//        } catch (IOException e) {
+//            throw new TranslatorException("Failed to generate code for choice node " +
+//                                                  getName() + " in " +
+//                                                  getLineNumber() + " at " +
+//                                                  getCharPosition()
+//                                                  + " in " + getFileName() + " " + e.getLocalizedMessage());
+//        }
     }
 }

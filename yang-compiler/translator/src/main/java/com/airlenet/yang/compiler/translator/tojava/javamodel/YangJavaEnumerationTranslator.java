@@ -111,16 +111,16 @@ public class YangJavaEnumerationTranslator
      */
     @Override
     public void generateCodeEntry(YangPluginConfig yangPlugin) throws TranslatorException {
-        try {
-            if (getReferredSchema() != null) {
-                throw new InvalidNodeForTranslatorException();
-            }
-            generateCodeOfNode(this, yangPlugin);
-            tempFileHandle.getEnumTempFiles().setEnumClass(true);
-        } catch (IOException e) {
-            throw new TranslatorException(getErrorMsg(FAIL_AT_ENTRY, this,
-                                                      e.getLocalizedMessage()), e);
-        }
+//        try {
+//            if (getReferredSchema() != null) {
+//                throw new InvalidNodeForTranslatorException();
+//            }
+//            generateCodeOfNode(this, yangPlugin);
+//            tempFileHandle.getEnumTempFiles().setEnumClass(true);
+//        } catch (IOException e) {
+//            throw new TranslatorException(getErrorMsg(FAIL_AT_ENTRY, this,
+//                                                      e.getLocalizedMessage()), e);
+//        }
     }
 
     /**
@@ -130,11 +130,11 @@ public class YangJavaEnumerationTranslator
      */
     @Override
     public void generateCodeExit() throws TranslatorException {
-        try {
-            generateJava(GENERATE_ENUM_CLASS, this);
-        } catch (IOException e) {
-            throw new TranslatorException(getErrorMsg(FAIL_AT_EXIT, this,
-                                                      e.getLocalizedMessage()), e);
-        }
+//        try {
+//            generateJava(GENERATE_ENUM_CLASS, this);
+//        } catch (IOException e) {
+//            throw new TranslatorException(getErrorMsg(FAIL_AT_EXIT, this,
+//                                                      e.getLocalizedMessage()), e);
+//        }
     }
 }

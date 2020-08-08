@@ -32,6 +32,10 @@ import com.airlenet.yang.compiler.translator.tojava.JavaCodeGeneratorInfo;
 import com.airlenet.yang.compiler.translator.tojava.JavaFileInfoContainer;
 import com.airlenet.yang.compiler.translator.tojava.JavaFileInfoTranslator;
 import com.airlenet.yang.compiler.utils.io.YangToJavaNamingConflictUtil;
+import com.tailf.jnc.YangString;
+import com.tailf.jnc.YangUInt16;
+import com.tailf.jnc.YangUInt32;
+import com.tailf.jnc.YangUInt8;
 
 import java.util.Stack;
 
@@ -74,6 +78,57 @@ public final class AttributesJavaDataType {
     private AttributesJavaDataType() {
     }
 
+    public static String getJNCDataType(YangType<?> yangType) {
+
+        YangDataTypes type = yangType.getDataType();
+
+        switch (type) {
+            case INT8:
+                return BYTE;
+            case INT16:
+                return SHORT;
+            case INT32:
+                return INT;
+            case INT64:
+                return LONG;
+            case UINT8:
+                return YangUInt8.class.getName();
+            case UINT16:
+                return YangUInt16.class.getName();
+            case UINT32:
+                return YangUInt32.class.getName();
+            case UINT64:
+                return BIG_INTEGER;
+            case BITS:
+                return BIT_SET;
+            case BINARY:
+                return BYTE + SQUARE_BRACKETS;
+            case DECIMAL64:
+                return BIG_DECIMAL;
+            case STRING:
+                return YangString.class.getName();
+            case BOOLEAN:
+                return BOOLEAN_DATA_TYPE;
+            case INSTANCE_IDENTIFIER:
+                return STRING_DATA_TYPE;
+            case DERIVED:
+                return ((YangJavaTypeTranslator) yangType).getJavaQualifiedInfo().getPkgInfo()+"."+((YangJavaTypeTranslator) yangType).getJavaQualifiedInfo().getClassInfo();
+            case UNION:
+                return ((YangJavaTypeTranslator) yangType).getJavaQualifiedInfo().getPkgInfo()+"."+((YangJavaTypeTranslator) yangType).getJavaQualifiedInfo().getClassInfo();
+            case LEAFREF:
+                YangType refType = getReferredTypeFromLeafref(yangType);
+                if (refType == null) {
+                    return OBJECT_STRING;
+                }
+                return getJNCDataType(getReferredTypeFromLeafref(yangType));
+            default:
+                throw new TranslatorException("given data type is not supported. " +
+                        yangType.getDataTypeName() + " in " +
+                        yangType.getLineNumber() + " at " +
+                        yangType.getCharPosition()
+                        + " in " + yangType.getFileName());
+        }
+    }
     /**
      * Returns java type.
      *

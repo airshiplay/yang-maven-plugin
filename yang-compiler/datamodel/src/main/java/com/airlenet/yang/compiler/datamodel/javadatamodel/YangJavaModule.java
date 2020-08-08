@@ -18,6 +18,7 @@ package com.airlenet.yang.compiler.datamodel.javadatamodel;
 
 import com.airlenet.yang.compiler.datamodel.YangModule;
 import com.airlenet.yang.compiler.datamodel.YangNode;
+import com.tailf.jnc.YangElement;
 
 import java.util.List;
 
@@ -61,5 +62,9 @@ public class YangJavaModule
     @Override
     public List<YangNode> getNotificationNodes() {
         return unmodifiableList(notificationNodes);
+    }
+
+    public String getPrefixClassName(){
+        return YangElement.normalize(getPrefix()+"Prefix");
     }
 }

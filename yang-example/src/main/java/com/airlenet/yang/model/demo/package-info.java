@@ -1,5 +1,5 @@
 /**
- * This class hierarchy was generated from the Yang module demo
+ * This class hierarchy was generated from the Yang module Demo
  * by the <a target="_top" href="https://github.com/tail-f-systems/JNC">JNC</a> plugin of <a target="_top" href="http://code.google.com/p/pyang/">pyang</a>.
  * The generated classes may be used to manipulate pieces of configuration data
  * with NETCONF operations such as edit-config, delete-config and lock. These

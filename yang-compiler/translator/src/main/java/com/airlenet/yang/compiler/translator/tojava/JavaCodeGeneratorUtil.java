@@ -121,10 +121,10 @@ public final class JavaCodeGeneratorUtil {
             if (curTraversal != PARENT) {
                 if (!(codeGenNode instanceof JavaCodeGenerator)) {
                     throw new TranslatorException("Unsupported node to generate code " +
-                                                          codeGenNode.getName() + " in " +
-                                                          codeGenNode.getLineNumber() + " at " +
-                                                          codeGenNode.getCharPosition() + " in " +
-                                                          codeGenNode.getFileName());
+                            codeGenNode.getName() + " in " +
+                            codeGenNode.getLineNumber() + " at " +
+                            codeGenNode.getCharPosition() + " in " +
+                            codeGenNode.getFileName());
                 }
                 try {
                     if (!(codeGenNode instanceof YangUses) ||
@@ -141,7 +141,7 @@ public final class JavaCodeGeneratorUtil {
                                 //to know in generated code what was the enum
                                 // name generated for current notification
                                 String enumName = JavaIdentifierSyntax.getEnumJavaAttribute(codeGenNode.getName()
-                                                                               .toUpperCase());
+                                        .toUpperCase());
                                 ((RpcNotificationContainer) codeGenNode.getParent())
                                         .addToNotificationEnumMap(enumName, codeGenNode);
                             }
