@@ -76,8 +76,13 @@ public class JavaClass {
         if (this.imports != null) {
             Collections.sort(this.imports);
             int size = this.imports.size();
+            String preImport = null;
             for (int i = 0; i < size; i++) {
                 String im = imports.get(i);
+                if(preImport !=null && preImport.equals(im)){
+                    continue;
+                }
+                preImport =im;
                 builder.append("import ");
                 builder.append(im);
                 builder.append(";\n");
@@ -92,8 +97,8 @@ public class JavaClass {
         }
         builder.append("\n");
         builder.append("/**\n");
-        builder.append("*"+description+"\n");
-        builder.append("**/\n");
+        builder.append(" * "+description+"\n");
+        builder.append(" */\n");
         builder.append("public class ").append(name)
             ;
         if(extend!=null){

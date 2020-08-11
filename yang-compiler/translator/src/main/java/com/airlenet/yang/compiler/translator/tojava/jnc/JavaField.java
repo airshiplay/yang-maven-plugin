@@ -5,10 +5,12 @@ import java.util.List;
 
 public class JavaField {
     private String[] modifiers;
+    private String type;
     private String name;
     private String value;
     private List<String> imports;
-    public JavaField(String name, String value, String... modifiers) {
+    public JavaField(String type,String name, String value, String... modifiers) {
+        this.type = type;
         this.name = name;
         this.value = value;
         this.modifiers = modifiers;
@@ -28,11 +30,13 @@ public class JavaField {
             }
         }
 
+        builder.append(type);
+        builder.append(" ");
         builder.append(name);
 
-        builder.append(" = \"");
+        builder.append(" = ");
         builder.append(value);
-        builder.append("\";");
+        builder.append(";");
 
         return builder.toString();
     }

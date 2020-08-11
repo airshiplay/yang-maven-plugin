@@ -121,9 +121,9 @@ public class YangJavaUnionTranslator
     public void generateCodeEntry(YangPluginConfig yangPlugin) throws TranslatorException {
         updateJNCPackageInfo(this,yangPlugin);
 //        try {
-            if (getReferredSchema() != null) {
-                throw new InvalidNodeForTranslatorException();
-            }
+//            if (getReferredSchema() != null) {
+//                throw new InvalidNodeForTranslatorException();
+//            }
             this.getTypeList().forEach(yangType -> {
                 ((YangJavaTypeTranslator) yangType).updateJavaQualifiedInfo(yangPlugin.getConflictResolver());
             });
@@ -151,13 +151,17 @@ public class YangJavaUnionTranslator
 
         String absoluteDirPath = getAbsolutePackagePath(fileInfo.getBaseCodeGenPath(),
                 fileInfo.getPackageFilePath());
-//        YangJavaModule yangJavaModule = (YangJavaModule)this.getRoot();
+//        YangJavaModule yangJavaModule = (YangJavaModule)this.getYangJavaModule();
         if(this.getParent()!=null && this.getParent() instanceof YangJavaTypeDef){
             return;
         }
 
-        JavaClass javaClass = new JavaClass(classname, fileInfo.getPackage(), fileInfo.getYangFileName()+";"+fileInfo.getLineNumber());
-        javaClass.setExtend(YangUnion.class.getName());
+        JavaClass javaClass = new JavaClass(classname, fileInfo.getPackage(), "JavaUnion;"+fileInfo.getYangFileName()+";"+fileInfo.getLineNumber());
+        if(this.getReferredSchema()!=null){
+            javaClass.setExtend(YangUnion.class.getName());
+        }else {
+            javaClass.setExtend(YangUnion.class.getName());
+        }
 
         javaClass.addMethod(new JavaMethod(classname,"")
                 .setModifiers("public")

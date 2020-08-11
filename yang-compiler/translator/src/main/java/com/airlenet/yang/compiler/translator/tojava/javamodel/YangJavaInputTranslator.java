@@ -28,6 +28,7 @@ import java.io.IOException;
 
 import static com.airlenet.yang.compiler.translator.tojava.GeneratedJavaFileType.GENERATE_INTERFACE_WITH_BUILDER;
 import static com.airlenet.yang.compiler.translator.tojava.YangJavaModelUtils.generateCodeOfAugmentableNode;
+import static com.airlenet.yang.compiler.translator.tojava.YangJavaModelUtils.updateJNCPackageInfo;
 
 /**
  * Represents input information extended to support java code generation.
@@ -109,16 +110,17 @@ public class YangJavaInputTranslator
      */
     @Override
     public void generateCodeEntry(YangPluginConfig yangPlugin) throws TranslatorException {
-        try {
-            generateCodeOfAugmentableNode(this, yangPlugin);
-        } catch (IOException e) {
-            throw new TranslatorException(
-                    "Failed to prepare generate code entry for input node " +
-                            getName() + " in " +
-                            getLineNumber() + " at " +
-                            getCharPosition()
-                            + " in " + getFileName() + " " + e.getLocalizedMessage());
-        }
+        updateJNCPackageInfo(this,yangPlugin);
+//        try {
+//            generateCodeOfAugmentableNode(this, yangPlugin);
+//        } catch (IOException e) {
+//            throw new TranslatorException(
+//                    "Failed to prepare generate code entry for input node " +
+//                            getName() + " in " +
+//                            getLineNumber() + " at " +
+//                            getCharPosition()
+//                            + " in " + getFileName() + " " + e.getLocalizedMessage());
+//        }
     }
 
     /**
@@ -128,14 +130,14 @@ public class YangJavaInputTranslator
      */
     @Override
     public void generateCodeExit() throws TranslatorException {
-        try {
-            getTempJavaCodeFragmentFiles().generateJavaFile(GENERATE_INTERFACE_WITH_BUILDER, this);
-        } catch (IOException e) {
-            throw new TranslatorException("Failed to generate code for input node " +
-                                                  getName() + " in " +
-                                                  getLineNumber() + " at " +
-                                                  getCharPosition()
-                                                  + " in " + getFileName() + " " + e.getLocalizedMessage());
-        }
+//        try {
+//            getTempJavaCodeFragmentFiles().generateJavaFile(GENERATE_INTERFACE_WITH_BUILDER, this);
+//        } catch (IOException e) {
+//            throw new TranslatorException("Failed to generate code for input node " +
+//                                                  getName() + " in " +
+//                                                  getLineNumber() + " at " +
+//                                                  getCharPosition()
+//                                                  + " in " + getFileName() + " " + e.getLocalizedMessage());
+//        }
     }
 }

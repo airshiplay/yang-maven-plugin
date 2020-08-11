@@ -18,28 +18,21 @@ package com.airlenet.yang.compiler.translator.tojava.javamodel;
 import com.airlenet.yang.compiler.datamodel.YangLeaf;
 import com.airlenet.yang.compiler.datamodel.YangLeafList;
 import com.airlenet.yang.compiler.datamodel.YangNode;
-import com.airlenet.yang.compiler.datamodel.javadatamodel.YangJavaContainer;
-import com.airlenet.yang.compiler.datamodel.javadatamodel.YangJavaList;
-import com.airlenet.yang.compiler.datamodel.javadatamodel.YangJavaModule;
-import com.airlenet.yang.compiler.datamodel.javadatamodel.YangJavaUnion;
+import com.airlenet.yang.compiler.datamodel.javadatamodel.*;
 import com.airlenet.yang.compiler.datamodel.utils.builtindatatype.YangDataTypes;
 import com.airlenet.yang.compiler.translator.exception.TranslatorException;
 import com.airlenet.yang.compiler.translator.tojava.JavaCodeGenerator;
 import com.airlenet.yang.compiler.translator.tojava.JavaCodeGeneratorInfo;
 import com.airlenet.yang.compiler.translator.tojava.JavaFileInfoTranslator;
 import com.airlenet.yang.compiler.translator.tojava.TempJavaCodeFragmentFiles;
+import com.airlenet.yang.compiler.translator.tojava.jnc.JNCCodeUtil;
 import com.airlenet.yang.compiler.translator.tojava.jnc.JavaClass;
 import com.airlenet.yang.compiler.translator.tojava.jnc.JavaMethod;
 import com.airlenet.yang.compiler.utils.io.YangPluginConfig;
-import com.tailf.jnc.ElementLeafListValueIterator;
-import com.tailf.jnc.JNCException;
 import com.tailf.jnc.YangElement;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static com.airlenet.yang.compiler.translator.tojava.GeneratedJavaFileType.GENERATE_INTERFACE_WITH_BUILDER;
 import static com.airlenet.yang.compiler.translator.tojava.YangJavaModelUtils.*;
@@ -130,18 +123,40 @@ public class YangJavaListTranslator
 
         List<YangLeaf> children = this.getListOfLeaf();
         for (YangLeaf yangLeaf : children) {
-            if (yangLeaf.getDataType().getDataType() == YangDataTypes.DERIVED || yangLeaf.getDataType().getDataType() == YangDataTypes.UNION) {
-                ((YangJavaLeafTranslator) yangLeaf).updateJavaQualifiedInfo();
+            if (yangLeaf.getDataType().getDataType() == YangDataTypes.DERIVED || yangLeaf.getDataType().getDataType() == YangDataTypes.UNION || yangLeaf.getDataType().getDataType() == YangDataTypes.ENUMERATION) {
                 ((YangJavaTypeTranslator) yangLeaf.getDataType()).updateJavaQualifiedInfo(yangPlugin.getConflictResolver());
+                ((YangJavaLeafTranslator) yangLeaf).updateJavaQualifiedInfo();
             }
         }
         for (YangLeafList yangLeaf : this.getListOfLeafList()) {
-            if (yangLeaf.getDataType().getDataType() == YangDataTypes.DERIVED || yangLeaf.getDataType().getDataType() == YangDataTypes.UNION) {
-                ((YangJavaLeafListTranslator) yangLeaf).updateJavaQualifiedInfo();
+            if (yangLeaf.getDataType().getDataType() == YangDataTypes.DERIVED || yangLeaf.getDataType().getDataType() == YangDataTypes.UNION || yangLeaf.getDataType().getDataType() == YangDataTypes.ENUMERATION) {
                 ((YangJavaTypeTranslator) yangLeaf.getDataType()).updateJavaQualifiedInfo(yangPlugin.getConflictResolver());
+                ((YangJavaLeafListTranslator) yangLeaf).updateJavaQualifiedInfo();
             }
         }
 
+        YangNode child = getChild();
+        while (child != null) {
+
+            if (child instanceof YangJavaChoice) {
+                YangNode childChild = child.getChild();
+                while (childChild != null) {
+                    List<YangLeaf> listOfLeaf = ((YangJavaCase) childChild).getListOfLeaf();
+                    for (YangLeaf yangLeaf : listOfLeaf) {
+                        ((YangJavaLeafTranslator) yangLeaf).updateJavaQualifiedInfo();
+                        ((YangJavaTypeTranslator) yangLeaf.getDataType()).updateJavaQualifiedInfo(yangPlugin.getConflictResolver());
+                    }
+                    childChild = childChild.getNextSibling();
+                }
+            }
+            child = child.getNextSibling();
+        }
+//        while (child!=null){
+//            if (child.getDataType().getDataType() == YangDataTypes.DERIVED || child.getDataType().getDataType() == YangDataTypes.UNION) {
+//                ((YangJavaLeafListTranslator) child).updateJavaQualifiedInfo();
+//                ((YangJavaTypeTranslator) child.getDataType()).updateJavaQualifiedInfo(yangPlugin.getConflictResolver());
+//            }
+//        }
 //        try {
 //            generateCodeAndUpdateInParent(this, yangPlugin, true);
 //        } catch (IOException e) {
@@ -164,46 +179,53 @@ public class YangJavaListTranslator
 
         String classname = YangElement.normalize(this.getName());
         JavaFileInfoTranslator fileInfo = this.getJavaFileInfo();
-        JavaClass javaClass = new JavaClass(classname, fileInfo.getPackage(), "");
+        JavaClass javaClass = new JavaClass(classname, fileInfo.getPackage(), "YangJavaList:" + this.getJavaFileInfo().getYangFileName() + ":" + getJavaFileInfo().getLineNumber());
         String absoluteDirPath = getAbsolutePackagePath(fileInfo.getBaseCodeGenPath(),
                 fileInfo.getPackageFilePath());
-        YangJavaModule yangJavaModule = (YangJavaModule) this.getRoot();
+        YangJavaModule yangJavaModule = (YangJavaModule) this.getYangJavaModule();
         javaClass.setExtend("com.tailf.jnc.YangElement");
+
+
+        //// empty constructor
         javaClass.addMethod(new JavaMethod(javaClass.getName(), "").setModifiers("public").addDependency(yangJavaModule.getJavaPackage() + "." + yangJavaModule.getPrefixClassName())
                 .addLine("super(" + yangJavaModule.getPrefixClassName() + ".NAMESPACE, \"" + this.getName() + "\");"));
 
         List<YangLeaf> listOfLeaf = this.getListOfLeaf();
 
-        List<YangLeaf> keys = new ArrayList<>();
-        for (String key : this.getKeyList()) {
-            for (YangLeaf yangLeaf : listOfLeaf) {
-                if (key.equals(yangLeaf.getName())) {
-                    keys.add(yangLeaf);
-                }
-            }
-        }
+        List<YangLeaf> keys = getListOfKeyLeaf();
+
 ///constructor
-
-        JavaMethod constructor = new JavaMethod(javaClass.getName(), "").addDependency("com.tailf.jnc.Leaf");
-        constructor.addLine("super(" + yangJavaModule.getPrefixClassName() + ".NAMESPACE, \"" + this.getName() + "\");");
-        for (YangLeaf yangLeaf : keys) {
-            constructor.addParameter(AttributesJavaDataType.getJNCDataType(yangLeaf.getDataType()), YangElement.camelize(yangLeaf.getName() + "Value"));
-            constructor.addLine("Leaf " + yangLeaf.getName() + " = new Leaf(" + yangJavaModule.getPrefixClassName() + ".NAMESPACE, \"" + yangLeaf.getName() + "\");");
-            constructor.addLine(yangLeaf.getName() + ".setValue(" + yangLeaf.getName() + "Value);");
-            constructor.addLine("insertChild(" + yangLeaf.getName() + ", childrenNames());");
-        }
-        constructor.setModifiers("public").setExceptions("JNCException").addDependency(yangJavaModule.getJavaPackage() + "." + yangJavaModule.getPrefixClassName());
-        javaClass.addMethod(constructor);
-
         if (!keys.isEmpty()) {
+
+            JavaMethod constructor = new JavaMethod(javaClass.getName(), "").addDependency("com.tailf.jnc.Leaf");
+            constructor.addLine("super(" + yangJavaModule.getPrefixClassName() + ".NAMESPACE, \"" + this.getName() + "\");");
+            for (YangLeaf yangLeaf : keys) {
+                YangLeaf dataTypeYangLeaf = yangLeaf;
+//            while (dataTypeYangLeaf.getReferredSchema()!=null){
+//                dataTypeYangLeaf =dataTypeYangLeaf.getReferredSchema();
+//            }
+                String jncDataType = AttributesJavaDataType.getJNCDataType(dataTypeYangLeaf.getDataType());
+                constructor.addParameter(jncDataType, YangElement.camelize(yangLeaf.getName() + "Value"));
+                constructor.addLine("Leaf " + YangElement.camelize(yangLeaf.getName()) + " = new Leaf(" + yangJavaModule.getPrefixClassName() + ".NAMESPACE, \"" + yangLeaf.getName() + "\");");
+                constructor.addLine(YangElement.camelize(yangLeaf.getName()) + ".setValue(" + YangElement.camelize(yangLeaf.getName()+ "Value") +");");
+                constructor.addLine("insertChild(" + YangElement.camelize(yangLeaf.getName()) + ", childrenNames());");
+                constructor.addLine("\n");
+            }
+            constructor.setModifiers("public").setExceptions("JNCException").addDependency(yangJavaModule.getJavaPackage() + "." + yangJavaModule.getPrefixClassName());
+            javaClass.addMethod(constructor);
+
 
             constructor = new JavaMethod(javaClass.getName(), "").addDependency("com.tailf.jnc.Leaf");
             constructor.addLine("super(" + yangJavaModule.getPrefixClassName() + ".NAMESPACE, \"" + this.getName() + "\");");
             for (YangLeaf yangLeaf : keys) {
                 constructor.addParameter("String", YangElement.camelize(yangLeaf.getName() + "Value"));
-                constructor.addLine("Leaf " + yangLeaf.getName() + " = new Leaf(" + yangJavaModule.getPrefixClassName() + ".NAMESPACE, \"" + yangLeaf.getName() + "\");");
-                constructor.addLine(yangLeaf.getName() + ".setValue(new " + AttributesJavaDataType.getJNCDataType(yangLeaf.getDataType()) + "(" + yangLeaf.getName() + "Value));");
-                constructor.addLine("insertChild(" + yangLeaf.getName() + ", childrenNames());");
+                constructor.addLine("Leaf " + YangElement.camelize(yangLeaf.getName()) + " = new Leaf(" + yangJavaModule.getPrefixClassName() + ".NAMESPACE, \"" + yangLeaf.getName() + "\");");
+                YangLeaf dataTypeYangLeaf = yangLeaf;
+//                while (dataTypeYangLeaf.getReferredSchema()!=null){
+//                    dataTypeYangLeaf =dataTypeYangLeaf.getReferredSchema();
+//                }
+                constructor.addLine(YangElement.camelize(yangLeaf.getName()) + ".setValue(new " + AttributesJavaDataType.getJNCDataType(dataTypeYangLeaf.getDataType()) + "(" + YangElement.camelize(yangLeaf.getName()+"Value") + "));");
+                constructor.addLine("insertChild(" + YangElement.camelize(yangLeaf.getName()) + ", childrenNames());");
             }
             constructor.setModifiers("public").setExceptions("JNCException").addDependency(yangJavaModule.getJavaPackage() + "." + yangJavaModule.getPrefixClassName());
             javaClass.addMethod(constructor);
@@ -212,308 +234,48 @@ public class YangJavaListTranslator
 
 
 /////keyNames
-        JavaMethod keyNames = new JavaMethod("keyNames", "String[]");
-        keyNames.setModifiers("public");
-        if (keys.isEmpty()) {
-            keyNames.addLine("return null;");
-        } else {
-            keyNames.addLine("return new String[]{");
-
-            for (YangLeaf child : keys) {
-                keyNames.addLine("\t\t\"" + child.getName() + "\",");
-            }
-
-            keyNames.addLine("};");
-        }
-
-
-        javaClass.addMethod(keyNames);
+        JNCCodeUtil.keyNamesMethod(javaClass, getListOfKeyLeaf());
 
 ////childrenNames
-        JavaMethod childrenNames = new JavaMethod("childrenNames", "String[]");
-        childrenNames.setModifiers("public")
-                .addLine("return new String[]{");
-
-        for (YangLeaf child : listOfLeaf) {
-            childrenNames.addLine("\t\t\"" + child.getName() + "\",");
-        }
-        for (YangLeafList child : this.getListOfLeafList()) {
-            childrenNames.addLine("\t\t\"" + child.getName() + "\",");
-        }
-        {
-            YangNode child = this.getChild();
-            while (child != null) {
-                if (child instanceof YangJavaList || child instanceof YangJavaContainer) {
-                    childrenNames.addLine("\t\t\"" + child.getName() + "\",");
-                }
-                child = child.getNextSibling();
-            }
-        }
-
-        childrenNames.addLine("};");
-        javaClass.addMethod(childrenNames);
+        JNCCodeUtil.childrenNamesMethod(javaClass, getListOfLeaf(), getListOfLeafList(), getChild());
 
 ////clone
-        JavaMethod clone = new JavaMethod("clone", classname);
-        clone.addDependency("com.tailf.jnc.JNCException");
-        clone.setModifiers("public")
-                .addLine(classname + " copy;").addLine("try {");
-        if (keys.isEmpty()) {
-            clone.addLine("\tcopy = new " + classname + "();");
-        } else {
-            String param = keys.stream().map(yangLeaf -> "get" + YangElement.normalize(yangLeaf.getName()) + "Value().toString()").collect(Collectors.joining(","));
-            clone.addLine("\tcopy = new " + classname + "(" + param + ");");
-        }
-        clone.addLine("} catch (JNCException e) {").addLine("    copy = null;").addLine("}").addLine(" return (" + classname + ")cloneContent(copy);");
-        javaClass.addMethod(clone);
+        JNCCodeUtil.cloneMethod(javaClass, keys);
 
 ////cloneShallow
-        JavaMethod cloneShallow = new JavaMethod("cloneShallow", classname);
-        cloneShallow.addDependency("com.tailf.jnc.JNCException");
-        cloneShallow.setModifiers("public")
-                .addLine(classname + " copy;").addLine("try {");
-        if (keys.isEmpty()) {
-            cloneShallow.addLine("\tcopy = new " + classname + "();");
-        } else {
-            String param = keys.stream().map(yangLeaf -> "get" + YangElement.normalize(yangLeaf.getName()) + "Value().toString()").collect(Collectors.joining(","));
-            cloneShallow.addLine("\tcopy = new " + classname + "(" + param + ");");
-        }
-        cloneShallow.addLine("} catch (JNCException e) {").addLine("    copy = null;").addLine("}").addLine(" return (" + classname + ")cloneShallowContent(copy);");
-        javaClass.addMethod(cloneShallow);
+        JNCCodeUtil.cloneShallowMethod(javaClass, keys);
 
         ////
 
         for (YangLeaf yangLeaf : listOfLeaf) {
-
-            JavaMethod getMethod = new JavaMethod("get" + YangElement.normalize(yangLeaf.getName()) + "Value", AttributesJavaDataType.getJNCDataType(yangLeaf.getDataType())).setModifiers("public");
-            getMethod.setExceptions("JNCException");
-            getMethod.addLine("return (" + AttributesJavaDataType.getJNCDataType(yangLeaf.getDataType()) + ")" + "getValue(\"" + yangLeaf.getName() + "\");");
-            javaClass.addMethod(getMethod);
-
-
-            JavaMethod setMethod = new JavaMethod("set" + YangElement.normalize(yangLeaf.getName()) + "Value", "void").setModifiers("public");
-            setMethod.setExceptions("JNCException");
-            setMethod.addParameter(AttributesJavaDataType.getJNCDataType(yangLeaf.getDataType()), YangElement.camelize(yangLeaf.getName() + "Value"));
-
-
-            setMethod.addLine("setLeafValue(" + yangJavaModule.getPrefixClassName() + ".NAMESPACE,");
-            setMethod.addLine("\t\"" + yangLeaf.getName() + "\",");
-            setMethod.addLine("\t" + YangElement.camelize(yangLeaf.getName() + "Value") + ",");
-            setMethod.addLine("\tchildrenNames());");
-            javaClass.addMethod(setMethod);
-
-            setMethod = new JavaMethod("set" + YangElement.normalize(yangLeaf.getName()) + "Value", "void").setModifiers("public");
-            setMethod.setExceptions("JNCException");
-            setMethod.addParameter("String", YangElement.camelize(yangLeaf.getName() + "Value"));
-
-            setMethod.addLine("set" + YangElement.normalize(yangLeaf.getName()) + "Value" + "(new " + AttributesJavaDataType.getJNCDataType(yangLeaf.getDataType()) + "(" + YangElement.camelize(yangLeaf.getName() + "Value") + "));");
-            javaClass.addMethod(setMethod);
-
-            JavaMethod addMethod = new JavaMethod("set" + YangElement.normalize(yangLeaf.getName()), "void").setModifiers("public");
-            addMethod.setExceptions("JNCException");
-            addMethod.addLine("setLeafValue(" + yangJavaModule.getPrefixClassName() + ".NAMESPACE,");
-            addMethod.addLine("\t\"" + yangLeaf.getName() + "\",");
-            addMethod.addLine("\tnull,");
-            addMethod.addLine("\tchildrenNames());");
-
-            javaClass.addMethod(addMethod);
-
-            JavaMethod unsetMethod = new JavaMethod("unset" + YangElement.normalize(yangLeaf.getName()) + "Value", "void").setModifiers("public");
-            unsetMethod.setExceptions("JNCException");
-            unsetMethod.addLine("delete" + "(\"" + yangLeaf.getName() + "\");");
-            javaClass.addMethod(unsetMethod);
-
-            Arrays.asList("Create", "Replace", "Merge", "Delete", "Remove").forEach(markType -> {
-                JavaMethod markMethod = new JavaMethod("mark" + YangElement.normalize(yangLeaf.getName()) + markType, "void").setModifiers("public");
-                markMethod.setExceptions("JNCException");
-                markMethod.addLine("markLeaf" + markType + "(\"" + yangLeaf.getName() + "\");");
-                javaClass.addMethod(markMethod);
-
-            });
-
+            JNCCodeUtil.yangLeafMethod(javaClass, yangJavaModule, yangLeaf);
         }
         for (YangLeafList yangLeafList : this.getListOfLeafList()) {
-
-            JavaMethod iteratorMethod = new JavaMethod( YangElement.camelize(yangLeafList.getName()) + "Iterator", "ElementLeafListValueIterator").setModifiers("public");
-            iteratorMethod.addDependency(ElementLeafListValueIterator.class.getName());
-            iteratorMethod.addLine("return new ElementLeafListValueIterator(children, \"user-name\");");
-            javaClass.addMethod(iteratorMethod);
-
-//            JavaMethod getMethod = new JavaMethod("get"+YangElement.normalize(yangLeafList.getName())+"List", AttributesJavaDataType.getJNCDataType(yangLeafList.getDataType())).setModifiers("public");
-//            getMethod.setExceptions("JNCException");
-//            getMethod.addLine("return ("+AttributesJavaDataType.getJNCDataType(yangLeafList.getDataType())+")"+"getValue(\""+yangLeafList.getName()+"\");");
-//            javaClass.addMethod(getMethod);
-
-
-            JavaMethod setMethod = new JavaMethod("set" + YangElement.normalize(yangLeafList.getName()) + "Value", "void").setModifiers("public");
-            setMethod.setExceptions("JNCException");
-            setMethod.addParameter(AttributesJavaDataType.getJNCDataType(yangLeafList.getDataType()), YangElement.camelize(yangLeafList.getName() + "Value"));
-
-
-            setMethod.addLine("setLeafValue(" + yangJavaModule.getPrefixClassName() + ".NAMESPACE,");
-            setMethod.addLine("\t\"" + yangLeafList.getName() + "\",");
-            setMethod.addLine("\t" + YangElement.camelize(yangLeafList.getName() + "Value") + ",");
-            setMethod.addLine("\tchildrenNames());");
-            javaClass.addMethod(setMethod);
-
-            setMethod = new JavaMethod("set" + YangElement.normalize(yangLeafList.getName()) + "Value", "void").setModifiers("public");
-            setMethod.setExceptions("JNCException");
-            setMethod.addParameter("String", YangElement.camelize(yangLeafList.getName() + "Value"));
-
-            setMethod.addLine("set" + YangElement.normalize(yangLeafList.getName()) + "Value" + "(new " + AttributesJavaDataType.getJNCDataType(yangLeafList.getDataType()) + "(" + YangElement.camelize(yangLeafList.getName() + "Value") + "));");
-            javaClass.addMethod(setMethod);
-
-            JavaMethod addMethod = new JavaMethod("set" + YangElement.normalize(yangLeafList.getName()), "void").setModifiers("public");
-            addMethod.setExceptions("JNCException");
-            addMethod.addLine("setLeafValue(" + yangJavaModule.getPrefixClassName() + ".NAMESPACE,");
-            addMethod.addLine("\t\"" + yangLeafList.getName() + "\",");
-            addMethod.addLine("\tnull,");
-            addMethod.addLine("\tchildrenNames());");
-
-            javaClass.addMethod(addMethod);
-
-            /// delete方法
-//            JavaMethod unsetMethod = new JavaMethod("unset"+YangElement.normalize(yangLeafList.getName())+"Value", "void").setModifiers("public");
-//            unsetMethod.setExceptions("JNCException");
-//            unsetMethod.addLine("delete"+"(\""+yangLeafList.getName()+"\");");
-//            javaClass.addMethod(unsetMethod);
-
-            // TODO 修改支持Key
-            Arrays.asList("Create", "Replace", "Merge", "Delete", "Remove").forEach(markType -> {
-                JavaMethod markMethod = new JavaMethod("mark" + YangElement.normalize(yangLeafList.getName()) + markType, "void").setModifiers("public");
-                markMethod.setExceptions("JNCException");
-                markMethod.addLine("markLeaf" + markType + "(\"" + yangLeafList.getName() + "\");");
-                javaClass.addMethod(markMethod);
-
-            });
+            JNCCodeUtil.yangLeafListMethod(javaClass, yangJavaModule, yangLeafList);
         }
 
         {
             YangNode child = this.getChild();
             while (child != null) {
-                if (child instanceof YangJavaList) {
+                if (child instanceof YangJavaUnion || child instanceof YangJavaUses || child instanceof YangJavaGrouping || child instanceof YangJavaEnumeration) {
 
-                    YangJavaList yangJavaList = (YangJavaList) child;
-
-
-                    JavaMethod iteratorMethod = new JavaMethod(YangElement.camelize(child.getName()) + "Iterator", "ElementLeafListValueIterator").setModifiers("public");
-                    iteratorMethod.addDependency(ElementLeafListValueIterator.class.getName());
-                    iteratorMethod.addLine("return new ElementLeafListValueIterator(children, \"user-name\");");
-                    javaClass.addMethod(iteratorMethod);
-
-//            JavaMethod getMethod = new JavaMethod("get"+YangElement.normalize(yangLeafList.getName())+"List", AttributesJavaDataType.getJNCDataType(yangLeafList.getDataType())).setModifiers("public");
-//            getMethod.setExceptions("JNCException");
-//            getMethod.addLine("return ("+AttributesJavaDataType.getJNCDataType(yangLeafList.getDataType())+")"+"getValue(\""+yangLeafList.getName()+"\");");
-//            javaClass.addMethod(getMethod);
-
-                    {
-
-                        JavaMethod addMethod = new JavaMethod("add" + YangElement.normalize(child.getName()), YangElement.normalize(child.getName())).setModifiers("public");
-                        addMethod.addDependency(child.getJavaPackage() + "." + YangElement.normalize(child.getName()));
-                        addMethod.setExceptions("JNCException");
-                        addMethod.addLine(YangElement.normalize(child.getName()) + " " + YangElement.camelize(child.getName()) + " = new " + YangElement.normalize(child.getName()) + "();");
-                        addMethod.addLine("insertChild(" + YangElement.camelize(child.getName()) + ", childrenNames());");
-                        addMethod.addLine("return " + YangElement.camelize(child.getName()) + ";");
-
-                        javaClass.addMethod(addMethod);
+                } else if (child instanceof YangJavaList) {
+//                JNCCodeUtil.yangNodeMethond(javaClass, child);
+                    JNCCodeUtil.yangJavaListMethod(javaClass, (YangJavaList) child);
+                } else if (child instanceof YangJavaContainer) {
+                    JNCCodeUtil.yangNodeMethond(javaClass, child);
+                    JNCCodeUtil.yangJavaContainerMethod(javaClass, (YangJavaContainer) child);
+                } else if (child instanceof YangJavaChoice) {
+                    YangNode childChild = child.getChild();
+                    while (childChild != null) {
+                        List<YangLeaf> listOfLeafChild = ((YangJavaCase) childChild).getListOfLeaf();
+                        for (YangLeaf yangLeaf : listOfLeafChild) {
+                            JNCCodeUtil.yangLeafMethod(javaClass, yangJavaModule, yangLeaf);
+                        }
+                        childChild = childChild.getNextSibling();
                     }
-
-                    {
-
-                        JavaMethod addMethod = new JavaMethod("add" + YangElement.normalize(child.getName()), YangElement.normalize(child.getName())).setModifiers("public");
-                        addMethod.addParameter(YangElement.normalize(child.getName()), YangElement.camelize(child.getName()));
-                        addMethod.addDependency(child.getJavaPackage() + "." + YangElement.normalize(child.getName()));
-                        addMethod.setExceptions("JNCException");
-                        addMethod.addLine("insertChild(" + YangElement.camelize(child.getName()) + ", childrenNames());");
-                        addMethod.addLine("return " + YangElement.camelize(child.getName()) + ";");
-
-                        javaClass.addMethod(addMethod);
-                    }
-                    if (!yangJavaList.getListOfKeyLeaf().isEmpty()) {
-
-
-                        JavaMethod addMethod = new JavaMethod("add" + YangElement.normalize(child.getName()), YangElement.normalize(child.getName())).setModifiers("public");
-
-                        List<String> parameterValue = new ArrayList<>();
-                        for (YangLeaf keyNodeLeaf : yangJavaList.getListOfKeyLeaf()) {
-                            parameterValue.add(YangElement.camelize(keyNodeLeaf.getName()) + "Value");
-                            addMethod.addParameter(AttributesJavaDataType.getJNCDataType(keyNodeLeaf.getDataType()), YangElement.camelize(keyNodeLeaf.getName()) + "Value");
-                        }
-
-                        addMethod.addDependency(child.getJavaPackage() + "." + YangElement.normalize(child.getName()));
-                        addMethod.setExceptions("JNCException");
-                        addMethod.addLine(YangElement.normalize(child.getName()) + " " + YangElement.camelize(child.getName()) + " = new " + YangElement.normalize(child.getName()) + "(" + parameterValue.stream().collect(Collectors.joining(",")) + ");");
-                        addMethod.addLine("return add" + YangElement.normalize(child.getName()) + "(" + YangElement.camelize(child.getName()) + ");");
-
-                        javaClass.addMethod(addMethod);
-
-                        ///////////////////////////
-                        addMethod = new JavaMethod("add" + YangElement.normalize(child.getName()), YangElement.normalize(child.getName())).setModifiers("public");
-
-                        parameterValue = new ArrayList<>();
-                        for (YangLeaf keyNodeLeaf : yangJavaList.getListOfKeyLeaf()) {
-                            parameterValue.add(YangElement.camelize(keyNodeLeaf.getName()) + "Value");
-                            addMethod.addParameter("String", YangElement.camelize(keyNodeLeaf.getName()) + "Value");
-                        }
-
-                        addMethod.addDependency(child.getJavaPackage() + "." + YangElement.normalize(child.getName()));
-                        addMethod.setExceptions("JNCException");
-                        addMethod.addLine(YangElement.normalize(child.getName()) + " " + YangElement.camelize(child.getName()) + " = new " + YangElement.normalize(child.getName()) + "(" + parameterValue.stream().collect(Collectors.joining(",")) + ");");
-                        addMethod.addLine("return add" + YangElement.normalize(child.getName()) + "(" + YangElement.camelize(child.getName()) + ");");
-
-                        javaClass.addMethod(addMethod);
-
-                        //   增加delete方法1
-
-
-                        JavaMethod deleteMethod = new JavaMethod("delete" + YangElement.normalize(child.getName()), "void").setModifiers("public");
-
-                        parameterValue = new ArrayList<>();
-                        for (YangLeaf keyNodeLeaf : yangJavaList.getListOfKeyLeaf()) {
-                            parameterValue.add(YangElement.camelize(keyNodeLeaf.getName()) + "Value");
-                            deleteMethod.addParameter(AttributesJavaDataType.getJNCDataType(keyNodeLeaf.getDataType()), YangElement.camelize(keyNodeLeaf.getName()) + "Value");
-                        }
-
-                        deleteMethod.addDependency(child.getJavaPackage() + "." + YangElement.normalize(child.getName()));
-                        deleteMethod.setExceptions("JNCException");
-
-                        deleteMethod.addLine("String path = \"rule" + yangJavaList.getListOfKeyLeaf().stream().map(keyLeaf -> "[" + keyLeaf.getName() + "='\" + " + YangElement.camelize(keyLeaf.getName()) + "Value + \"']").collect(Collectors.joining("")) + "\";");
-                        deleteMethod.addLine("delete(path);");
-
-                        javaClass.addMethod(deleteMethod);
-
-                        // 增加delete方法2
-                        deleteMethod = new JavaMethod("delete" + YangElement.normalize(child.getName()), "void").setModifiers("public");
-
-                        parameterValue = new ArrayList<>();
-                        for (YangLeaf keyNodeLeaf : yangJavaList.getListOfKeyLeaf()) {
-                            parameterValue.add(YangElement.camelize(keyNodeLeaf.getName()) + "Value");
-                            deleteMethod.addParameter("String", YangElement.camelize(keyNodeLeaf.getName()) + "Value");
-                        }
-
-                        deleteMethod.addDependency(child.getJavaPackage() + "." + YangElement.normalize(child.getName()));
-                        deleteMethod.setExceptions("JNCException");
-
-                        deleteMethod.addLine("String path = \"rule" + yangJavaList.getListOfKeyLeaf().stream().map(keyLeaf -> "[" + keyLeaf.getName() + "='\" + " + YangElement.camelize(keyLeaf.getName()) + "Value + \"']").collect(Collectors.joining("")) + "\";");
-                        deleteMethod.addLine("delete(path);");
-
-                        javaClass.addMethod(deleteMethod);
-
-
-                    }
-
-
-//
-//                    final YangNode fchild =child;
-//                    Arrays.asList("Create", "Replace", "Merge", "Delete", "Remove").forEach(markType -> {
-//                        JavaMethod markMethod = new JavaMethod("mark" + YangElement.normalize(fchild.getName()) + markType, "void").setModifiers("public");
-//                        markMethod.setExceptions("JNCException");
-//                        markMethod.addLine("markLeaf" + markType + "(\"" + fchild.getName() + "\");");
-//                        javaClass.addMethod(markMethod);
-//
-//                    });
-
-
+                } else {
+                    JNCCodeUtil.yangNodeMethond(javaClass, child);
                 }
                 child = child.getNextSibling();
             }

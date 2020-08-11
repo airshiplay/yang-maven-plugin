@@ -26,17 +26,16 @@ import com.airlenet.yang.compiler.datamodel.YangNode;
 import com.airlenet.yang.compiler.datamodel.YangType;
 import com.airlenet.yang.compiler.datamodel.YangTypeDef;
 import com.airlenet.yang.compiler.datamodel.YangUnion;
+import com.airlenet.yang.compiler.datamodel.javadatamodel.YangJavaIdentity;
 import com.airlenet.yang.compiler.datamodel.utils.builtindatatype.YangDataTypes;
 import com.airlenet.yang.compiler.translator.exception.TranslatorException;
 import com.airlenet.yang.compiler.translator.tojava.JavaCodeGeneratorInfo;
 import com.airlenet.yang.compiler.translator.tojava.JavaFileInfoContainer;
 import com.airlenet.yang.compiler.translator.tojava.JavaFileInfoTranslator;
 import com.airlenet.yang.compiler.utils.io.YangToJavaNamingConflictUtil;
-import com.tailf.jnc.YangString;
-import com.tailf.jnc.YangUInt16;
-import com.tailf.jnc.YangUInt32;
-import com.tailf.jnc.YangUInt8;
+import com.tailf.jnc.*;
 
+import java.math.BigInteger;
 import java.util.Stack;
 
 import static com.airlenet.yang.compiler.translator.tojava.YangJavaModelUtils.getCurNodePackage;
@@ -84,13 +83,13 @@ public final class AttributesJavaDataType {
 
         switch (type) {
             case INT8:
-                return BYTE;
+                return Byte.class.getName();
             case INT16:
-                return SHORT;
+                return Short.class.getName();
             case INT32:
-                return INT;
+                return Integer.class.getName();
             case INT64:
-                return LONG;
+                return Long.class.getName();
             case UINT8:
                 return YangUInt8.class.getName();
             case UINT16:
@@ -98,29 +97,45 @@ public final class AttributesJavaDataType {
             case UINT32:
                 return YangUInt32.class.getName();
             case UINT64:
-                return BIG_INTEGER;
-            case BITS:
-                return BIT_SET;
+                return BigInteger.class.getName();
+
             case BINARY:
                 return BYTE + SQUARE_BRACKETS;
             case DECIMAL64:
-                return BIG_DECIMAL;
+                return BigInteger.class.getName();
             case STRING:
                 return YangString.class.getName();
             case BOOLEAN:
-                return BOOLEAN_DATA_TYPE;
+                return YangBoolean.class.getName();
+            case EMPTY:
+                return YangEmpty.class.getName();
             case INSTANCE_IDENTIFIER:
                 return STRING_DATA_TYPE;
+            case BITS:
+                return YangBits.class.getName();
+            case ENUMERATION:
             case DERIVED:
-                return ((YangJavaTypeTranslator) yangType).getJavaQualifiedInfo().getPkgInfo()+"."+((YangJavaTypeTranslator) yangType).getJavaQualifiedInfo().getClassInfo();
             case UNION:
+                if(((YangJavaTypeTranslator) yangType).getJavaQualifiedInfo().getPkgInfo()==null){
+                    System.out.println("");
+                }
                 return ((YangJavaTypeTranslator) yangType).getJavaQualifiedInfo().getPkgInfo()+"."+((YangJavaTypeTranslator) yangType).getJavaQualifiedInfo().getClassInfo();
             case LEAFREF:
                 YangType refType = getReferredTypeFromLeafref(yangType);
                 if (refType == null) {
-                    return OBJECT_STRING;
+                    return com.tailf.jnc.YangString.class.getName();
                 }
                 return getJNCDataType(getReferredTypeFromLeafref(yangType));
+            case IDENTITYREF:
+                  return YangIdentityref.class.getName();
+//                YangIdentityRef ir = (YangIdentityRef) yangType.getDataTypeExtendedInfo();
+//                if (ir.isInGrouping()) {
+//                    return OBJECT_STRING;
+//                }
+//                YangIdentity identity = ir.getReferredIdentity();
+//
+//                return identity.getJavaPackage()+"."+YangElement.normalize(identity.getName());
+
             default:
                 throw new TranslatorException("given data type is not supported. " +
                         yangType.getDataTypeName() + " in " +
@@ -221,9 +236,9 @@ public final class AttributesJavaDataType {
                 case BOOLEAN:
                     return BOOLEAN_WRAPPER;
                 case ENUMERATION:
-                    return getCapitalCase(
-                            getCamelCase(((YangJavaEnumerationTranslator) yangType.getDataTypeExtendedInfo()).getName(),
-                                         pluginConfig));
+                    return YangElement.normalize(
+                            ((YangJavaEnumerationTranslator) yangType.getDataTypeExtendedInfo()).getName()
+                                         );
                 case BITS:
                     return BIT_SET;
                 case BINARY:
@@ -235,8 +250,8 @@ public final class AttributesJavaDataType {
                 case EMPTY:
                     return BOOLEAN_WRAPPER;
                 case UNION:
-                    return getCapitalCase(getCamelCase(((YangJavaUnionTranslator) yangType
-                            .getDataTypeExtendedInfo()).getName(), pluginConfig));
+                    return YangElement.normalize(((YangJavaUnionTranslator) yangType
+                            .getDataTypeExtendedInfo()).getName());
                 case INSTANCE_IDENTIFIER:
                     return STRING_DATA_TYPE;
                 case DERIVED:
@@ -255,9 +270,9 @@ public final class AttributesJavaDataType {
                 case STRING:
                     return STRING_DATA_TYPE;
                 case ENUMERATION:
-                    return getCapitalCase(
-                            getCamelCase(((YangJavaEnumerationTranslator) yangType.getDataTypeExtendedInfo()).getName(),
-                                         pluginConfig));
+                    return YangElement.normalize(
+                             (((YangJavaEnumerationTranslator) yangType.getDataTypeExtendedInfo()).getName()
+                                          ));
                 case BITS:
                     return BIT_SET;
                 case DECIMAL64:
@@ -269,8 +284,8 @@ public final class AttributesJavaDataType {
                 case EMPTY:
                     return BOOLEAN_DATA_TYPE;
                 case UNION:
-                    return getCapitalCase(getCamelCase(((YangJavaUnionTranslator) yangType
-                            .getDataTypeExtendedInfo()).getName(), pluginConfig));
+                    return YangElement.normalize((((YangJavaUnionTranslator) yangType
+                            .getDataTypeExtendedInfo()).getName()));
                 case INSTANCE_IDENTIFIER:
                     return STRING_DATA_TYPE;
                 case DERIVED:
@@ -291,13 +306,13 @@ public final class AttributesJavaDataType {
     private static String getDerivedImplClass(
             YangType<?> yangType, YangToJavaNamingConflictUtil pluginConfig) {
         String name = yangType.getDataTypeName();
-        YangDerivedInfo derivedInfo = (YangDerivedInfo) yangType
-                .getDataTypeExtendedInfo();
-        YangTypeDef typeDef = derivedInfo.getReferredTypeDef();
-        if (typeDef.isNameConflict()) {
-            name = name + TYPEDEF;
-        }
-        return getCapitalCase(getCamelCase(name, pluginConfig));
+//        YangDerivedInfo derivedInfo = (YangDerivedInfo) yangType
+//                .getDataTypeExtendedInfo();
+//        YangTypeDef typeDef = derivedInfo.getReferredTypeDef();
+//        if (typeDef.isNameConflict()) {
+//            name = name + TYPEDEF;
+//        }
+        return YangElement.normalize(name);// getCapitalCase(getCamelCase(name, pluginConfig));
     }
 
     /**
@@ -612,6 +627,10 @@ public final class AttributesJavaDataType {
         return lri.isInGrouping() ? null : lri.getEffectiveDataType();
     }
 
+    private static YangIdentity getReferredTypeFromIdentityref(YangType type) {
+        YangIdentityRef lri = (YangIdentityRef) type.getDataTypeExtendedInfo();
+        return lri.isInGrouping() ? null : lri.getReferredIdentity();
+    }
     /**
      * Returns leaf ref import string.
      *

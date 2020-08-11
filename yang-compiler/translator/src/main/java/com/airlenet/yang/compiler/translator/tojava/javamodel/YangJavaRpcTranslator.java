@@ -140,63 +140,63 @@ public class YangJavaRpcTranslator
             throw new TranslatorException(getErrorMsg(INVALID_PARENT_NODE,
                                                       this));
         }
-
-        /*
-         * Create attribute info for input and output of rpc and add it to the
-         * parent import list.
-         */
-        TempJavaServiceFragmentFiles tempJavaFragmentFiles =
-                ((TempJavaCodeFragmentFilesContainer) getParent())
-                        .getTempJavaCodeFragmentFiles()
-                        .getServiceTempFiles();
-        JavaAttributeInfo javaAttributeInfoOfInput = null;
-        JavaAttributeInfo javaAttributeInfoOfOutput = null;
-
-        // Get the child input and output node and obtain create java attribute
-        // info.
-        YangNode yangNode = getChild();
-        while (yangNode != null) {
-            if (yangNode instanceof YangInput) {
-                javaAttributeInfoOfInput = tempJavaFragmentFiles
-                        .getChildNodeAsAttributeInParentService(yangNode,
-                                                                getParent(),
-                                                                getJavaClassNameOrBuiltInType());
-            } else if (yangNode instanceof YangOutput) {
-                javaAttributeInfoOfOutput = tempJavaFragmentFiles
-                        .getChildNodeAsAttributeInParentService(yangNode,
-                                                                getParent(),
-                                                                getJavaClassNameOrBuiltInType());
-            } else {
-                throw new TranslatorException(getErrorMsg(INVALID_CHILD_NODE,
-                                                          this));
-            }
-            yangNode = yangNode.getNextSibling();
-        }
-
-        /*
-         * Add the rpc information to the parent's service temp file.
-         */
-        try {
-
-            ((TempJavaCodeFragmentFilesContainer) parent)
-                    .getTempJavaCodeFragmentFiles().getServiceTempFiles()
-                    .addJavaSnippetInfoToApplicableTempFiles(
-                            javaAttributeInfoOfInput, javaAttributeInfoOfOutput,
-                            getJavaClassNameOrBuiltInType());
-        } catch (IOException e) {
-            throw new TranslatorException(getErrorMsg(FAIL_AT_EXIT, this,
-                                                      e.getLocalizedMessage()));
-        }
-
-        // generate RPC command file
-        /*try {
-            generateJava(GENERATE_RPC_COMMAND_CLASS, this);
-        } catch (IOException e) {
-            throw new TranslatorException("Failed to generate code for RPC node " +
-                                                  getName() + " in " +
-                                                  getLineNumber() + " at " +
-                                                  getCharPosition()
-                                                  + " in " + getFileName() + " " + e.getLocalizedMessage());
-        }*/
+//
+//        /*
+//         * Create attribute info for input and output of rpc and add it to the
+//         * parent import list.
+//         */
+//        TempJavaServiceFragmentFiles tempJavaFragmentFiles =
+//                ((TempJavaCodeFragmentFilesContainer) getParent())
+//                        .getTempJavaCodeFragmentFiles()
+//                        .getServiceTempFiles();
+//        JavaAttributeInfo javaAttributeInfoOfInput = null;
+//        JavaAttributeInfo javaAttributeInfoOfOutput = null;
+//
+//        // Get the child input and output node and obtain create java attribute
+//        // info.
+//        YangNode yangNode = getChild();
+//        while (yangNode != null) {
+//            if (yangNode instanceof YangInput) {
+//                javaAttributeInfoOfInput = tempJavaFragmentFiles
+//                        .getChildNodeAsAttributeInParentService(yangNode,
+//                                                                getParent(),
+//                                                                getJavaClassNameOrBuiltInType());
+//            } else if (yangNode instanceof YangOutput) {
+//                javaAttributeInfoOfOutput = tempJavaFragmentFiles
+//                        .getChildNodeAsAttributeInParentService(yangNode,
+//                                                                getParent(),
+//                                                                getJavaClassNameOrBuiltInType());
+//            } else {
+//                throw new TranslatorException(getErrorMsg(INVALID_CHILD_NODE,
+//                                                          this));
+//            }
+//            yangNode = yangNode.getNextSibling();
+//        }
+//
+//        /*
+//         * Add the rpc information to the parent's service temp file.
+//         */
+//        try {
+//
+//            ((TempJavaCodeFragmentFilesContainer) parent)
+//                    .getTempJavaCodeFragmentFiles().getServiceTempFiles()
+//                    .addJavaSnippetInfoToApplicableTempFiles(
+//                            javaAttributeInfoOfInput, javaAttributeInfoOfOutput,
+//                            getJavaClassNameOrBuiltInType());
+//        } catch (IOException e) {
+//            throw new TranslatorException(getErrorMsg(FAIL_AT_EXIT, this,
+//                                                      e.getLocalizedMessage()));
+//        }
+//
+//        // generate RPC command file
+//        /*try {
+//            generateJava(GENERATE_RPC_COMMAND_CLASS, this);
+//        } catch (IOException e) {
+//            throw new TranslatorException("Failed to generate code for RPC node " +
+//                                                  getName() + " in " +
+//                                                  getLineNumber() + " at " +
+//                                                  getCharPosition()
+//                                                  + " in " + getFileName() + " " + e.getLocalizedMessage());
+//        }*/
     }
 }

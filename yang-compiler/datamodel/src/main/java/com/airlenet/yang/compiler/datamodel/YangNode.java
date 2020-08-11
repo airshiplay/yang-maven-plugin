@@ -16,6 +16,7 @@
 package com.airlenet.yang.compiler.datamodel;
 
 import com.airlenet.yang.compiler.datamodel.exceptions.DataModelException;
+import com.airlenet.yang.compiler.datamodel.javadatamodel.YangJavaSubModule;
 import com.airlenet.yang.compiler.datamodel.utils.DataModelUtils;
 import com.airlenet.yang.compiler.datamodel.utils.Parsable;
 import com.airlenet.yang.compiler.utils.io.impl.YangIoUtils;
@@ -239,10 +240,13 @@ public abstract class YangNode
         this.parent = parent;
     }
 
-    public  YangNode getRoot(){
+    public  YangNode getYangJavaModule(){
         YangNode root =this;
         while (root.getParent()!=null){
             root=root.getParent();
+        }
+        if(root instanceof YangJavaSubModule){
+          root =  ((YangJavaSubModule)root).getBelongsTo().getModuleNode();
         }
         return root;
     }

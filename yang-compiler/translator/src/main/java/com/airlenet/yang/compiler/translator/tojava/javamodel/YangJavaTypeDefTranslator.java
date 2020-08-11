@@ -148,6 +148,12 @@ public class YangJavaTypeDefTranslator
                 ((YangJavaTypeTranslator)yangType).updateJavaQualifiedInfo(yangPlugin.getConflictResolver());
             });
         }
+        if(typeInTypeDef.getDataType() == BITS){
+
+            this.getTypeList().forEach(yangType -> {
+                ((YangJavaTypeTranslator)yangType).updateJavaQualifiedInfo(yangPlugin.getConflictResolver());
+            });
+        }
         ((YangJavaTypeTranslator)typeInTypeDef).updateJavaQualifiedInfo(yangPlugin.getConflictResolver());
 
 //        try {
@@ -170,10 +176,10 @@ public class YangJavaTypeDefTranslator
     public void generateCodeExit() throws TranslatorException {
         String classname= YangElement.normalize(this.getName());
         JavaFileInfoTranslator fileInfo = this.getJavaFileInfo();
-        JavaClass javaClass = new JavaClass(classname, fileInfo.getPackage(), fileInfo.getYangFileName()+""+fileInfo.getLineNumber());
+        JavaClass javaClass = new JavaClass(classname, fileInfo.getPackage(), "JavaTypeDef;"+fileInfo.getYangFileName()+""+fileInfo.getLineNumber());
         String absoluteDirPath = getAbsolutePackagePath(fileInfo.getBaseCodeGenPath(),
                 fileInfo.getPackageFilePath());
-//        YangJavaModule yangJavaModule = (YangJavaModule)this.getRoot();
+//        YangJavaModule yangJavaModule = (YangJavaModule)this.getYangJavaModule();
 
         YangType typeInTypeDef = this.getTypeDefBaseType();
 
@@ -198,7 +204,8 @@ public class YangJavaTypeDefTranslator
             javaClass.addMethod(new JavaMethod("check","void").setModifiers("public").setExceptions(YangException.class.getName())
                     .addLine("\tsuper.check();")
             );
-        }else if(typeInTypeDef.getDataType() == UINT8||typeInTypeDef.getDataType() == UINT16||typeInTypeDef.getDataType() == UINT32 ||typeInTypeDef.getDataType() == UINT64){
+        }else if(typeInTypeDef.getDataType() == UINT8||typeInTypeDef.getDataType() == UINT16||typeInTypeDef.getDataType() == UINT32 ||typeInTypeDef.getDataType() == UINT64
+                ||typeInTypeDef.getDataType() == INT16||typeInTypeDef.getDataType() == INT32||typeInTypeDef.getDataType() == INT64){
             String extend=null;
             String type =null;
             switch (typeInTypeDef.getDataType()){
@@ -206,17 +213,29 @@ public class YangJavaTypeDefTranslator
                     extend= YangUInt8.class.getName();
                     type ="short";
                     break;
+                case INT16:
+                    extend= YangInt16.class.getName();
+                    type ="short";
+                    break;
                 case UINT16:
                     extend= YangUInt16.class.getName();
+                    type ="int";
+                    break;
+                case INT32:
+                    extend= YangInt32.class.getName();
                     type ="int";
                     break;
                 case UINT32:
                     extend= YangUInt32.class.getName();
                     type ="long";
                     break;
+                case INT64:
+                    extend= YangInt64.class.getName();
+                    type ="long";
+                    break;
                 case UINT64:
                     extend= YangUInt64.class.getName();
-                    type ="long";
+                    type =BigInteger.class.getName();
                     break;
             }
             javaClass.setExtend(extend);
@@ -272,8 +291,18 @@ public class YangJavaTypeDefTranslator
             javaClass.addMethod(new JavaMethod("check","void").setModifiers("public").setExceptions(YangException.class.getName())
                     .addLine("super.check();")
             );
-        }else if(typeInTypeDef.getDataType() == STRING){
-            javaClass.setExtend(YangString.class.getName());
+        }else if(typeInTypeDef.getDataType() == STRING ||typeInTypeDef.getDataType()==BINARY){
+
+            String extend=null;
+            switch (typeInTypeDef.getDataType()){
+                case STRING:
+                    extend= YangString.class.getName();
+                    break;
+                case BINARY:
+                    extend=YangBinary.class.getName();
+                    break;
+            }
+            javaClass.setExtend(extend);
 
             javaClass.addMethod(new JavaMethod(classname,"")
                     .setModifiers("public")

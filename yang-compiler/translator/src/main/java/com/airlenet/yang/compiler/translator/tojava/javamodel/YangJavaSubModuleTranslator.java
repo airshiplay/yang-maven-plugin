@@ -33,9 +33,7 @@ import static com.airlenet.yang.compiler.datamodel.utils.DataModelUtils.isRpcChi
 import static com.airlenet.yang.compiler.translator.tojava.GeneratedJavaFileType.GENERATE_ALL_EVENT_CLASS_MASK;
 import static com.airlenet.yang.compiler.translator.tojava.GeneratedJavaFileType.GENERATE_INTERFACE_WITH_BUILDER;
 import static com.airlenet.yang.compiler.translator.tojava.GeneratedJavaFileType.GENERATE_SERVICE_AND_MANAGER;
-import static com.airlenet.yang.compiler.translator.tojava.YangJavaModelUtils.generateCodeOfRootNode;
-import static com.airlenet.yang.compiler.translator.tojava.YangJavaModelUtils.generateInterfaceFileForNonDataNodes;
-import static com.airlenet.yang.compiler.translator.tojava.YangJavaModelUtils.isRootNodesCodeGenRequired;
+import static com.airlenet.yang.compiler.translator.tojava.YangJavaModelUtils.*;
 import static com.airlenet.yang.compiler.translator.tojava.utils.JavaIdentifierSyntax.getRootPackage;
 import static com.airlenet.yang.compiler.translator.tojava.utils.TranslatorErrorType.FAIL_AT_ENTRY;
 import static com.airlenet.yang.compiler.translator.tojava.utils.TranslatorErrorType.FAIL_AT_EXIT;
@@ -139,21 +137,30 @@ public class YangJavaSubModuleTranslator
                 getVersion(), getModuleName(), getRevision(),
                 yangPlugin.getConflictResolver());
 
+        updateJNCPackageInfo(this,yangPlugin,subModulePkg);
+        YangNode moduleNode = getBelongsTo().getModuleNode();
+        ((YangJavaModuleTranslator) moduleNode).updatePackageInfo(yangPlugin);
+
+
+//        String modulePkg = getRootPackage(getVersion(),moduleNode. getModuleName(),
+//                getRevision(),
+//                yangPlugin.getConflictResolver());
+//        updateJNCPackageInfo(this, yangPlugin, modulePkg);
         /*if (isNotificationChildNodePresent(this)) {
             getJavaFileInfo().setGeneratedFileTypes(
                     getJavaFileInfo().getGeneratedFileTypes()
                             | GENERATE_ALL_EVENT_CLASS_MASK);
         } */
-        try {
-            generateCodeOfRootNode(this, yangPlugin, subModulePkg);
-            if (isRpcChildNodePresent(this)) {
-                tempFileHandle.getServiceTempFiles().addAugmentedRpcMethod(
-                        this);
-            }
-        } catch (IOException e) {
-            throw new TranslatorException(getErrorMsg(FAIL_AT_ENTRY, this,
-                                                      e.getLocalizedMessage()));
-        }
+//        try {
+//            generateCodeOfRootNode(this, yangPlugin, subModulePkg);
+//            if (isRpcChildNodePresent(this)) {
+//                tempFileHandle.getServiceTempFiles().addAugmentedRpcMethod(
+//                        this);
+//            }
+//        } catch (IOException e) {
+//            throw new TranslatorException(getErrorMsg(FAIL_AT_ENTRY, this,
+//                                                      e.getLocalizedMessage()));
+//        }
     }
 
     /**
@@ -171,40 +178,40 @@ public class YangJavaSubModuleTranslator
          *
          * The manager class needs to extend the "ListenerRegistry".
          */
-        try {
-            if ((getJavaFileInfo().getGeneratedFileTypes() &
-                    GENERATE_ALL_EVENT_CLASS_MASK) != 0) {
-                getTempJavaCodeFragmentFiles().generateJavaFile(
-                        GENERATE_ALL_EVENT_CLASS_MASK, this);
-            }
-            if (!isRootNodesCodeGenRequired(this)) {
-                generateInterfaceFileForNonDataNodes(this);
-            } else {
-                getTempJavaCodeFragmentFiles()
-                        .generateJavaFile(GENERATE_INTERFACE_WITH_BUILDER, this);
-                if (getJavaFileInfo().getPluginConfig()
-                        .getCodeGenerateForSbi() == null ||
-                        !getJavaFileInfo().getPluginConfig()
-                                .getCodeGenerateForSbi().equals(SBI)) {
-                    if (isRpcChildNodePresent(this)) {
-                        getTempJavaCodeFragmentFiles().generateJavaFile(
-                                GENERATE_SERVICE_AND_MANAGER, this);
-                        // TODO : code generation for rpc at module level
-                        /*getTempJavaCodeFragmentFiles()
-                                .generateJavaFile(GENERATE_ALL_RPC_CLASS_MASK, this);
-                        */
-                    }
-                }
-            }
-
-            searchAndDeleteTempDir(getJavaFileInfo().getBaseCodeGenPath() +
-                                           getJavaFileInfo().getPackageFilePath());
-            removeEmptyDirectory(getJavaFileInfo().getBaseCodeGenPath() +
-                                         getJavaFileInfo().getPackageFilePath());
-        } catch (IOException e) {
-            throw new TranslatorException(getErrorMsg(FAIL_AT_EXIT, this,
-                                                      e.getLocalizedMessage()));
-        }
+//        try {
+//            if ((getJavaFileInfo().getGeneratedFileTypes() &
+//                    GENERATE_ALL_EVENT_CLASS_MASK) != 0) {
+//                getTempJavaCodeFragmentFiles().generateJavaFile(
+//                        GENERATE_ALL_EVENT_CLASS_MASK, this);
+//            }
+//            if (!isRootNodesCodeGenRequired(this)) {
+//                generateInterfaceFileForNonDataNodes(this);
+//            } else {
+//                getTempJavaCodeFragmentFiles()
+//                        .generateJavaFile(GENERATE_INTERFACE_WITH_BUILDER, this);
+//                if (getJavaFileInfo().getPluginConfig()
+//                        .getCodeGenerateForSbi() == null ||
+//                        !getJavaFileInfo().getPluginConfig()
+//                                .getCodeGenerateForSbi().equals(SBI)) {
+//                    if (isRpcChildNodePresent(this)) {
+//                        getTempJavaCodeFragmentFiles().generateJavaFile(
+//                                GENERATE_SERVICE_AND_MANAGER, this);
+//                        // TODO : code generation for rpc at module level
+//                        /*getTempJavaCodeFragmentFiles()
+//                                .generateJavaFile(GENERATE_ALL_RPC_CLASS_MASK, this);
+//                        */
+//                    }
+//                }
+//            }
+//
+//            searchAndDeleteTempDir(getJavaFileInfo().getBaseCodeGenPath() +
+//                                           getJavaFileInfo().getPackageFilePath());
+//            removeEmptyDirectory(getJavaFileInfo().getBaseCodeGenPath() +
+//                                         getJavaFileInfo().getPackageFilePath());
+//        } catch (IOException e) {
+//            throw new TranslatorException(getErrorMsg(FAIL_AT_EXIT, this,
+//                                                      e.getLocalizedMessage()));
+//        }
     }
 
     /**

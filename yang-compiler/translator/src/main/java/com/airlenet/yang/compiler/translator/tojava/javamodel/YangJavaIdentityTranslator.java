@@ -128,63 +128,63 @@ public class YangJavaIdentityTranslator extends YangJavaIdentity
      */
     @Override
     public void generateCodeEntry(YangPluginConfig plg) throws TranslatorException {
-        try {
-
-            updatePackageInfo(this, plg);
-            JavaQualifiedTypeInfoTranslator basePkgInfo =
-                    new JavaQualifiedTypeInfoTranslator();
-            JavaFileInfoTranslator itsInfo = getJavaFileInfo();
-            String name = itsInfo.getJavaName();
-            String className = getCapitalCase(name);
-            String path = itsInfo.getPackageFilePath();
-            createPackage(this);
-
-            List<String> imports = null;
-            boolean isQualified;
-            List<YangIdentity> idList = getExtendList();
-
-            if (getBaseNode() != null &&
-                    getBaseNode().getReferredIdentity() != null) {
-                if (!(getBaseNode().getReferredIdentity()
-                        instanceof YangJavaIdentityTranslator)) {
-                    throw new TranslatorException(
-                            getErrorMsg(FAIL_AT_ENTRY, this, EMPTY_STRING));
-                }
-                YangJavaIdentityTranslator base =
-                        (YangJavaIdentityTranslator) getBaseNode()
-                                .getReferredIdentity();
-                JavaFileInfoTranslator info = base.getJavaFileInfo();
-                YangToJavaNamingConflictUtil conf = plg.getConflictResolver();
-
-                if (info.getPackage() == null || info.getJavaName() == null) {
-                    info.setJavaName(AttributesJavaDataType.getIdJavaName(base, conf));
-                    info.setPackage(AttributesJavaDataType.getTypePackage(base, conf));
-                }
-
-                basePkgInfo.setClassInfo(getCapitalCase(info.getJavaName()));
-                basePkgInfo.setPkgInfo(info.getPackage());
-                isQualified = importData.addImportInfo(
-                        basePkgInfo, className, javaFileInfo.getPackage());
-                if (!isQualified) {
-                    imports = importData.getImports(true);
-                }
-            }
-
-            imports = getImportOfDerId(idList, imports, className);
-            File file = getFileObject(path, className,
-                                      JAVA_FILE_EXTENSION, itsInfo);
-            initiateJavaFileGeneration(file, GENERATE_IDENTITY_CLASS,
-                                       imports, this, className);
-
-            //Add to string and from string method to class
-            addStringMethodsToClass(file, name, idList);
-            insertDataIntoJavaFile(file, CLOSE_CURLY_BRACKET);
-            formatFile(file);
-            closeFile(file, false);
-        } catch (IOException e) {
-            throw new TranslatorException(getErrorMsg(FAIL_AT_EXIT, this,
-                                                      e.getLocalizedMessage()));
-        }
+//        try {
+//
+//            updatePackageInfo(this, plg);
+//            JavaQualifiedTypeInfoTranslator basePkgInfo =
+//                    new JavaQualifiedTypeInfoTranslator();
+//            JavaFileInfoTranslator itsInfo = getJavaFileInfo();
+//            String name = itsInfo.getJavaName();
+//            String className = getCapitalCase(name);
+//            String path = itsInfo.getPackageFilePath();
+//            createPackage(this);
+//
+//            List<String> imports = null;
+//            boolean isQualified;
+//            List<YangIdentity> idList = getExtendList();
+//
+//            if (getBaseNode() != null &&
+//                    getBaseNode().getReferredIdentity() != null) {
+//                if (!(getBaseNode().getReferredIdentity()
+//                        instanceof YangJavaIdentityTranslator)) {
+//                    throw new TranslatorException(
+//                            getErrorMsg(FAIL_AT_ENTRY, this, EMPTY_STRING));
+//                }
+//                YangJavaIdentityTranslator base =
+//                        (YangJavaIdentityTranslator) getBaseNode()
+//                                .getReferredIdentity();
+//                JavaFileInfoTranslator info = base.getJavaFileInfo();
+//                YangToJavaNamingConflictUtil conf = plg.getConflictResolver();
+//
+//                if (info.getPackage() == null || info.getJavaName() == null) {
+//                    info.setJavaName(AttributesJavaDataType.getIdJavaName(base, conf));
+//                    info.setPackage(AttributesJavaDataType.getTypePackage(base, conf));
+//                }
+//
+//                basePkgInfo.setClassInfo(getCapitalCase(info.getJavaName()));
+//                basePkgInfo.setPkgInfo(info.getPackage());
+//                isQualified = importData.addImportInfo(
+//                        basePkgInfo, className, javaFileInfo.getPackage());
+//                if (!isQualified) {
+//                    imports = importData.getImports(true);
+//                }
+//            }
+//
+//            imports = getImportOfDerId(idList, imports, className);
+//            File file = getFileObject(path, className,
+//                                      JAVA_FILE_EXTENSION, itsInfo);
+//            initiateJavaFileGeneration(file, GENERATE_IDENTITY_CLASS,
+//                                       imports, this, className);
+//
+//            //Add to string and from string method to class
+//            addStringMethodsToClass(file, name, idList);
+//            insertDataIntoJavaFile(file, CLOSE_CURLY_BRACKET);
+//            formatFile(file);
+//            closeFile(file, false);
+//        } catch (IOException e) {
+//            throw new TranslatorException(getErrorMsg(FAIL_AT_EXIT, this,
+//                                                      e.getLocalizedMessage()));
+//        }
     }
 
     /**

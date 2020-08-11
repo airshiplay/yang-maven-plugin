@@ -88,13 +88,16 @@ public class JavaMethod {
                 builder.append(" ");
             }
         }
-        builder.append(returnType);
-        builder.append(" ");
+        if (!returnType.equals("")) {
+            builder.append(returnType);
+            builder.append(" ");
+        }
+
         builder.append(name);
 
         builder.append("(");
         if (this.parameters != null) {
-            builder.append(this.parameters.stream().collect(Collectors.joining(",")));
+            builder.append(this.parameters.stream().collect(Collectors.joining(",\n\t\t\t\t")));
         }
         builder.append(") ");
         if (this.exceptions != null) {

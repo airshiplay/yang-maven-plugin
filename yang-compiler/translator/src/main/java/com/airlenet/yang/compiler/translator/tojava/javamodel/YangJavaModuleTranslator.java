@@ -114,6 +114,12 @@ public class YangJavaModuleTranslator
         tempFileHandle = fileHandle;
     }
 
+    public void updatePackageInfo(YangPluginConfig yangPlugin){
+        String modulePkg = getRootPackage(getVersion(), getModuleName(),
+                getRevision(),
+                yangPlugin.getConflictResolver());
+        updateJNCPackageInfo(this, yangPlugin, modulePkg);
+    }
     /**
      * Generates java code for module.
      *
@@ -124,9 +130,9 @@ public class YangJavaModuleTranslator
     public void generateCodeEntry(YangPluginConfig yangPlugin)
             throws TranslatorException {
         String modulePkg = getRootPackage(getVersion(), getModuleName(),
-                                          getRevision(),
-                                          yangPlugin.getConflictResolver());
-        updateJNCPackageInfo(this, yangPlugin, modulePkg);
+                getRevision(),
+                yangPlugin.getConflictResolver());
+        updatePackageInfo(yangPlugin);
 
         JavaFileInfoTranslator fileInfo = this.getJavaFileInfo();
 
@@ -136,8 +142,8 @@ public class YangJavaModuleTranslator
 
         JavaClass javaClass = new JavaClass(classname, modulePkg, "The root class for namespace"+this.getModuleNamespace());
 
-        javaClass.addField(new JavaField("NAMESPACE",this.getModuleNamespace(), "public" ,"static" ,"final", "String"),
-                new JavaField("PREFIX",this.getPrefix(), "public" ,"static" ,"final", "String"));
+        javaClass.addField(new JavaField("String","NAMESPACE","\""+this.getModuleNamespace()+"\"", "public" ,"static" ,"final"),
+                new JavaField("String","PREFIX","\""+this.getPrefix()+"\"", "public" ,"static" ,"final" ));
         JavaMethod enabler = new JavaMethod("enable","void")
                 .setExceptions(new String[]{"JNCException"}).addDependency("com.tailf.jnc.JNCException")
                 .addJavadoc("Enable the elements in this namespace to be aware")
