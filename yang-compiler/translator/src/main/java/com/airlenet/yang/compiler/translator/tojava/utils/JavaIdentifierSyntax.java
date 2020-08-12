@@ -111,6 +111,23 @@ public final class JavaIdentifierSyntax {
         return pkg.toString().toLowerCase();
     }
 
+    public static String getPrefixPackage(String version, String name,
+                                        YangRevision revision,
+                                        YangToJavaNamingConflictUtil resolver) {
+
+        StringBuilder pkg = new StringBuilder(DEFAULT_BASE_PKG)
+                .append(PERIOD)
+                .append(getYangVersion(version))
+                .append(PERIOD)
+                .append(getCamelCase(name, resolver));
+        if (revision != null) {
+            pkg.append(PERIOD)
+                    .append(getYangRevisionStr(revision.getRevDate()));
+        }
+        pkg.append(PERIOD)
+                .append(getCamelCase(name, resolver));
+        return pkg.toString().toLowerCase();
+    }
     /**
      * Returns version.
      *

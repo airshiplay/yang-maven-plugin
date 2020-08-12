@@ -28,6 +28,7 @@ import java.io.IOException;
 
 import static com.airlenet.yang.compiler.translator.tojava.GeneratedJavaFileType.GENERATE_INTERFACE_WITH_BUILDER;
 import static com.airlenet.yang.compiler.translator.tojava.YangJavaModelUtils.generateCodeOfNode;
+import static com.airlenet.yang.compiler.translator.tojava.YangJavaModelUtils.updateJNCPackageInfo;
 
 /**
  * Represents augment information extended to support java code generation.
@@ -108,15 +109,16 @@ public class YangJavaAugmentTranslator
      */
     @Override
     public void generateCodeEntry(YangPluginConfig yangPlugin) throws TranslatorException {
-        try {
-            generateCodeOfNode(this, yangPlugin);
-        } catch (IOException e) {
-            throw new TranslatorException("Failed to generate code for augmentable node " +
-                                                  getName() + " in " +
-                                                  getLineNumber() + " at " +
-                                                  getCharPosition()
-                                                  + " in " + getFileName() + " " + e.getLocalizedMessage());
-        }
+        updateJNCPackageInfo(this,yangPlugin);
+//        try {
+//            generateCodeOfNode(this, yangPlugin);
+//        } catch (IOException e) {
+//            throw new TranslatorException("Failed to generate code for augmentable node " +
+//                                                  getName() + " in " +
+//                                                  getLineNumber() + " at " +
+//                                                  getCharPosition()
+//                                                  + " in " + getFileName() + " " + e.getLocalizedMessage());
+//        }
     }
 
     /**
@@ -126,17 +128,17 @@ public class YangJavaAugmentTranslator
      */
     @Override
     public void generateCodeExit() throws TranslatorException {
-        try {
-            if (validateAugmentNode()) {
-                getTempJavaCodeFragmentFiles().generateJavaFile(GENERATE_INTERFACE_WITH_BUILDER, this);
-            }
-        } catch (IOException e) {
-            throw new TranslatorException("Failed to generate code for augmentable node " +
-                                                  getName() + " in " +
-                                                  getLineNumber() + " at " +
-                                                  getCharPosition()
-                                                  + " in " + getFileName() + " " + e.getLocalizedMessage());
-        }
+//        try {
+//            if (validateAugmentNode()) {
+//                getTempJavaCodeFragmentFiles().generateJavaFile(GENERATE_INTERFACE_WITH_BUILDER, this);
+//            }
+//        } catch (IOException e) {
+//            throw new TranslatorException("Failed to generate code for augmentable node " +
+//                                                  getName() + " in " +
+//                                                  getLineNumber() + " at " +
+//                                                  getCharPosition()
+//                                                  + " in " + getFileName() + " " + e.getLocalizedMessage());
+//        }
     }
 
     /**

@@ -16,6 +16,7 @@
 
 package com.airlenet.yang.compiler.plugin.maven;
 
+import com.airlenet.yang.compiler.utils.UtilConstants;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -71,8 +72,8 @@ public class YangUtilManager extends AbstractMojo {
     @Parameter(property = "yangFilesDir", defaultValue = "src/main/yang/")
     private String yangFilesDir;
 
-    @Parameter(property = "codeGenPackage", defaultValue = "com.airlenet.yang.gen")
-    private String codeGenPackage;
+    @Parameter(property = "packageName", defaultValue = "com.airlenet.yang.gen")
+    private String packageName;
 
     /**
      * Source directory for generated files.
@@ -170,7 +171,8 @@ public class YangUtilManager extends AbstractMojo {
 
             bldr.setCodeGenDir(Paths.get(codeGenDir));
             bldr.setMetadataGenDir(Paths.get(metaDataGenDir));
-            bldr.setCodeGenPackage(codeGenPackage);
+            DEFAULT_BASE_PKG = packageName;
+            bldr.setCodeGenPackage(packageName);
             bldr.setYangFilesDir(searchDir);
             for (Path path : depSchemas) {
                 bldr.addDependentSchema(path);

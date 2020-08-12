@@ -11,18 +11,10 @@
 
     <artifactId>yang-example</artifactId>
 
-    <properties>
-        <version.jnc>1.2.0</version.jnc>
-    </properties>
     <dependencies>
         <dependency>
             <groupId>com.airlenet.yang</groupId>
             <artifactId>yang-jnc</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.airlenet.yang</groupId>
-            <artifactId>yang-model</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>
@@ -43,7 +35,7 @@
 <!--                    <errorAbort>false</errorAbort>-->
 <!--                    <prefix>Prefix</prefix>-->
 <!--                    <excludes>-->
-<!--&lt;!&ndash;                        <exclude>module/**/*.yang</exclude>&ndash;&gt;-->
+<!--                        <exclude>module/**/*.yang</exclude>-->
 <!--                    </excludes>-->
 <!--                    <pyangFilePath>/home/lig/.local/bin/pyang</pyangFilePath>-->
 <!--                </configuration>-->
@@ -65,7 +57,9 @@
                 <artifactId>yang-maven-plugin</artifactId>
                 <version>${project.version}</version>
                 <configuration>
-                    <yangFilesDir>src/test/yang</yangFilesDir>
+                    <yangFilesDir>src/main/yang</yangFilesDir>
+                    <packageName>com.test.yang.model.gen</packageName>
+                    <classFileDir>src/main/java</classFileDir>
                 </configuration>
                 <executions>
                     <execution>

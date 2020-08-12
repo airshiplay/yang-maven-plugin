@@ -35,6 +35,7 @@ import java.io.IOException;
 
 import static com.airlenet.yang.compiler.translator.tojava.GeneratedJavaFileType.GENERATE_INTERFACE_WITH_BUILDER;
 import static com.airlenet.yang.compiler.translator.tojava.YangJavaModelUtils.generateCodeOfAugmentableNode;
+import static com.airlenet.yang.compiler.translator.tojava.YangJavaModelUtils.updateJNCPackageInfo;
 import static com.airlenet.yang.compiler.translator.tojava.utils.JavaIdentifierSyntax.getEnumJavaAttribute;
 import static com.airlenet.yang.compiler.translator.tojava.utils.TranslatorErrorType.FAIL_AT_ENTRY;
 import static com.airlenet.yang.compiler.translator.tojava.utils.TranslatorErrorType.FAIL_AT_EXIT;
@@ -141,13 +142,14 @@ public class YangJavaNotificationTranslator
 
         // Generate subject of the notification(event), this is simple interface
         // with builder class.
-        try {
-            generateCodeOfAugmentableNode(this, yangPlugin);
-            //addNotificationToExtendsList();
-        } catch (IOException e) {
-            throw new TranslatorException(getErrorMsg(FAIL_AT_ENTRY, this,
-                                                      e.getLocalizedMessage()));
-        }
+        updateJNCPackageInfo(this,yangPlugin);
+//        try {
+//            generateCodeOfAugmentableNode(this, yangPlugin);
+//            //addNotificationToExtendsList();
+//        } catch (IOException e) {
+//            throw new TranslatorException(getErrorMsg(FAIL_AT_ENTRY, this,
+//                                                      e.getLocalizedMessage()));
+//        }
     }
 
     /*Adds current notification info to the extends list so its parents service*/
@@ -181,12 +183,12 @@ public class YangJavaNotificationTranslator
     @Override
     public void generateCodeExit()
             throws TranslatorException {
-        try {
-            getTempJavaCodeFragmentFiles().generateJavaFile(
-                    GENERATE_INTERFACE_WITH_BUILDER, this);
-        } catch (IOException e) {
-            throw new TranslatorException(getErrorMsg(FAIL_AT_EXIT, this,
-                                                      e.getLocalizedMessage()));
-        }
+//        try {
+//            getTempJavaCodeFragmentFiles().generateJavaFile(
+//                    GENERATE_INTERFACE_WITH_BUILDER, this);
+//        } catch (IOException e) {
+//            throw new TranslatorException(getErrorMsg(FAIL_AT_EXIT, this,
+//                                                      e.getLocalizedMessage()));
+//        }
     }
 }

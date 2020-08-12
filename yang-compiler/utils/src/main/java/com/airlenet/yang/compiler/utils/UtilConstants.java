@@ -985,7 +985,7 @@ public final class UtilConstants {
     /**
      * Static attribute for base package.
      */
-    public static final String DEFAULT_BASE_PKG = "com.airlenet.yang.gen";
+    public static String DEFAULT_BASE_PKG = "com.airlenet.yang.gen";
 
     /**
      * Static attribute for YANG date prefix.

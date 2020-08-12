@@ -12,7 +12,7 @@ public class JavaMethod {
     private List<String> imports;
     private List<String> parameters;
     private String[] modifiers;
-    private List<String> javadocs;
+    private String javadoc;
     private List<String> lines;
 
 
@@ -33,16 +33,9 @@ public class JavaMethod {
         return this;
     }
 
-    public JavaMethod setJavadocs(List<String> javadoc) {
-        this.javadocs = javadoc;
-        return this;
-    }
 
-    public JavaMethod addJavadoc(String javadoc) {
-        if (this.javadocs == null) {
-            this.javadocs = new ArrayList<>();
-        }
-        this.javadocs.add(javadoc);
+    public JavaMethod setJavadoc(String javadoc) {
+        this.javadoc=(javadoc);
         return this;
     }
 
@@ -81,7 +74,10 @@ public class JavaMethod {
 
     public String toJavaCode() {
         StringBuilder builder = new StringBuilder();
-        builder.append("\t");
+        if(this.javadoc!=null){
+            builder.append("\t/**").append("\n\t * ").append(Arrays.stream(this.javadoc.split("\n")).map(l->l.trim()).collect(Collectors.joining("\n\t * "))).append("\n\t */");
+        }
+        builder.append("\n\t");
         if (this.modifiers != null) {
             for (String modifier : modifiers) {
                 builder.append(modifier);
