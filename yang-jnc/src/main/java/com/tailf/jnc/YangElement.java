@@ -1116,4 +1116,118 @@ public abstract class YangElement extends Element {
         return (Element) addChild.invoke(this, new Object[]{});
     }
 
+    public String toCLIString() {
+        final StringBuffer s = new StringBuffer();
+        toCLIString(0, s);
+        return s.toString();
+    }
+
+    protected void toCLIString(int indent, StringBuffer s) {
+        final boolean flag = hasChildren();
+        final String qName = qualifiedName();
+        if (childrenNames().length == 1) {
+            for (final Element child : getChildren()) {
+                child.toCLIString(indent, s);
+            }
+            return;
+        }
+
+        if (keyNames() == null && getParent()!=null) {
+            for (final Element child : getChildren()) {
+                if (child instanceof Leaf) {
+                    s.append(" ").append(child.getValue());
+                } else {
+                    child.toCLIString(indent, s);
+                }
+            }
+            return;
+        }
+
+        s.append(new String(new char[indent * 2]).replace("\0", " "));
+        s.append("").append(qName);
+        // add xmlns attributes (prefixes)
+        //        if (prefixes != null) {
+        //            for (final Prefix p : prefixes) {
+        //                s.append(" ").append(p.toXMLString());
+        //            }
+        //        }
+        // add attributes
+        //        if (attrs != null) {
+        //            for (final Attribute attr : attrs) {
+        //                s.append(" ").append(attr.toXMLString(this));
+        //            }
+        //        }
+        indent++;
+        // add children elements if any
+
+        boolean exit = true;
+        if (flag) {
+            String[] keyNames = keyNames();
+            if (keyNames != null) {
+                for (String keyName : keyNames) {
+                    Element child = getChild(keyName);
+                    if (child != null) {
+                        s.append(" ").append(child.getValue());
+                    }
+                }
+            }
+            if (keyNames() != null && 2 == childrenNames().length) {
+                String qualifiedName = null;
+                for (String n : childrenNames()) {
+                    if (!n.equals(keyNames()[0])) {
+                        qualifiedName = n;
+                        break;
+                    }
+                }
+                try {
+                    this.getClass().getMethod(qualifiedName + "Iterator");
+                    s.append("").append(("\n"));
+                } catch (Exception e) {
+                    s.append("");//一共两个节点，一个为key，后续直接接在key后面,节点数不重复。
+                    exit = false;
+                }
+
+            } else {
+                s.append("").append(("\n"));
+            }
+
+            for (final Element child : getChildren()) {
+                if (!containerName(keyNames(), child.qualifiedName())) {
+                    child.toCLIString(indent, s);
+                }
+            }
+
+        } else { // add value if any
+            if (value != null) {
+                s.append(" ").append((""));
+                final String stringValue = value.toString().replaceAll("&",
+                        "&amp;");
+                s.append(getIndentationSpacing(false, indent));
+                s.append(stringValue).append((""));
+            } else {
+                // self-closing tag
+                s.append("").append((""));
+                return;
+            }
+        }
+        indent--;
+        if (exit) {
+            s.append(getIndentationSpacing(flag, indent)).append("exit").append("\n");
+        } else {
+            s.append(getIndentationSpacing(flag, indent)).append("\n");
+        }
+
+    }
+
+    private boolean containerName(String[] names, String name) {
+        if (names == null) {
+            return false;
+        }
+        for (String n : names) {
+            if (name.equals(n)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

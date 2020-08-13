@@ -1,4 +1,4 @@
-# yang-maven-plugin
+# yang-java
 Yang file is parsed by Java antlr4; Yang file is parsed by java code and JNC code is generated.
 Its principle is based on JNC and onos-yang-tools
  
@@ -9,6 +9,7 @@ Its principle is based on JNC and onos-yang-tools
  [antlr](https://www.antlr.org/)
  [onos-yang-tools](https://github.com/opennetworkinglab/onos-yang-tools)
 # yang-jnc
+
 Modify based on [JNC](https://github.com/tail-f-systems/JNC)
 
 # yang-maven-plugin

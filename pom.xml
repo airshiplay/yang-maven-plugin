@@ -5,12 +5,12 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.airlenet.yang</groupId>
-    <artifactId>yang-tools</artifactId>
+    <artifactId>yang-java</artifactId>
     <version>2.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>yang-tools</name>
-    <description>play yang</description>
-    <url>https://github.com/airlenet/yang-maven-plugin</url>
+    <name>yang-java</name>
+    <description>yang-java</description>
+    <url>https://github.com/airlenet/yang-java</url>
     <modules>
         <module>yang-compiler</module>
         <module>yang-jnc</module>
@@ -49,12 +49,12 @@
     </organization>
     <scm>
         <connection>
-            scm:git:https://github.com/airlenet/yang-maven-plugin.git
+            scm:git:https://github.com/airlenet/yang-java.git
         </connection>
         <developerConnection>
-            https://github.com/airlenet/yang-maven-plugin.git
+            https://github.com/airlenet/yang-java.git
         </developerConnection>
-        <url>https://github.com/airlenet/yang-maven-plugin</url>
+        <url>https://github.com/airlenet/yang-java</url>
         <tag>HEAD</tag>
     </scm>
     <repositories>

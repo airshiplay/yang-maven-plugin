@@ -1717,7 +1717,7 @@ public final class UtilConstants {
     /**
      * Static attribute for error msg.
      */
-    public static final String VERSION_ERROR = "yang-tools " +
+    public static final String VERSION_ERROR = "yang-java " +
             "does not support maven version below \"3.3.9\" , your current " +
             "version is ";
 
