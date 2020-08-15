@@ -169,6 +169,22 @@ public class NetconfSession {
      */
     protected Capabilities capabilities;
 
+
+    /**
+     * The XML parser instance.
+     */
+    XMLParser parser;
+
+    /**
+     * The outgoing transport for this Session
+     */
+    Transport out;
+
+    /**
+     * The incoming transport for this Session
+     */
+    Transport in;
+
     /**
      * Return a Capabilities object with the NETCONF capabilities for this
      * session. The capabilities are received from the <code>hello</code>
@@ -186,21 +202,6 @@ public class NetconfSession {
     public boolean hasCapability(String uri) {
         return capabilities.hasCapability(uri);
     }
-
-    /**
-     * The XML parser instance.
-     */
-    XMLParser parser;
-
-    /**
-     * The outgoing transport for this Session
-     */
-    Transport out;
-
-    /**
-     * The incoming transport for this Session
-     */
-    Transport in;
 
     /**
      * Creates a new session object using the given transport object. This will

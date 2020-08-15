@@ -11,17 +11,15 @@ package com.tailf.jnc;
 public class Leaf extends Element {
 
     private static final long serialVersionUID = 1L;
-
+    // cache the Tagpath and the SchemaNode
+    private Tagpath tp = null;
+    private SchemaNode n = null;
     public Leaf(String ns, String name) {
         super(ns, name);
     }
 
-    // cache the Tagpath and the SchemaNode
-    private Tagpath tp = null;
-    private SchemaNode n = null;
-
     @Override
-    protected void encode(Transport out, boolean newline_at_end,
+    protected void encode(Transport out, boolean newlineAtEnd,
             Capabilities capas) throws JNCException {
         if (RevisionInfo.olderRevisionSupportEnabled && capas != null) {
             if (tp == null) {
@@ -69,7 +67,7 @@ public class Leaf extends Element {
                 }
             }
         }
-        super.encode(out, newline_at_end, capas);
+        super.encode(out, newlineAtEnd, capas);
     }
 
     @Override

@@ -1,6 +1,6 @@
 package com.tailf.jnc;
 
-public class YangInstanceIdentifier extends YangString {
+public class YangInstanceIdentifier extends YangBaseString {
 
     /**
      * Creates a YangString object from a java.lang.String.
