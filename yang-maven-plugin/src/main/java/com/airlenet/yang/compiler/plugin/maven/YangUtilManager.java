@@ -17,6 +17,7 @@
 package com.airlenet.yang.compiler.plugin.maven;
 
 import com.airlenet.yang.compiler.utils.UtilConstants;
+import org.apache.commons.io.FileUtils;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -33,21 +34,16 @@ import com.airlenet.yang.compiler.tool.DefaultYangCompilationParam;
 import com.airlenet.yang.compiler.tool.YangCompilerManager;
 import org.sonatype.plexus.build.incremental.BuildContext;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
+import static com.airlenet.yang.compiler.utils.UtilConstants.*;
 import static org.apache.maven.plugins.annotations.LifecyclePhase.PROCESS_SOURCES;
 import static org.apache.maven.plugins.annotations.ResolutionScope.COMPILE;
 import static com.airlenet.yang.compiler.plugin.utils.PluginUtils.getValidModelId;
-import static com.airlenet.yang.compiler.utils.UtilConstants.DEFAULT_BASE_PKG;
-import static com.airlenet.yang.compiler.utils.UtilConstants.DEFAULT_JAR_RES_PATH;
-import static com.airlenet.yang.compiler.utils.UtilConstants.EMPTY_STRING;
-import static com.airlenet.yang.compiler.utils.UtilConstants.IN;
-import static com.airlenet.yang.compiler.utils.UtilConstants.SLASH;
-import static com.airlenet.yang.compiler.utils.UtilConstants.TEMP;
-import static com.airlenet.yang.compiler.utils.UtilConstants.YANG_RESOURCES;
 import static com.airlenet.yang.compiler.utils.io.impl.YangFileScanner.getYangFiles;
 import static com.airlenet.yang.compiler.utils.io.impl.YangIoUtils.deleteDirectory;
 import static com.airlenet.yang.compiler.utils.io.impl.YangIoUtils.getDirectory;
@@ -170,7 +166,7 @@ public class YangUtilManager extends AbstractMojo {
                     DefaultYangCompilationParam.builder();
 
             bldr.setCodeGenDir(Paths.get(codeGenDir));
-            bldr.setMetadataGenDir(Paths.get(metaDataGenDir));
+            bldr.setMetadataGenDir(Paths.get(outputDir+SLASH+YANG));
             DEFAULT_BASE_PKG = packageName;
             bldr.setCodeGenPackage(packageName);
             bldr.setYangFilesDir(searchDir);
@@ -192,7 +188,7 @@ public class YangUtilManager extends AbstractMojo {
             output = compiler.compileYangFiles(bldr.build());
 
             YangPluginUtils.addToCompilationRoot(codeGenDir, project, context);
-            YangPluginUtils.addToProjectResource(outputDir + SLASH + TEMP + SLASH, project);
+//            YangPluginUtils.addToProjectResource(outputDir + SLASH + TEMP + SLASH, project);
         } catch (YangCompilerException e) {
             String fileName = EMPTY_STRING;
             if (e.getYangFile() != null) {

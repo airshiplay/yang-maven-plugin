@@ -41,7 +41,7 @@ public class DefaultYangCompiledOutput implements YangCompiledOutput {
      * @param generatedJava generated java paths
      */
     public DefaultYangCompiledOutput(YangModel model, Set<Path> generatedJava) {
-        checkNotNull(model);
+//        checkNotNull(model);
         checkNotNull(generatedJava);
         this.model = model;
         this.generatedJava = generatedJava;

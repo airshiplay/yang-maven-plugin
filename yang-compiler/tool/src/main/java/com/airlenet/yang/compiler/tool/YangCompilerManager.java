@@ -168,7 +168,7 @@ public class YangCompilerManager implements YangCompilerService {
                 createYangNodeSet();
 
                 // Serialize data model.
-                processSerialization(resourceGenDir, param.getModelId());
+//                processSerialization(resourceGenDir, param.getModelId());
 
                 // Resolve dependencies using linker.
                 try {
@@ -388,7 +388,7 @@ public class YangCompilerManager implements YangCompilerService {
         String serFileName = path + YANG_META_DATA;
         try (FileOutputStream out = new FileOutputStream(serFileName);
              ObjectOutputStream objectOutputStream = new ObjectOutputStream(new BufferedOutputStream(out))) {
-            objectOutputStream.writeObject(model);
+//            objectOutputStream.writeObject(model);
         }
     }
 
