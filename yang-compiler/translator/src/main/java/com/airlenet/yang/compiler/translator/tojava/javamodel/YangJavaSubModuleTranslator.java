@@ -122,7 +122,15 @@ public class YangJavaSubModuleTranslator
     public String getNameSpaceFromModule() {
         return ((YangModule) getBelongsTo().getModuleNode()).getModuleNamespace();
     }
-
+    public void generatePackageInfo(YangPluginConfig yangPlugin){
+        if(this.getParent()!=null){
+            ((JavaCodeGenerator)this.getParent()).generatePackageInfo(yangPlugin);
+        }
+        String subModulePkg = getRootPackage(
+                getVersion(), getModuleName(), getRevision(),
+                yangPlugin.getConflictResolver());
+        updateJNCPackageInfo(this,yangPlugin,subModulePkg);
+    }
     /**
      * Prepares the information for java code generation corresponding to
      * YANG submodule info.
@@ -139,7 +147,7 @@ public class YangJavaSubModuleTranslator
 
         updateJNCPackageInfo(this,yangPlugin,subModulePkg);
         YangNode moduleNode = getBelongsTo().getModuleNode();
-        ((YangJavaModuleTranslator) moduleNode).updatePackageInfo(yangPlugin);
+        ((YangJavaModuleTranslator) moduleNode).generatePackageInfo(yangPlugin);
 
 
 //        String modulePkg = getRootPackage(getVersion(),moduleNode. getModuleName(),

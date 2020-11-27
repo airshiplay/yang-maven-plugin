@@ -3,12 +3,16 @@ package com.airlenet.yang.compiler.translator.tojava.jnc;
 import com.airlenet.yang.compiler.datamodel.*;
 import com.airlenet.yang.compiler.datamodel.javadatamodel.*;
 import com.airlenet.yang.compiler.translator.tojava.javamodel.AttributesJavaDataType;
+import com.airlenet.yang.compiler.translator.tojava.javamodel.YangJavaAugmentTranslator;
+import com.airlenet.yang.compiler.translator.tojava.javamodel.YangJavaUsesTranslator;
 import com.tailf.jnc.ElementChildrenIterator;
 import com.tailf.jnc.ElementLeafListValueIterator;
 import com.tailf.jnc.JNCException;
 import com.tailf.jnc.YangBits;
 import com.tailf.jnc.YangElement;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -33,7 +37,7 @@ public class JNCCodeUtil {
         javaClass.addMethod(keyNames);
     }
 
-    public static void childrenNamesMethod(JavaClass javaClass, List<YangLeaf> listOfLeaf, List<YangLeafList> listOfLeafList, YangNode child) {
+    public static void childrenNamesMethod(JavaClass javaClass, List<YangLeaf> listOfLeaf, List<YangLeafList> listOfLeafList, YangNode child, List<YangAugment> augmentedInfoList) {
         JavaMethod childrenNames = new JavaMethod("childrenNames", "String[]");
         childrenNames.setModifiers("public")
                 .addLine("return new String[]{");
@@ -44,6 +48,29 @@ public class JNCCodeUtil {
 
         for (YangLeafList yangLeafList : listOfLeafList) {
             childrenNames.addLine("\t\t\"" + yangLeafList.getName() + "\",");
+        }
+
+        for (YangNode yangAugment : augmentedInfoList) {
+
+            List<YangLeaf> augmentListOfLeaf = ((YangJavaAugmentTranslator) yangAugment).getListOfLeaf();
+            for (YangLeaf yangLeaf : augmentListOfLeaf) {
+                childrenNames.addLine("\t\t\"" + yangLeaf.getName() + "\",");
+            }
+            YangNode augmentedNode = yangAugment.getChild();
+
+            if (augmentedNode == null) {
+                continue;
+            }
+
+            if (augmentedNode instanceof YangJavaUsesTranslator) {
+
+                augmentedNode = augmentedNode.getNextSibling();
+                if (augmentedNode == null) {
+                    continue;
+                }
+            }
+
+            childrenNames.addLine("\t\t\"" + augmentedNode.getName() + "\",");
         }
 
         while (child != null) {
@@ -75,7 +102,7 @@ public class JNCCodeUtil {
         if (keys == null || keys.isEmpty()) {
             clone.addLine("\tcopy = new " + javaClass.getName() + "();");
         } else {
-            String param = keys.stream().map(yangLeaf -> "get" + YangElement.normalize(yangLeaf.getName()) + "Value().toString()").collect(Collectors.joining(","));
+            String param = keys.stream().map(yangLeaf -> "get" + YangElement.normalizeField(yangLeaf.getName()) + "Value().toString()").collect(Collectors.joining(","));
             clone.addLine("try {").addLine("\tcopy = new " + javaClass.getName() + "(" + param + ");").addLine("} catch (JNCException e) {").addLine("    copy = null;").addLine("}");
         }
         clone.addLine(" return (" + javaClass.getName() + ")cloneContent(copy);");
@@ -91,7 +118,7 @@ public class JNCCodeUtil {
         if (yangLeafKeyList == null || yangLeafKeyList.isEmpty()) {
             cloneShallow.addLine("\tcopy = new " + javaClass.getName() + "();");
         } else {
-            String param = yangLeafKeyList.stream().map(yangLeaf -> "get" + YangElement.normalize(yangLeaf.getName()) + "Value().toString()").collect(Collectors.joining(","));
+            String param = yangLeafKeyList.stream().map(yangLeaf -> "get" + YangElement.normalizeField(yangLeaf.getName()) + "Value().toString()").collect(Collectors.joining(","));
             cloneShallow.addLine("try {").addLine("\tcopy = new " + javaClass.getName() + "(" + param + ");").addLine("} catch (JNCException e) {").addLine("    copy = null;").addLine("}");
         }
         cloneShallow.addLine(" return (" + javaClass.getName() + ")cloneShallowContent(copy);");
@@ -104,7 +131,7 @@ public class JNCCodeUtil {
 //            dataTypeYangLeaf =dataTypeYangLeaf.getReferredSchema();
 //        }
         String leafDateTypeClassName = AttributesJavaDataType.getJNCDataType(dataTypeYangLeaf.getDataType());
-        JavaMethod getMethod = new JavaMethod("get" + YangElement.normalize(yangLeaf.getName()) + "Value", leafDateTypeClassName).setModifiers("public");
+        JavaMethod getMethod = new JavaMethod("get" + YangElement.normalizeField(yangLeaf.getName()) + "Value", leafDateTypeClassName).setModifiers("public");
         getMethod.setExceptions("JNCException");
         getMethod.setJavadoc(yangLeaf.getDescription());
         if (yangLeaf.getDefaultValueInString() == null) {
@@ -119,7 +146,7 @@ public class JNCCodeUtil {
         javaClass.addMethod(getMethod);
         yangLeaf.getDefaultValueInString();
 
-        JavaMethod setMethod = new JavaMethod("set" + YangElement.normalize(yangLeaf.getName()) + "Value", "void").setModifiers("public");
+        JavaMethod setMethod = new JavaMethod("set" + YangElement.normalizeField(yangLeaf.getName()) + "Value", "void").setModifiers("public");
         setMethod.setExceptions("JNCException");
         setMethod.addParameter(leafDateTypeClassName, YangElement.camelize(yangLeaf.getName() + "Value"));
 
@@ -132,16 +159,16 @@ public class JNCCodeUtil {
 
         if (!"String".equals(leafDateTypeClassName)) {
 
-            setMethod = new JavaMethod("set" + YangElement.normalize(yangLeaf.getName()) + "Value", "void").setModifiers("public");
+            setMethod = new JavaMethod("set" + YangElement.normalizeField(yangLeaf.getName()) + "Value", "void").setModifiers("public");
             setMethod.setExceptions("JNCException");
             setMethod.addParameter("String", YangElement.camelize(yangLeaf.getName() + "Value"));
             if (com.tailf.jnc.YangEmpty.class.getName().equals(leafDateTypeClassName)) {
-                setMethod.addLine("set" + YangElement.normalize(yangLeaf.getName()) + "Value" + "(new " + leafDateTypeClassName + "());");
+                setMethod.addLine("set" + YangElement.normalizeField(yangLeaf.getName()) + "Value" + "(new " + leafDateTypeClassName + "());");
             } else if (leafDateTypeClassName.equals("byte[]")) {
-                setMethod.addLine("set" + YangElement.normalize(yangLeaf.getName()) + "Value" + "(" + YangElement.camelize(yangLeaf.getName() + "Value") + ".getBytes());");
+                setMethod.addLine("set" + YangElement.normalizeField(yangLeaf.getName()) + "Value" + "(" + YangElement.camelize(yangLeaf.getName() + "Value") + ".getBytes());");
             } else if (leafDateTypeClassName.equals(YangBits.class.getName())) {
                 Set<Map.Entry<Integer, YangBit>> entries = ((com.airlenet.yang.compiler.datamodel.YangBits) yangLeaf.getDataType().getDataTypeExtendedInfo()).getBitPositionMap().entrySet();
-                setMethod.addLine("set" + YangElement.normalize(yangLeaf.getName()) + "Value" + "(new com.tailf.jnc.YangBits(" + YangElement.camelize(yangLeaf.getName() + "Value") + ",");
+                setMethod.addLine("set" + YangElement.normalizeField(yangLeaf.getName()) + "Value" + "(new com.tailf.jnc.YangBits(" + YangElement.camelize(yangLeaf.getName() + "Value") + ",");
                 setMethod.addLine("\tnew java.math.BigInteger(\"" + entries.stream().map(entry -> entry.getKey().intValue()).collect(Collectors.summarizingInt(position -> 1 << position)).getSum() + "\"),");
                 setMethod.addLine("\tnew String[] {" + entries.stream().map(entry -> "\"" + entry.getValue().getBitName() + "\"").collect(Collectors.joining(",")) + " },");
                 setMethod.addLine("\tnew int[] {" + entries.stream().map(entry -> entry.getKey().intValue() + "").collect(Collectors.joining(",")) + " }");
@@ -149,13 +176,45 @@ public class JNCCodeUtil {
 //                    setMethod.addLine("    new int[] {0, 1, 2, }");
                 setMethod.addLine("));");
             } else {
-                setMethod.addLine("set" + YangElement.normalize(yangLeaf.getName()) + "Value" + "(new " + leafDateTypeClassName + "(" + YangElement.camelize(yangLeaf.getName() + "Value") + "));");
+                setMethod.addLine("set" + YangElement.normalizeField(yangLeaf.getName()) + "Value" + "(new " + leafDateTypeClassName + "(" + YangElement.camelize(yangLeaf.getName() + "Value") + "));");
             }
             javaClass.addMethod(setMethod);
         }
 
+        JavaMethod setRealMethod = new JavaMethod("set" + YangElement.normalizeField(yangLeaf.getName()) + "Value", "void").setModifiers("public");
+        setRealMethod.setExceptions("JNCException");
 
-        JavaMethod addMethod = new JavaMethod("add" + YangElement.normalize(yangLeaf.getName()), "void").setModifiers("public");
+        if (com.tailf.jnc.YangDecimal64.class.getName().equals(leafDateTypeClassName)) {
+            setRealMethod.addParameter(BigDecimal.class.getName(), YangElement.camelize(yangLeaf.getName() + "Value"));
+            setRealMethod.addLine("set" + YangElement.normalizeField(yangLeaf.getName()) + "Value(new " + leafDateTypeClassName + "(" + YangElement.camelize(yangLeaf.getName() + "Value" + "));"));
+            javaClass.addMethod(setRealMethod);
+        } else if (com.tailf.jnc.YangUInt64.class.getName().equals(leafDateTypeClassName)) {
+            setRealMethod.addParameter(BigInteger.class.getName(), YangElement.camelize(yangLeaf.getName() + "Value"));
+            setRealMethod.addLine("set" + YangElement.normalizeField(yangLeaf.getName()) + "Value(new " + leafDateTypeClassName + "(" + YangElement.camelize(yangLeaf.getName() + "Value" + "));"));
+            javaClass.addMethod(setRealMethod);
+        } else if (com.tailf.jnc.YangInt64.class.getName().equals(leafDateTypeClassName) || com.tailf.jnc.YangUInt32.class.getName().equals(leafDateTypeClassName)) {
+            setRealMethod.addParameter(Long.class.getName(), YangElement.camelize(yangLeaf.getName() + "Value"));
+            setRealMethod.addLine("set" + YangElement.normalizeField(yangLeaf.getName()) + "Value(new " + leafDateTypeClassName + "(" + YangElement.camelize(yangLeaf.getName() + "Value" + "));"));
+            javaClass.addMethod(setRealMethod);
+        } else if (com.tailf.jnc.YangInt32.class.getName().equals(leafDateTypeClassName) || com.tailf.jnc.YangUInt16.class.getName().equals(leafDateTypeClassName)) {
+            setRealMethod.addParameter(Integer.class.getName(), YangElement.camelize(yangLeaf.getName() + "Value"));
+            setRealMethod.addLine("set" + YangElement.normalizeField(yangLeaf.getName()) + "Value(new " + leafDateTypeClassName + "(" + YangElement.camelize(yangLeaf.getName() + "Value" + "));"));
+            javaClass.addMethod(setRealMethod);
+        } else if (com.tailf.jnc.YangInt16.class.getName().equals(leafDateTypeClassName) || com.tailf.jnc.YangUInt8.class.getName().equals(leafDateTypeClassName)) {
+            setRealMethod.addParameter(Integer.class.getName(), YangElement.camelize(yangLeaf.getName() + "Value"));
+            setRealMethod.addLine("set" + YangElement.normalizeField(yangLeaf.getName()) + "Value(new " + leafDateTypeClassName + "(" + YangElement.camelize(yangLeaf.getName() + "Value" + "));"));
+            javaClass.addMethod(setRealMethod);
+        } else if (com.tailf.jnc.YangInt8.class.getName().equals(leafDateTypeClassName)) {
+            setRealMethod.addParameter(Short.class.getName(), YangElement.camelize(yangLeaf.getName() + "Value"));
+            setRealMethod.addLine("set" + YangElement.normalizeField(yangLeaf.getName()) + "Value(new " + leafDateTypeClassName + "(" + YangElement.camelize(yangLeaf.getName() + "Value" + "));"));
+
+            javaClass.addMethod(setRealMethod);
+        } else {
+            //TODO
+        }
+
+
+        JavaMethod addMethod = new JavaMethod("add" + YangElement.normalizeField(yangLeaf.getName()), "void").setModifiers("public");
         addMethod.setExceptions("JNCException");
         addMethod.addLine("setLeafValue(" + yangJavaModule.getPrefixClassName() + ".NAMESPACE,");
         addMethod.addLine("\t\"" + yangLeaf.getName() + "\",");
@@ -164,13 +223,13 @@ public class JNCCodeUtil {
 
         javaClass.addMethod(addMethod);
 
-        JavaMethod unsetMethod = new JavaMethod("unset" + YangElement.normalize(yangLeaf.getName()) + "Value", "void").setModifiers("public");
+        JavaMethod unsetMethod = new JavaMethod("unset" + YangElement.normalizeField(yangLeaf.getName()) + "Value", "void").setModifiers("public");
         unsetMethod.setExceptions("JNCException");
         unsetMethod.addLine("delete" + "(\"" + yangLeaf.getName() + "\");");
         javaClass.addMethod(unsetMethod);
 
         Arrays.asList("Create", "Replace", "Merge", "Delete", "Remove").forEach(markType -> {
-            JavaMethod markMethod = new JavaMethod("mark" + YangElement.normalize(yangLeaf.getName()) + markType, "void").setModifiers("public");
+            JavaMethod markMethod = new JavaMethod("mark" + YangElement.normalizeField(yangLeaf.getName()) + markType, "void").setModifiers("public");
             markMethod.setExceptions("JNCException");
             markMethod.addLine("markLeaf" + markType + "(\"" + yangLeaf.getName() + "\");");
             javaClass.addMethod(markMethod);
@@ -323,6 +382,52 @@ public class JNCCodeUtil {
                 javaClass.addMethod(markMethod);
             }
 
+
+        });
+    }
+
+    public static void yangJavaAnydataMethod(JavaClass javaClass, YangJavaModule yangJavaModule, YangJavaAnydata yangLeaf) {
+
+        String leafDateTypeClassName = "String";
+        JavaMethod getMethod = new JavaMethod("get" + YangElement.normalize(yangLeaf.getName()) + "Value", leafDateTypeClassName).setModifiers("public");
+        getMethod.setExceptions("JNCException");
+        getMethod.setJavadoc(yangLeaf.getDescription());
+
+        getMethod.addLine("return (" + leafDateTypeClassName + ")" + "getValue(\"" + yangLeaf.getName() + "\");");
+
+        javaClass.addMethod(getMethod);
+
+        JavaMethod setMethod = new JavaMethod("set" + YangElement.normalize(yangLeaf.getName()) + "Value", "void").setModifiers("public");
+        setMethod.setExceptions("JNCException");
+        setMethod.addParameter(leafDateTypeClassName, YangElement.camelize(yangLeaf.getName() + "Value"));
+
+
+        setMethod.addLine("setLeafValue(" + yangJavaModule.getPrefixClassName() + ".NAMESPACE,");
+        setMethod.addLine("\t\"" + yangLeaf.getName() + "\",");
+        setMethod.addLine("\t" + YangElement.camelize(yangLeaf.getName() + "Value") + ",");
+        setMethod.addLine("\tchildrenNames());");
+        javaClass.addMethod(setMethod);
+
+
+        JavaMethod addMethod = new JavaMethod("add" + YangElement.normalize(yangLeaf.getName()), "void").setModifiers("public");
+        addMethod.setExceptions("JNCException");
+        addMethod.addLine("setLeafValue(" + yangJavaModule.getPrefixClassName() + ".NAMESPACE,");
+        addMethod.addLine("\t\"" + yangLeaf.getName() + "\",");
+        addMethod.addLine("\tnull,");
+        addMethod.addLine("\tchildrenNames());");
+
+        javaClass.addMethod(addMethod);
+
+        JavaMethod unsetMethod = new JavaMethod("unset" + YangElement.normalize(yangLeaf.getName()) + "Value", "void").setModifiers("public");
+        unsetMethod.setExceptions("JNCException");
+        unsetMethod.addLine("delete" + "(\"" + yangLeaf.getName() + "\");");
+        javaClass.addMethod(unsetMethod);
+
+        Arrays.asList("Create", "Replace", "Merge", "Delete", "Remove").forEach(markType -> {
+            JavaMethod markMethod = new JavaMethod("mark" + YangElement.normalize(yangLeaf.getName()) + markType, "void").setModifiers("public");
+            markMethod.setExceptions("JNCException");
+            markMethod.addLine("markLeaf" + markType + "(\"" + yangLeaf.getName() + "\");");
+            javaClass.addMethod(markMethod);
 
         });
     }

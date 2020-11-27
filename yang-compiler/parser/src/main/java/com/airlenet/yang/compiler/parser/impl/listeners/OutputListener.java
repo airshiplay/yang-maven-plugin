@@ -16,9 +16,7 @@
 
 package com.airlenet.yang.compiler.parser.impl.listeners;
 
-import com.airlenet.yang.compiler.datamodel.YangNode;
-import com.airlenet.yang.compiler.datamodel.YangOutput;
-import com.airlenet.yang.compiler.datamodel.YangRpc;
+import com.airlenet.yang.compiler.datamodel.*;
 import com.airlenet.yang.compiler.datamodel.exceptions.DataModelException;
 import com.airlenet.yang.compiler.datamodel.utils.Parsable;
 import com.airlenet.yang.compiler.parser.exceptions.ParserException;
@@ -81,7 +79,7 @@ public final class OutputListener {
         ListenerValidation.checkStackIsNotEmpty(listener, ListenerErrorType.MISSING_HOLDER, OUTPUT_DATA, "", ListenerErrorLocation.ENTRY);
 
         Parsable curData = listener.getParsedDataStack().peek();
-        if (curData instanceof YangRpc) {
+        if (curData instanceof YangRpc || curData instanceof YangAction || curData instanceof YangTailfAction) {
 
             YangOutput yangOutput = getYangOutputNode(JAVA_GENERATION);
             yangOutput.setName(OUTPUT);

@@ -109,16 +109,16 @@ public class YangJavaAnydataTranslator
      */
     @Override
     public void generateCodeEntry(YangPluginConfig yangPlugin) throws TranslatorException {
-        try {
-            generateCodeAndUpdateInParent(this, yangPlugin, false);
-        } catch (IOException e) {
-            throw new TranslatorException("Failed to generate code for " +
-                                                  "anydata node " +
-                                                  getName() + " in " +
-                                                  getLineNumber() + " at " +
-                                                  getCharPosition()
-                                                  + " in " + getFileName() + " " + e.getLocalizedMessage());
-        }
+//        try {
+//            generateCodeAndUpdateInParent(this, yangPlugin, false);
+//        } catch (IOException e) {
+//            throw new TranslatorException("Failed to generate code for " +
+//                                                  "anydata node " +
+//                                                  getName() + " in " +
+//                                                  getLineNumber() + " at " +
+//                                                  getCharPosition()
+//                                                  + " in " + getFileName() + " " + e.getLocalizedMessage());
+//        }
     }
 
     /**
@@ -128,15 +128,15 @@ public class YangJavaAnydataTranslator
      */
     @Override
     public void generateCodeExit() throws TranslatorException {
-        try {
-            generateJava(GENERATE_INTERFACE_WITH_BUILDER, this);
-        } catch (IOException e) {
-            throw new TranslatorException("Failed to generate code for " +
-                                                  "anydata node " +
-                                                  getName() + " in " +
-                                                  getLineNumber() + " at " +
-                                                  getCharPosition()
-                                                  + " in " + getFileName() + " " + e.getLocalizedMessage());
-        }
+//        try {
+//            generateJava(GENERATE_INTERFACE_WITH_BUILDER, this);
+//        } catch (IOException e) {
+//            throw new TranslatorException("Failed to generate code for " +
+//                                                  "anydata node " +
+//                                                  getName() + " in " +
+//                                                  getLineNumber() + " at " +
+//                                                  getCharPosition()
+//                                                  + " in " + getFileName() + " " + e.getLocalizedMessage());
+//        }
     }
 }

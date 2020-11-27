@@ -199,15 +199,15 @@ public class YangUtilManager extends AbstractMojo {
                         DEFAULT_BASE_PKG));
             } catch (IOException ex) {
                 throw new MojoExecutionException(
-                        "Error handler failed to delete files for data model node.");
+                        "Error handler failed to delete files for data model node.",e);
             }
             getLog().info(e.getCause());
             throw new MojoExecutionException(
                     "Exception occurred due to " + e.getLocalizedMessage() +
-                            IN + fileName + " YANG file.");
+                            IN + fileName + " YANG file.",e);
         } catch (IOException e) {
             throw new MojoExecutionException(
-                    "Failed to process files");
+                    "Failed to process files",e);
         }
     }
 }

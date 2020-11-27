@@ -15,9 +15,7 @@
  */
 package com.airlenet.yang.compiler.translator.tojava.javamodel;
 
-import com.airlenet.yang.compiler.datamodel.YangLeaf;
-import com.airlenet.yang.compiler.datamodel.YangLeafList;
-import com.airlenet.yang.compiler.datamodel.YangNode;
+import com.airlenet.yang.compiler.datamodel.*;
 import com.airlenet.yang.compiler.datamodel.javadatamodel.*;
 import com.airlenet.yang.compiler.datamodel.utils.builtindatatype.YangDataTypes;
 import com.airlenet.yang.compiler.translator.exception.TranslatorException;
@@ -109,6 +107,14 @@ public class YangJavaListTranslator
         tempFileHandle = fileHandle;
     }
 
+    @Override
+    public void generatePackageInfo(YangPluginConfig yangPlugin) {
+        if(this.getParent()!=null){
+            ((JavaCodeGenerator)this.getParent()).generatePackageInfo(yangPlugin);
+        }
+        updateJNCPackageInfo(this, yangPlugin);
+    }
+
     /**
      * Prepare the information for java code generation corresponding to YANG
      * list info.
@@ -193,8 +199,15 @@ public class YangJavaListTranslator
 
 
         //// empty constructor
-        javaClass.addMethod(new JavaMethod(javaClass.getName(), "").setModifiers("public").addDependency(yangJavaModule.getJavaPackage() + "." + yangJavaModule.getPrefixClassName())
-                .addLine("super(" + yangJavaModule.getPrefixClassName() + ".NAMESPACE, \"" + this.getName() + "\");"));
+        JavaMethod emptyConstructorMethod = new JavaMethod(javaClass.getName(), "").setModifiers("public").addDependency(yangJavaModule.getJavaPackage() + "." + yangJavaModule.getPrefixClassName())
+                .addLine("super(" + yangJavaModule.getPrefixClassName() + ".NAMESPACE, \"" + this.getName() + "\");")
+                ;
+        YangJavaModule parentYangJavaModule = (YangJavaModule) getParent().getYangJavaModule();
+        if(parentYangJavaModule ==null || getParent() instanceof YangJavaModule ||!parentYangJavaModule.getPrefixClassName().equals(yangJavaModule.getPrefixClassName())){
+            emptyConstructorMethod.addLine("setDefaultPrefix();");
+        }
+
+        javaClass.addMethod(emptyConstructorMethod);
 
         List<YangLeaf> listOfLeaf = this.getListOfLeaf();
 
@@ -212,8 +225,17 @@ public class YangJavaListTranslator
 //            }
                 String jncDataType = AttributesJavaDataType.getJNCDataType(dataTypeYangLeaf.getDataType());
                 constructor.addParameter(jncDataType, YangElement.camelize(yangLeaf.getName() + "Value"));
+                if(jncDataType.equals("com.tailf.jnc.YangIdentityref")){
+                    YangJavaModule javaModule = (YangJavaModule)((YangIdentityRef) yangLeaf.getDataType().getDataTypeExtendedInfo()).getReferredIdentity().getYangJavaModule();
+                    constructor.addLine("setPrefix(new com.tailf.jnc.Prefix("+javaModule.getJavaPackage()+"."+javaModule.getPrefixClassName()+".PREFIX,");
+                    constructor.addLine("\t\t"+javaModule.getJavaPackage()+"."+javaModule.getPrefixClassName()+".NAMESPACE));");
+                    emptyConstructorMethod.addLine("setPrefix(new com.tailf.jnc.Prefix("+javaModule.getJavaPackage()+"."+javaModule.getPrefixClassName()+".PREFIX,");
+                    emptyConstructorMethod.addLine("\t\t"+javaModule.getJavaPackage()+"."+javaModule.getPrefixClassName()+".NAMESPACE));");
+                }
                 constructor.addLine("Leaf " + YangElement.camelize(yangLeaf.getName()) + " = new Leaf(" + yangJavaModule.getPrefixClassName() + ".NAMESPACE, \"" + yangLeaf.getName() + "\");");
                 constructor.addLine(YangElement.camelize(yangLeaf.getName()) + ".setValue(" + YangElement.camelize(yangLeaf.getName()+ "Value") +");");
+
+
                 constructor.addLine("insertChild(" + YangElement.camelize(yangLeaf.getName()) + ", childrenNames());");
             }
             constructor.setModifiers("public").setExceptions("JNCException").addDependency(yangJavaModule.getJavaPackage() + "." + yangJavaModule.getPrefixClassName());
@@ -223,9 +245,16 @@ public class YangJavaListTranslator
             constructor = new JavaMethod(javaClass.getName(), "").addDependency("com.tailf.jnc.Leaf");
             constructor.addLine("super(" + yangJavaModule.getPrefixClassName() + ".NAMESPACE, \"" + this.getName() + "\");");
             for (YangLeaf yangLeaf : keys) {
-                constructor.addParameter("String", YangElement.camelize(yangLeaf.getName() + "Value"));
-                constructor.addLine("Leaf " + YangElement.camelize(yangLeaf.getName()) + " = new Leaf(" + yangJavaModule.getPrefixClassName() + ".NAMESPACE, \"" + yangLeaf.getName() + "\");");
                 YangLeaf dataTypeYangLeaf = yangLeaf;
+                constructor.addParameter("String", YangElement.camelize(yangLeaf.getName() + "Value"));
+                String jncDataType = AttributesJavaDataType.getJNCDataType(dataTypeYangLeaf.getDataType());
+                if(jncDataType.equals("com.tailf.jnc.YangIdentityref")){
+                    YangJavaModule javaModule = (YangJavaModule)((YangIdentityRef) yangLeaf.getDataType().getDataTypeExtendedInfo()).getReferredIdentity().getYangJavaModule();
+                    constructor.addLine("setPrefix(new com.tailf.jnc.Prefix("+javaModule.getJavaPackage()+"."+javaModule.getPrefixClassName()+".PREFIX,");
+                    constructor.addLine("\t\t"+javaModule.getJavaPackage()+"."+javaModule.getPrefixClassName()+".NAMESPACE));");
+                }
+                constructor.addLine("Leaf " + YangElement.camelize(yangLeaf.getName()) + " = new Leaf(" + yangJavaModule.getPrefixClassName() + ".NAMESPACE, \"" + yangLeaf.getName() + "\");");
+
 //                while (dataTypeYangLeaf.getReferredSchema()!=null){
 //                    dataTypeYangLeaf =dataTypeYangLeaf.getReferredSchema();
 //                }
@@ -242,7 +271,7 @@ public class YangJavaListTranslator
         JNCCodeUtil.keyNamesMethod(javaClass, getListOfKeyLeaf());
 
 ////childrenNames
-        JNCCodeUtil.childrenNamesMethod(javaClass, getListOfLeaf(), getListOfLeafList(), getChild());
+        JNCCodeUtil.childrenNamesMethod(javaClass, getListOfLeaf(), getListOfLeafList(), getChild(), getAugmentedInfoList());
 
 ////clone
         JNCCodeUtil.cloneMethod(javaClass, keys);
@@ -262,7 +291,8 @@ public class YangJavaListTranslator
         {
             YangNode child = this.getChild();
             while (child != null) {
-                if (child instanceof YangJavaUnion || child instanceof YangJavaUses || child instanceof YangJavaGrouping || child instanceof YangJavaEnumeration) {
+                if (child instanceof YangJavaUnion || child instanceof YangJavaUses || child instanceof YangJavaGrouping || child instanceof YangJavaEnumeration
+                        || child instanceof YangJavaAction|| child instanceof YangJavaTailfAction) {
 
                 } else if (child instanceof YangJavaList) {
 //                JNCCodeUtil.yangNodeMethond(javaClass, child);
@@ -279,6 +309,8 @@ public class YangJavaListTranslator
                         }
                         childChild = childChild.getNextSibling();
                     }
+                } else if(child instanceof YangJavaAnydata ){
+                    JNCCodeUtil.yangJavaAnydataMethod(javaClass,yangJavaModule, (YangJavaAnydata)child);
                 } else {
                     JNCCodeUtil.yangNodeMethond(javaClass, child,false);
                 }

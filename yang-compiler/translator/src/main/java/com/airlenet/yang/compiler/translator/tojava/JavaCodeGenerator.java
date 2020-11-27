@@ -26,6 +26,9 @@ import java.io.IOException;
  */
 public interface JavaCodeGenerator {
 
+    public default void generatePackageInfo(YangPluginConfig yangPlugin){
+
+    }
     /**
      * Traverse the schema of application and generate corresponding code.
      *

@@ -15,49 +15,10 @@
  */
 package com.airlenet.yang.compiler.translator.tojava;
 
-import com.airlenet.yang.compiler.datamodel.YangAnydata;
-import com.airlenet.yang.compiler.datamodel.YangAugment;
-import com.airlenet.yang.compiler.datamodel.YangCase;
-import com.airlenet.yang.compiler.datamodel.YangChoice;
-import com.airlenet.yang.compiler.datamodel.YangContainer;
-import com.airlenet.yang.compiler.datamodel.YangGrouping;
-import com.airlenet.yang.compiler.datamodel.YangIdentity;
-import com.airlenet.yang.compiler.datamodel.YangInput;
-import com.airlenet.yang.compiler.datamodel.YangLeaf;
-import com.airlenet.yang.compiler.datamodel.YangLeafList;
-import com.airlenet.yang.compiler.datamodel.YangList;
-import com.airlenet.yang.compiler.datamodel.YangModule;
-import com.airlenet.yang.compiler.datamodel.YangNotification;
-import com.airlenet.yang.compiler.datamodel.YangOutput;
-import com.airlenet.yang.compiler.datamodel.YangRpc;
-import com.airlenet.yang.compiler.datamodel.YangSubModule;
-import com.airlenet.yang.compiler.datamodel.YangType;
-import com.airlenet.yang.compiler.datamodel.YangTypeDef;
-import com.airlenet.yang.compiler.datamodel.YangUnion;
-import com.airlenet.yang.compiler.datamodel.YangUses;
+import com.airlenet.yang.compiler.datamodel.*;
 import com.airlenet.yang.compiler.datamodel.utils.GeneratedLanguage;
 import com.airlenet.yang.compiler.translator.exception.TranslatorException;
-import com.airlenet.yang.compiler.translator.tojava.javamodel.YangJavaAnydataTranslator;
-import com.airlenet.yang.compiler.translator.tojava.javamodel.YangJavaAugmentTranslator;
-import com.airlenet.yang.compiler.translator.tojava.javamodel.YangJavaCaseTranslator;
-import com.airlenet.yang.compiler.translator.tojava.javamodel.YangJavaChoiceTranslator;
-import com.airlenet.yang.compiler.translator.tojava.javamodel.YangJavaContainerTranslator;
-import com.airlenet.yang.compiler.translator.tojava.javamodel.YangJavaEnumerationTranslator;
-import com.airlenet.yang.compiler.translator.tojava.javamodel.YangJavaGroupingTranslator;
-import com.airlenet.yang.compiler.translator.tojava.javamodel.YangJavaIdentityTranslator;
-import com.airlenet.yang.compiler.translator.tojava.javamodel.YangJavaInputTranslator;
-import com.airlenet.yang.compiler.translator.tojava.javamodel.YangJavaLeafListTranslator;
-import com.airlenet.yang.compiler.translator.tojava.javamodel.YangJavaLeafTranslator;
-import com.airlenet.yang.compiler.translator.tojava.javamodel.YangJavaListTranslator;
-import com.airlenet.yang.compiler.translator.tojava.javamodel.YangJavaModuleTranslator;
-import com.airlenet.yang.compiler.translator.tojava.javamodel.YangJavaNotificationTranslator;
-import com.airlenet.yang.compiler.translator.tojava.javamodel.YangJavaOutputTranslator;
-import com.airlenet.yang.compiler.translator.tojava.javamodel.YangJavaRpcTranslator;
-import com.airlenet.yang.compiler.translator.tojava.javamodel.YangJavaSubModuleTranslator;
-import com.airlenet.yang.compiler.translator.tojava.javamodel.YangJavaTypeDefTranslator;
-import com.airlenet.yang.compiler.translator.tojava.javamodel.YangJavaTypeTranslator;
-import com.airlenet.yang.compiler.translator.tojava.javamodel.YangJavaUnionTranslator;
-import com.airlenet.yang.compiler.translator.tojava.javamodel.YangJavaUsesTranslator;
+import com.airlenet.yang.compiler.translator.tojava.javamodel.*;
 
 /**
  * Represents factory to create data model objects based on the target file type.
@@ -377,6 +338,26 @@ public final class YangDataModelFactory {
         }
     }
 
+    public static YangAction getYangActionNode(GeneratedLanguage targetLanguage) {
+        switch (targetLanguage) {
+            case JAVA_GENERATION: {
+                return new YangJavaActionTranslator();
+            }
+            default: {
+                throw new TranslatorException("Only YANG to Java is supported.");
+            }
+        }
+    }
+    public static YangTailfAction getYangTailfActionNode(GeneratedLanguage targetLanguage) {
+        switch (targetLanguage) {
+            case JAVA_GENERATION: {
+                return new YangJavaTailfActionTranslator();
+            }
+            default: {
+                throw new TranslatorException("Only YANG to Java is supported.");
+            }
+        }
+    }
     /**
      * Returns based on the target language generate the inherited data model node.
      *

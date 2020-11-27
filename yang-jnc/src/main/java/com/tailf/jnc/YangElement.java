@@ -375,6 +375,26 @@ public abstract class YangElement extends Element {
             return capitalize(res);
         }
     }
+    public static String normalizeField(String s) {
+//        s= s.replaceAll("_","-");
+        final String res = camelize(s);
+        int start = 0, end = res.length();
+
+        if (res.startsWith("_")) {
+            start++;
+        }
+        if (res.endsWith("_")) {
+            end--;
+        }
+
+        if (end - start < 0) {
+            return "";
+        } else if (start != 0 || end != res.length()) {
+            return "J" + capitalize(res.substring(start, end));
+        } else {
+            return capitalize(res);
+        }
+    }
 
     protected void setLeafValue(String ns, String path, Object value,
                                 String[] childrenNames) throws JNCException {

@@ -187,13 +187,13 @@ public final class PatternRestrictionListener {
         try {
             Pattern.compile(compile);
         } catch (PatternSyntaxException e) {
-            ParserException exc = new ParserException(
-                    "YANG file error : " + getYangConstructType(PATTERN_DATA)
-                            + " name " + ctx.string().getText()
-                            + " is not a valid regular expression");
-            exc.setLine(ctx.getStart().getLine());
-            exc.setCharPosition(ctx.getStart().getCharPositionInLine());
-            throw exc;
+//            ParserException exc = new ParserException(
+//                    "YANG file error : " + getYangConstructType(PATTERN_DATA)
+//                            + " name " + ctx.string().getText()
+//                            + " is not a valid regular expression");
+//            exc.setLine(ctx.getStart().getLine());
+//            exc.setCharPosition(ctx.getStart().getCharPositionInLine());
+//            throw exc;
         }
         return compile;
     }

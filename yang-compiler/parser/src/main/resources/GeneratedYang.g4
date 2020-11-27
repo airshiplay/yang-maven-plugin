@@ -380,6 +380,8 @@ import YangLexer;
                     | choiceStatement
                     | anyxmlStatement
                     | usesStatement
+                    | actionStatement
+                    | tailfActionStatement
                     | anydataStatement;
 
     /**
@@ -1146,7 +1148,7 @@ import YangLexer;
     augmentStatement : AUGMENT_KEYWORD augment LEFT_CURLY_BRACE stmtSep
             ((whenStatement | ifFeatureStatement | statusStatement
             | descriptionStatement | referenceStatement
-            | dataDefStatement  | caseStatement) stmtSep)* RIGHT_CURLY_BRACE;
+            | dataDefStatement  | caseStatement | actionStatement | tailfActionStatement| listStatement) stmtSep)* RIGHT_CURLY_BRACE;
 
     /**
      *  when-stmt           = when-keyword sep string optsep
@@ -1182,9 +1184,19 @@ import YangLexer;
     rpcStatement : RPC_KEYWORD identifier (STMTEND | LEFT_CURLY_BRACE stmtSep
             ((ifFeatureStatement | statusStatement | descriptionStatement
             | referenceStatement | typedefStatement | groupingStatement
-            | inputStatement | outputStatement | defaultDenyAllStatement)
+            | actionStatement | tailfActionStatement | inputStatement | outputStatement | defaultDenyAllStatement)
             stmtSep)* RIGHT_CURLY_BRACE);
 
+    actionStatement : ACTION_KEYWORD identifier (STMTEND | LEFT_CURLY_BRACE stmtSep
+            ((ifFeatureStatement | statusStatement | descriptionStatement
+            | referenceStatement | typedefStatement | groupingStatement
+            | inputStatement | outputStatement | defaultDenyAllStatement)
+            stmtSep)* RIGHT_CURLY_BRACE);
+    tailfActionStatement : TAILF_ACTION_KEYWORD identifier (STMTEND | LEFT_CURLY_BRACE stmtSep
+            ((ifFeatureStatement | statusStatement | descriptionStatement
+            | referenceStatement | typedefStatement | groupingStatement
+            | inputStatement | outputStatement | defaultDenyAllStatement)
+            stmtSep)* RIGHT_CURLY_BRACE);
     /**
      * input-stmt          = input-keyword optsep
      *                       "{" stmtsep
@@ -1481,7 +1493,7 @@ import YangLexer;
                 | errorAppTagStatement | errorMessageStatement | extensionStatement
                 | featureStatement | fractionDigitStatement | groupingStatement
                 | identityStatement | ifFeatureStatement | importStatement
-                | includeStatement | inputStatement | keyStatement
+                | includeStatement | inputStatement | actionStatement | tailfActionStatement | keyStatement
                 | leafListStatement | leafStatement | lengthStatement
                 | listStatement | mandatoryStatement | maxElementsStatement
                 | minElementsStatement | moduleStatement | mustStatement
@@ -1574,7 +1586,7 @@ import YangLexer;
                   | MODULE_KEYWORD | MUST_KEYWORD | NAMESPACE_KEYWORD | NOTIFICATION_KEYWORD | ORDERED_BY_KEYWORD
                   | ORGANIZATION_KEYWORD | OUTPUT_KEYWORD | PATH_KEYWORD | PATTERN_KEYWORD | POSITION_KEYWORD
                   | PREFIX_KEYWORD | PRESENCE_KEYWORD | RANGE_KEYWORD | REFERENCE_KEYWORD | REFINE_KEYWORD
-                  | REQUIRE_INSTANCE_KEYWORD | REVISION_KEYWORD | REVISION_DATE_KEYWORD | RPC_KEYWORD
+                  | REQUIRE_INSTANCE_KEYWORD | REVISION_KEYWORD | REVISION_DATE_KEYWORD | RPC_KEYWORD | ACTION_KEYWORD | TAILF_ACTION_KEYWORD
                   | STATUS_KEYWORD | SUBMODULE_KEYWORD | TYPE_KEYWORD | TYPEDEF_KEYWORD | UNIQUE_KEYWORD
                   | UNITS_KEYWORD | USES_KEYWORD | VALUE_KEYWORD | WHEN_KEYWORD | YANG_VERSION_KEYWORD
                   | YIN_ELEMENT_KEYWORD | ADD_KEYWORD | CURRENT_KEYWORD | DELETE_KEYWORD | DEPRECATED_KEYWORD

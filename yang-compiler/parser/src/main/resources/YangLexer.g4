@@ -79,6 +79,8 @@ package com.airlenet.yang.compiler.parser.antlrgencode;
     REVISION_KEYWORD    : 'revision';
     REVISION_DATE_KEYWORD : 'revision-date';
     RPC_KEYWORD         : 'rpc';
+    ACTION_KEYWORD      : 'action';
+    TAILF_ACTION_KEYWORD    : 'tailf:action';
     STATUS_KEYWORD      : 'status';
     SUBMODULE_KEYWORD   : 'submodule';
     TYPE_KEYWORD        : 'type';

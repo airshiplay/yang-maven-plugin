@@ -109,7 +109,7 @@ public class YangJavaModuleTranslator
         tempFileHandle = fileHandle;
     }
 
-    public void updatePackageInfo(YangPluginConfig yangPlugin){
+    public void generatePackageInfo(YangPluginConfig yangPlugin){
         String modulePkg = getRootPackage(getVersion(), getModuleName(),
                 getRevision(),
                 yangPlugin.getConflictResolver());
@@ -132,7 +132,7 @@ public class YangJavaModuleTranslator
         String prefixPkg = getPrefixPackage(getVersion(), getModuleName(),
                 getRevision(),
                 yangPlugin.getConflictResolver());
-        updatePackageInfo(yangPlugin);
+        generatePackageInfo(yangPlugin);
 
         JavaFileInfoTranslator fileInfo = this.getJavaFileInfo();
 

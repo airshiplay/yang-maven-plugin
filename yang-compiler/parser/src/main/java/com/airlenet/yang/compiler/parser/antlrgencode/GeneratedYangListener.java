@@ -1205,6 +1205,13 @@ public interface GeneratedYangListener extends ParseTreeListener {
      * @param currentContext current context in the parsed tree
      */
     void exitRpcStatement(RpcStatementContext currentContext);
+
+
+
+    void enterActionStatement(ActionStatementContext currentContext);
+
+    void exitActionStatement(ActionStatementContext currentContext);
+
     /**
      * Enters a parse tree produced by GeneratedYangParser for grammar rule inputStatement.
      *
@@ -1786,4 +1793,8 @@ public interface GeneratedYangListener extends ParseTreeListener {
      * @param currentContext current context in the parsed tree
      */
     void exitYangStatement(YangStatementContext currentContext);
+
+    void enterTailfActionStatement(TailfActionStatementContext currentContext);
+
+    void exitTailfActionStatement(TailfActionStatementContext currentContext);
 }

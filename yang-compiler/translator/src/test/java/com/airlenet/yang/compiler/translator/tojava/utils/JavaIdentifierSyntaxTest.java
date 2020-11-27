@@ -75,9 +75,9 @@ public final class JavaIdentifierSyntaxTest {
     private static final String WITHOUT_CAMEL_CASE1 = ".-_try-._-.123";
     private static final String WITH_CAMEL_CASE1 = "try123";
     private static final String WITHOUT_CAMEL_CASE2 = "_try";
-    private static final String WITH_CAMEL_CASE2 = "yangAutoPrefixTry";
+    private static final String WITH_CAMEL_CASE2 = "jTry";
     private static final String WITHOUT_CAMEL_CASE3 = "-1-123g-123ga-a";
-    private static final String WITH_CAMEL_CASE3 = "yangAutoPrefix1123G123Gaa";
+    private static final String WITH_CAMEL_CASE3 = "j1123G123Gaa";
     private static final String WITHOUT_CAMEL_CASE4 = "a-b-c-d-e-f-g-h";
     private static final String WITH_CAMEL_CASE4 = "aBcDeFgh";
     private static final String WITHOUT_CAMEL_CASE5 = "TestName";
@@ -99,7 +99,7 @@ public final class JavaIdentifierSyntaxTest {
     private static final String WITHOUT_CAMEL_CASE13 = "t-RY";
     private static final String WITH_CAMEL_CASE13 = "tRy";
     private static final String WITHOUT_CAMEL_CASE14 = "TRY";
-    private static final String WITH_CAMEL_CASE14 = "yangAutoPrefixTry";
+    private static final String WITH_CAMEL_CASE14 = "jTry";
     private static final String WITHOUT_CAPITAL = "test_this";
     private static final String WITH_CAPITAL = "Test_this";
     private static final String WITH_SMALL = "test_this";

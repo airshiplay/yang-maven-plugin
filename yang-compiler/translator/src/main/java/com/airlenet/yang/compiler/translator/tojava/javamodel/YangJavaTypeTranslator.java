@@ -42,7 +42,7 @@ public class YangJavaTypeTranslator
         /*
          * Type is added as an attribute in the class.
          */
-        String className = AttributesJavaDataType.getJavaImportClass(this, false, conflictResolver);
+        String className = AttributesJavaDataType.getJavaImportClass(this, true, conflictResolver);
         if (className != null) {
             /*
              * Corresponding to the attribute type a class needs to be imported,
@@ -50,7 +50,7 @@ public class YangJavaTypeTranslator
              */
             importInfo.setClassInfo(className);
             String classPkg = AttributesJavaDataType.getJavaImportPackage(this,
-                                                   false, conflictResolver);
+                                                   true, conflictResolver);
             if (classPkg == null) {
                 throw new TranslatorException("import package cannot be null when the class is used " +
                                                       getDataTypeName() + " in " +

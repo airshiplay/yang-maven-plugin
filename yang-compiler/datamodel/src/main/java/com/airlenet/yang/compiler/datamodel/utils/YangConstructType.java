@@ -442,7 +442,8 @@ public enum YangConstructType {
     /**
      * Identifies the YANG anydata element parsed data.
      */
-    ANYDATA_DATA;
+    ANYDATA_DATA,
+    ACTION_DATA;
 
     /**
      * Returns the YANG construct keyword corresponding to enum values.
@@ -623,6 +624,8 @@ public enum YangConstructType {
                 return "unknown-statement";
             case ANYDATA_DATA:
                 return "anydata";
+            case ACTION_DATA:
+                return "action";
             default:
                 return "yang";
         }

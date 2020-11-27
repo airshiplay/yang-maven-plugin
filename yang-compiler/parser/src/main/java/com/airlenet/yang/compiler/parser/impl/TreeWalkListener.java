@@ -16,6 +16,8 @@
 
 package com.airlenet.yang.compiler.parser.impl;
 
+import com.airlenet.yang.compiler.parser.antlrgencode.GeneratedYangParser;
+import com.airlenet.yang.compiler.parser.impl.listeners.*;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
@@ -25,84 +27,6 @@ import com.airlenet.yang.compiler.datamodel.utils.YangConstructType;
 import com.airlenet.yang.compiler.parser.antlrgencode.GeneratedYangListener;
 import com.airlenet.yang.compiler.parser.antlrgencode.GeneratedYangParser.AnydataStatementContext;
 import com.airlenet.yang.compiler.parser.antlrgencode.GeneratedYangParser.YangStatementContext;
-import com.airlenet.yang.compiler.parser.impl.listeners.AnydataListener;
-import com.airlenet.yang.compiler.parser.impl.listeners.AppDataStructureListener;
-import com.airlenet.yang.compiler.parser.impl.listeners.AppExtendedNameListener;
-import com.airlenet.yang.compiler.parser.impl.listeners.ArgumentListener;
-import com.airlenet.yang.compiler.parser.impl.listeners.AugmentListener;
-import com.airlenet.yang.compiler.parser.impl.listeners.BaseFileListener;
-import com.airlenet.yang.compiler.parser.impl.listeners.BaseListener;
-import com.airlenet.yang.compiler.parser.impl.listeners.BelongsToListener;
-import com.airlenet.yang.compiler.parser.impl.listeners.BitListener;
-import com.airlenet.yang.compiler.parser.impl.listeners.BitsListener;
-import com.airlenet.yang.compiler.parser.impl.listeners.CaseListener;
-import com.airlenet.yang.compiler.parser.impl.listeners.ChoiceListener;
-import com.airlenet.yang.compiler.parser.impl.listeners.CompilerAnnotationListener;
-import com.airlenet.yang.compiler.parser.impl.listeners.ConfigListener;
-import com.airlenet.yang.compiler.parser.impl.listeners.ContactListener;
-import com.airlenet.yang.compiler.parser.impl.listeners.ContainerListener;
-import com.airlenet.yang.compiler.parser.impl.listeners.DataStructureKeyListener;
-import com.airlenet.yang.compiler.parser.impl.listeners.Decimal64Listener;
-import com.airlenet.yang.compiler.parser.impl.listeners.DefaultDenyAllExtRefListener;
-import com.airlenet.yang.compiler.parser.impl.listeners.DefaultDenyWriteExtRefListener;
-import com.airlenet.yang.compiler.parser.impl.listeners.DefaultListener;
-import com.airlenet.yang.compiler.parser.impl.listeners.DescriptionListener;
-import com.airlenet.yang.compiler.parser.impl.listeners.DeviateAddListener;
-import com.airlenet.yang.compiler.parser.impl.listeners.DeviateDeleteListener;
-import com.airlenet.yang.compiler.parser.impl.listeners.DeviateReplaceListener;
-import com.airlenet.yang.compiler.parser.impl.listeners.DeviationListener;
-import com.airlenet.yang.compiler.parser.impl.listeners.EnumListener;
-import com.airlenet.yang.compiler.parser.impl.listeners.EnumerationListener;
-import com.airlenet.yang.compiler.parser.impl.listeners.ErrorAppTagListener;
-import com.airlenet.yang.compiler.parser.impl.listeners.ErrorMessageListener;
-import com.airlenet.yang.compiler.parser.impl.listeners.ExtensionListener;
-import com.airlenet.yang.compiler.parser.impl.listeners.FeatureListener;
-import com.airlenet.yang.compiler.parser.impl.listeners.FractionDigitsListener;
-import com.airlenet.yang.compiler.parser.impl.listeners.GroupingListener;
-import com.airlenet.yang.compiler.parser.impl.listeners.IdentityListener;
-import com.airlenet.yang.compiler.parser.impl.listeners.IdentityRefListener;
-import com.airlenet.yang.compiler.parser.impl.listeners.IfFeatureListener;
-import com.airlenet.yang.compiler.parser.impl.listeners.ImportListener;
-import com.airlenet.yang.compiler.parser.impl.listeners.IncludeListener;
-import com.airlenet.yang.compiler.parser.impl.listeners.InputListener;
-import com.airlenet.yang.compiler.parser.impl.listeners.KeyListener;
-import com.airlenet.yang.compiler.parser.impl.listeners.LeafListListener;
-import com.airlenet.yang.compiler.parser.impl.listeners.LeafListener;
-import com.airlenet.yang.compiler.parser.impl.listeners.LeafrefListener;
-import com.airlenet.yang.compiler.parser.impl.listeners.LengthRestrictionListener;
-import com.airlenet.yang.compiler.parser.impl.listeners.ListListener;
-import com.airlenet.yang.compiler.parser.impl.listeners.MandatoryListener;
-import com.airlenet.yang.compiler.parser.impl.listeners.MaxElementsListener;
-import com.airlenet.yang.compiler.parser.impl.listeners.MinElementsListener;
-import com.airlenet.yang.compiler.parser.impl.listeners.ModuleListener;
-import com.airlenet.yang.compiler.parser.impl.listeners.MustListener;
-import com.airlenet.yang.compiler.parser.impl.listeners.NamespaceListener;
-import com.airlenet.yang.compiler.parser.impl.listeners.NotificationListener;
-import com.airlenet.yang.compiler.parser.impl.listeners.OrganizationListener;
-import com.airlenet.yang.compiler.parser.impl.listeners.OutputListener;
-import com.airlenet.yang.compiler.parser.impl.listeners.PathListener;
-import com.airlenet.yang.compiler.parser.impl.listeners.PatternRestrictionListener;
-import com.airlenet.yang.compiler.parser.impl.listeners.PositionListener;
-import com.airlenet.yang.compiler.parser.impl.listeners.PrefixListener;
-import com.airlenet.yang.compiler.parser.impl.listeners.PresenceListener;
-import com.airlenet.yang.compiler.parser.impl.listeners.RangeRestrictionListener;
-import com.airlenet.yang.compiler.parser.impl.listeners.ReferenceListener;
-import com.airlenet.yang.compiler.parser.impl.listeners.RequireInstanceListener;
-import com.airlenet.yang.compiler.parser.impl.listeners.RevisionDateListener;
-import com.airlenet.yang.compiler.parser.impl.listeners.RevisionListener;
-import com.airlenet.yang.compiler.parser.impl.listeners.RpcListener;
-import com.airlenet.yang.compiler.parser.impl.listeners.ShortCaseListener;
-import com.airlenet.yang.compiler.parser.impl.listeners.StatusListener;
-import com.airlenet.yang.compiler.parser.impl.listeners.SubModuleListener;
-import com.airlenet.yang.compiler.parser.impl.listeners.TypeDefListener;
-import com.airlenet.yang.compiler.parser.impl.listeners.TypeListener;
-import com.airlenet.yang.compiler.parser.impl.listeners.UnionListener;
-import com.airlenet.yang.compiler.parser.impl.listeners.UniqueListener;
-import com.airlenet.yang.compiler.parser.impl.listeners.UnitsListener;
-import com.airlenet.yang.compiler.parser.impl.listeners.UsesListener;
-import com.airlenet.yang.compiler.parser.impl.listeners.ValueListener;
-import com.airlenet.yang.compiler.parser.impl.listeners.VersionListener;
-import com.airlenet.yang.compiler.parser.impl.listeners.WhenListener;
 
 import java.util.Stack;
 
@@ -1247,12 +1171,18 @@ public class TreeWalkListener implements GeneratedYangListener {
 
     @Override
     public void enterLeafStatement(LeafStatementContext ctx) {
-        LeafListener.processLeafEntry(this, ctx);
+        if(getUnsupportedYangConstructDepth() ==0)
+        {
+            LeafListener.processLeafEntry(this, ctx);
+        }
     }
 
     @Override
     public void exitLeafStatement(LeafStatementContext ctx) {
-        LeafListener.processLeafExit(this, ctx);
+        if(getUnsupportedYangConstructDepth() ==0)
+        {
+            LeafListener.processLeafExit(this, ctx);
+        }
     }
 
     @Override
@@ -1342,12 +1272,17 @@ public class TreeWalkListener implements GeneratedYangListener {
 
     @Override
     public void enterUsesStatement(UsesStatementContext ctx) {
-        UsesListener.processUsesEntry(this, ctx);
+        if(getUnsupportedYangConstructDepth() ==0){
+            UsesListener.processUsesEntry(this, ctx);
+        }
+
     }
 
     @Override
     public void exitUsesStatement(UsesStatementContext ctx) {
-        UsesListener.processUsesExit(this, ctx);
+        if(getUnsupportedYangConstructDepth() ==0){
+            UsesListener.processUsesExit(this, ctx);
+        }
     }
 
     @Override
@@ -1468,23 +1403,49 @@ public class TreeWalkListener implements GeneratedYangListener {
     }
 
     @Override
+    public void enterActionStatement(GeneratedYangParser.ActionStatementContext currentContext) {
+        ActionListener.processActionEntry(this,currentContext);
+    }
+
+    @Override
+    public void exitActionStatement(GeneratedYangParser.ActionStatementContext currentContext) {
+        ActionListener.processActionExit(this,currentContext);
+    }
+
+    @Override
+    public void enterTailfActionStatement(GeneratedYangParser.TailfActionStatementContext currentContext) {
+        TailfActionListener.processActionEntry(this,currentContext);
+    }
+
+    @Override
+    public void exitTailfActionStatement(GeneratedYangParser.TailfActionStatementContext currentContext) {
+        TailfActionListener.processActionExit(this,currentContext);
+    }
+    @Override
     public void enterInputStatement(InputStatementContext ctx) {
-        InputListener.processInputEntry(this, ctx);
+        if (getUnsupportedYangConstructDepth() == 0) {
+            InputListener.processInputEntry(this, ctx);
+        }
+
     }
 
     @Override
     public void exitInputStatement(InputStatementContext ctx) {
-        InputListener.processInputExit(this, ctx);
+        if (getUnsupportedYangConstructDepth() == 0) {
+            InputListener.processInputExit(this, ctx);
+        }
     }
 
     @Override
     public void enterOutputStatement(OutputStatementContext ctx) {
-        OutputListener.processOutputEntry(this, ctx);
+        if (getUnsupportedYangConstructDepth() == 0) {
+        OutputListener.processOutputEntry(this, ctx);}
     }
 
     @Override
     public void exitOutputStatement(OutputStatementContext ctx) {
-        OutputListener.processOutputExit(this, ctx);
+        if (getUnsupportedYangConstructDepth() == 0) {
+        OutputListener.processOutputExit(this, ctx);}
     }
 
     @Override
@@ -1895,17 +1856,30 @@ public class TreeWalkListener implements GeneratedYangListener {
 
     @Override
     public void enterUnknownStatement(UnknownStatementContext ctx) {
-        increaseUnsupportedYangConstructDepth();
-        handleUnsupportedYangConstruct(UNKNOWN_STATEMENT, ctx,
-                                       CURRENTLY_UNSUPPORTED, getFileName(),
-                                       ctx.unknown().getText());
+            increaseUnsupportedYangConstructDepth();
+            handleUnsupportedYangConstruct(UNKNOWN_STATEMENT, ctx,
+                    CURRENTLY_UNSUPPORTED, getFileName(),
+                    ctx.unknown().getText());
+
+
     }
 
     @Override
     public void exitUnknownStatement(UnknownStatementContext ctx) {
-        decreaseUnsupportedYangConstructDepth();
+
+            decreaseUnsupportedYangConstructDepth();
+
     }
 
+//    @Override
+//    public void enterTailfStatement(GeneratedYangParser.TailfStatementContext tailfStatementContext) {
+//        increaseUnsupportedYangConstructDepth();
+//    }
+//
+//    @Override
+//    public void exitTailfStatement(GeneratedYangParser.TailfStatementContext tailfStatementContext) {
+//        decreaseUnsupportedYangConstructDepth();
+//    }
     @Override
     public void enterUnknownStatement2(UnknownStatement2Context ctx) {
         // do nothing

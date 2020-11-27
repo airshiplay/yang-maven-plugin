@@ -23,6 +23,8 @@ import com.airlenet.yang.compiler.translator.tojava.JavaFileInfoTranslator;
 import com.airlenet.yang.compiler.translator.tojava.TempJavaCodeFragmentFiles;
 import com.airlenet.yang.compiler.utils.io.YangPluginConfig;
 
+import static com.airlenet.yang.compiler.translator.tojava.YangJavaModelUtils.updateJNCPackageInfo;
+
 /**
  * Represents uses information extended to support java code generation.
  */
@@ -92,6 +94,13 @@ public class YangJavaUsesTranslator
         tempFileHandle = fileHandle;
     }
 
+    @Override
+    public void generatePackageInfo(YangPluginConfig yangPlugin) {
+        if(this.getParent()!=null){
+            ((JavaCodeGenerator)this.getParent()).generatePackageInfo(yangPlugin);
+        }
+        updateJNCPackageInfo(this, yangPlugin);
+    }
     @Override
     public void generateCodeEntry(YangPluginConfig yangPlugin)
             throws TranslatorException {

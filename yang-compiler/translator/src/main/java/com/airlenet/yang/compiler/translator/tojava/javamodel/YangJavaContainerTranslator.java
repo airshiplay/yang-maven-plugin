@@ -19,14 +19,13 @@ import com.airlenet.yang.compiler.datamodel.*;
 import com.airlenet.yang.compiler.datamodel.javadatamodel.*;
 import com.airlenet.yang.compiler.datamodel.utils.builtindatatype.YangDataTypes;
 import com.airlenet.yang.compiler.translator.exception.TranslatorException;
-import com.airlenet.yang.compiler.translator.tojava.JavaCodeGenerator;
-import com.airlenet.yang.compiler.translator.tojava.JavaCodeGeneratorInfo;
-import com.airlenet.yang.compiler.translator.tojava.JavaFileInfoTranslator;
-import com.airlenet.yang.compiler.translator.tojava.TempJavaCodeFragmentFiles;
+import com.airlenet.yang.compiler.translator.tojava.*;
 import com.airlenet.yang.compiler.translator.tojava.jnc.JNCCodeUtil;
 import com.airlenet.yang.compiler.translator.tojava.jnc.JavaClass;
+import com.airlenet.yang.compiler.translator.tojava.jnc.JavaField;
 import com.airlenet.yang.compiler.translator.tojava.jnc.JavaMethod;
 import com.airlenet.yang.compiler.utils.io.YangPluginConfig;
+import com.tailf.jnc.JNCException;
 import com.tailf.jnc.YangElement;
 
 import java.io.IOException;
@@ -107,6 +106,13 @@ public class YangJavaContainerTranslator
         tempFileHandle = fileHandle;
     }
 
+    public void generatePackageInfo(YangPluginConfig yangPlugin){
+        if(this.getParent()!=null){
+            ((JavaCodeGenerator)this.getParent()).generatePackageInfo(yangPlugin);
+        }
+
+        updateJNCPackageInfo(this, yangPlugin);
+    }
     /**
      * Prepare the information for java code generation corresponding to YANG
      * container info.
@@ -148,6 +154,20 @@ public class YangJavaContainerTranslator
             }
             child = child.getNextSibling();
         }
+
+        List<YangAugment> yangAugmentList = getAugmentedInfoList();
+
+        for (YangAugment yangAugment:yangAugmentList){
+            YangNode augmentedNode = yangAugment.getChild();
+            if(augmentedNode!=null)
+            {
+                if(augmentedNode instanceof YangJavaUsesTranslator){
+                    augmentedNode = augmentedNode.getNextSibling();
+                }
+
+                ((JavaCodeGenerator)augmentedNode).generatePackageInfo(yangPlugin);
+            }
+        }
 //        try {
 //            generateCodeAndUpdateInParent(this, yangPlugin, false);
 //        } catch (IOException e) {
@@ -181,14 +201,22 @@ public class YangJavaContainerTranslator
 
 
         javaClass.setExtend("com.tailf.jnc.YangElement");
-        javaClass.addMethod(new JavaMethod(javaClass.getName(), "").setModifiers("public").addDependency(yangJavaModule.getJavaPackage() + "." + yangJavaModule.getPrefixClassName())
+        JavaMethod emptyConstructorMethod = new JavaMethod(javaClass.getName(), "").setModifiers("public").addDependency(yangJavaModule.getJavaPackage() + "." + yangJavaModule.getPrefixClassName())
                 .addLine("super(" + yangJavaModule.getPrefixClassName() + ".NAMESPACE, \"" + this.getName() + "\");")
                 .addDependency(yangJavaModule.getJavaPackage() + "." + yangJavaModule.getPrefixClassName())
-                .addLine("setDefaultPrefix();")
-                .addLine("setPrefix(" + yangJavaModule.getPrefixClassName() + ".PREFIX);"));
+                ;
+        YangJavaModule parentYangJavaModule = (YangJavaModule) getParent().getYangJavaModule();
+        if(parentYangJavaModule ==null || getParent() instanceof YangJavaModule ||!parentYangJavaModule.getPrefixClassName().equals(yangJavaModule.getPrefixClassName())){
+            emptyConstructorMethod.addLine("setDefaultPrefix();");
+        }
+
+        javaClass.addMethod(emptyConstructorMethod);
+
+
+
 
         JNCCodeUtil.keyNamesMethod(javaClass, null);
-        JNCCodeUtil.childrenNamesMethod(javaClass, getListOfLeaf(), getListOfLeafList(), getChild());
+        JNCCodeUtil.childrenNamesMethod(javaClass, getListOfLeaf(), getListOfLeafList(), getChild(),getAugmentedInfoList());
 
         JNCCodeUtil.cloneMethod(javaClass, null);
 
@@ -203,7 +231,9 @@ public class YangJavaContainerTranslator
         }
         YangNode child = getChild();
         while (child != null) {
-            if (child instanceof YangJavaUnion||child instanceof YangJavaUses ||child instanceof YangJavaGrouping ||child instanceof YangJavaEnumeration ||child instanceof YangTypeDef) {
+            if (child instanceof YangJavaUnion||child instanceof YangJavaUses ||child instanceof YangJavaGrouping
+                    ||child instanceof YangJavaEnumeration ||child instanceof YangTypeDef
+                    || child instanceof YangJavaAction|| child instanceof YangJavaTailfAction) {
 
             } else if (child instanceof YangJavaList) {
 //                JNCCodeUtil.yangNodeMethond(javaClass, child);
@@ -225,7 +255,33 @@ public class YangJavaContainerTranslator
             }
             child = child.getNextSibling();
         }
+        List<YangAugment> yangAugmentList = getAugmentedInfoList();
 
+        for (YangAugment yangAugment:yangAugmentList){
+            YangNode augmentedNode = yangAugment.getChild();
+            if(augmentedNode==null){
+                continue;
+            }
+            if(augmentedNode instanceof YangJavaUsesTranslator){
+                augmentedNode = augmentedNode.getNextSibling();
+            }
+            JavaFileInfoTranslator augmentFileInfoTranslator   = ((JavaFileInfoContainer) augmentedNode).getJavaFileInfo();
+
+
+            String filedName= YangElement.camelize(augmentedNode.getName());
+            String augmentClassname = YangElement.normalize(augmentedNode.getName());
+
+            javaClass.addDependency( augmentFileInfoTranslator.getPackage()+"."+augmentClassname);
+            javaClass.addField(new JavaField(augmentClassname ,filedName,"null","public"));
+            javaClass.addMethod(new JavaMethod("get"+augmentClassname,augmentClassname).setModifiers("public").addLine("return this."+filedName+";"));
+            javaClass.addMethod(new JavaMethod("add"+augmentClassname,augmentClassname).setModifiers("public").addParameter(augmentClassname,filedName).setExceptions(JNCException.class.getName())
+                    .addLine(" this."+ filedName+ " = "+filedName+";").addLine("this.insertChild("+filedName+", this.childrenNames());").addLine("return this."+filedName+";"));
+            javaClass.addMethod(new JavaMethod("add"+augmentClassname,augmentClassname).setModifiers("public").setExceptions(JNCException.class.getName()).addLine(augmentClassname+" "+filedName+ " = new "+augmentClassname+"();")
+                    .addLine(" this."+ filedName+ " = "+filedName+";").addLine("this.insertChild("+filedName+", this.childrenNames());").addLine("return this."+filedName+";"));
+
+            javaClass.addMethod(new JavaMethod("delete"+augmentClassname,"void").setModifiers("public").setExceptions(JNCException.class.getName())
+                    .addLine("this."+ filedName+ " = null;").addLine("String path=\""+augmentedNode.getName()+"\";").addLine("this.delete(path);"));
+        }
         try {
             javaClass.write(this.getJavaFileInfo().getBaseCodeGenPath() + this.getJavaFileInfo().getPackageFilePath());
         } catch (IOException e) {

@@ -996,7 +996,7 @@ public final class UtilConstants {
      * Static attribute for YANG automatic prefix for identifiers with keywords
      * and beginning with digits.
      */
-    public static final String YANG_AUTO_PREFIX = "yangAutoPrefix";
+    public static final String YANG_AUTO_PREFIX = "j";
 
     /**
      * Static attribute for YANG version prefix.

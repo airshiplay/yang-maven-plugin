@@ -77,4 +77,8 @@ public class YangIdentityref extends YangBaseType<Element> {
         return new YangIdentityref(toString());
     }
 
+    @Override
+    public String toString() {
+        return getValue().name;
+    }
 }
