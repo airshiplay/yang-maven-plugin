@@ -112,7 +112,7 @@ public class YangJavaUnionTranslator
 
     @Override
     public void generatePackageInfo(YangPluginConfig yangPlugin) {
-        if(this.getParent()!=null){
+        if(this.getParent()!=null && ((JavaCodeGeneratorInfo)this.getParent()).getJavaFileInfo().getPackage()==null){
             ((JavaCodeGenerator)this.getParent()).generatePackageInfo(yangPlugin);
         }
         updateJNCPackageInfo(this, yangPlugin);

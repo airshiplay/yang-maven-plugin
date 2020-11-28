@@ -31,6 +31,7 @@ import com.tailf.jnc.YangElement;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.airlenet.yang.compiler.translator.tojava.GeneratedJavaFileType.GENERATE_INTERFACE_WITH_BUILDER;
 import static com.airlenet.yang.compiler.translator.tojava.YangJavaModelUtils.*;
@@ -109,7 +110,7 @@ public class YangJavaListTranslator
 
     @Override
     public void generatePackageInfo(YangPluginConfig yangPlugin) {
-        if(this.getParent()!=null){
+        if(this.getParent()!=null&& ((JavaCodeGeneratorInfo)this.getParent()).getJavaFileInfo().getPackage()==null){
             ((JavaCodeGenerator)this.getParent()).generatePackageInfo(yangPlugin);
         }
         updateJNCPackageInfo(this, yangPlugin);
@@ -150,6 +151,13 @@ public class YangJavaListTranslator
                     ((YangJavaTypeTranslator) yangLeaf.getDataType()).updateJavaQualifiedInfo(yangPlugin.getConflictResolver());
                 }
             }
+            YangNode augmentedNode = yangAugment.getChild();
+            while (augmentedNode!=null && augmentedNode instanceof YangJavaUsesTranslator){
+                augmentedNode = augmentedNode.getNextSibling();
+            }
+            if(augmentedNode!=null){
+                ((JavaCodeGenerator)augmentedNode).generatePackageInfo(yangPlugin);
+            }
         }
         YangNode child = getChild();
         while (child != null) {
@@ -169,19 +177,6 @@ public class YangJavaListTranslator
         }
         List<YangAugment> yangAugmentList = getAugmentedInfoList();
 
-        for (YangAugment yangAugment:yangAugmentList){
-            YangNode augmentedNode = yangAugment.getChild();
-            if(augmentedNode!=null)
-            {
-                if(augmentedNode instanceof YangJavaUsesTranslator){
-                    augmentedNode = augmentedNode.getNextSibling();
-                }
-//                if(augmentedNode.getFileName().endsWith("tailf-acm.yang")){
-//                  System.err.println(  "==========================="+augmentedNode.getClass());
-//                }
-                ((JavaCodeGenerator)augmentedNode).generatePackageInfo(yangPlugin);
-            }
-        }
 //        while (child!=null){
 //            if (child.getDataType().getDataType() == YangDataTypes.DERIVED || child.getDataType().getDataType() == YangDataTypes.UNION) {
 //                ((YangJavaLeafListTranslator) child).updateJavaQualifiedInfo();
@@ -309,7 +304,8 @@ public class YangJavaListTranslator
         for (YangLeaf yangLeaf : listOfLeaf) {
             JNCCodeUtil.yangLeafMethod(javaClass, yangJavaModule, yangLeaf);
         }
-        for (YangLeaf yangLeaf : allAugmentLeafList) {
+        List<YangLeaf> augmentLeafList = getAugmentedInfoList().stream().flatMap(a -> a.getListOfLeaf().stream()).collect(Collectors.toList());
+        for (YangLeaf yangLeaf : augmentLeafList) {
 
             JNCCodeUtil.yangLeafMethod(javaClass, yangJavaModule, yangLeaf);
 
@@ -352,8 +348,14 @@ public class YangJavaListTranslator
             if(augmentedNode==null){
                 continue;
             }
-            if(augmentedNode instanceof YangJavaUsesTranslator){
+            while (augmentedNode!=null && augmentedNode instanceof YangJavaUsesTranslator){
                 augmentedNode = augmentedNode.getNextSibling();
+            }
+            if(augmentedNode ==null){
+                continue;
+            }
+            if(augmentedNode instanceof YangJavaUnionTranslator){
+                continue;
             }
             JavaFileInfoTranslator augmentFileInfoTranslator   = ((JavaFileInfoContainer) augmentedNode).getJavaFileInfo();
 
