@@ -32,6 +32,7 @@ import com.airlenet.yang.compiler.api.YangCompilerException;
 import com.airlenet.yang.compiler.api.YangCompilerService;
 import com.airlenet.yang.compiler.tool.DefaultYangCompilationParam;
 import com.airlenet.yang.compiler.tool.YangCompilerManager;
+import org.codehaus.plexus.util.Scanner;
 import org.sonatype.plexus.build.incremental.BuildContext;
 
 import java.io.File;
@@ -67,6 +68,10 @@ public class YangUtilManager extends AbstractMojo {
      */
     @Parameter(property = "yangFilesDir", defaultValue = "src/main/yang/")
     private String yangFilesDir;
+
+
+    @Parameter(property = "excludes", defaultValue = "src/main/yang/")
+    protected List<String> excludes;
 
     @Parameter(property = "packageName", defaultValue = "com.airlenet.yang.gen")
     private String packageName;
@@ -173,10 +178,19 @@ public class YangUtilManager extends AbstractMojo {
             for (Path path : depSchemas) {
                 bldr.addDependentSchema(path);
             }
+            Scanner scanner = context.newScanner(new File(searchDir), false);
+            scanner.setExcludes(excludes.toArray(new String[0]));
+            scanner.scan();
+            String[] includedFiles = scanner.getIncludedFiles();
 
-            for (String file : getYangFiles(searchDir)) {
-                bldr.addYangFile(Paths.get(file));
+            if (includedFiles != null) {
+                for (String includedFile : includedFiles) {
+                    bldr.addYangFile(Paths.get(scanner.getBasedir()+SLASH+ includedFile));
+                }
             }
+//            for (String file : getYangFiles(searchDir)) {
+//                bldr.addYangFile(Paths.get(file));
+//            }
 
             if (modelId != null) {
                 bldr.setModelId(getValidModelId(modelId));

@@ -29,6 +29,7 @@ import com.tailf.jnc.JNCException;
 import com.tailf.jnc.YangElement;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.airlenet.yang.compiler.translator.tojava.GeneratedJavaFileType.GENERATE_INTERFACE_WITH_BUILDER;
@@ -58,7 +59,7 @@ public class YangJavaContainerTranslator
         setJavaFileInfo(new JavaFileInfoTranslator());
         getJavaFileInfo().setGeneratedFileTypes(GENERATE_INTERFACE_WITH_BUILDER);
     }
-
+    List<YangLeaf> allAugmentLeafList = new ArrayList<>();
     /**
      * Returns the generated java file information.
      *
@@ -138,6 +139,17 @@ public class YangJavaContainerTranslator
             }
         }
 
+        for (YangNode yangAugment : getAugmentedInfoList()) {
+
+            List<YangLeaf> augmentListOfLeaf = ((YangJavaAugmentTranslator) yangAugment).getListOfLeaf();
+            allAugmentLeafList.addAll(augmentListOfLeaf);
+            for (YangLeaf yangLeaf : augmentListOfLeaf) {
+                if (yangLeaf.getDataType().getDataType() == YangDataTypes.DERIVED || yangLeaf.getDataType().getDataType() == YangDataTypes.UNION|| yangLeaf.getDataType().getDataType() == YangDataTypes.ENUMERATION) {
+                    ((YangJavaLeafTranslator) yangLeaf).updateJavaQualifiedInfo();
+                    ((YangJavaTypeTranslator) yangLeaf.getDataType()).updateJavaQualifiedInfo(yangPlugin.getConflictResolver());
+                }
+            }
+        }
         YangNode child = getChild();
         while (child != null) {
 
@@ -222,6 +234,11 @@ public class YangJavaContainerTranslator
 
         JNCCodeUtil.cloneShallowMethod(javaClass, null);
         for (YangLeaf yangLeaf : getListOfLeaf()) {
+
+            JNCCodeUtil.yangLeafMethod(javaClass, yangJavaModule, yangLeaf);
+
+        }
+        for (YangLeaf yangLeaf : allAugmentLeafList) {
 
             JNCCodeUtil.yangLeafMethod(javaClass, yangJavaModule, yangLeaf);
 

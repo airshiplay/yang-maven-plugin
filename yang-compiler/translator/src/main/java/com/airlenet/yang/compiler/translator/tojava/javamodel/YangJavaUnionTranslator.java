@@ -110,6 +110,13 @@ public class YangJavaUnionTranslator
         tempFileHandle = fileHandle;
     }
 
+    @Override
+    public void generatePackageInfo(YangPluginConfig yangPlugin) {
+        if(this.getParent()!=null){
+            ((JavaCodeGenerator)this.getParent()).generatePackageInfo(yangPlugin);
+        }
+        updateJNCPackageInfo(this, yangPlugin);
+    }
     /**
      * Prepare the information for java code generation corresponding to YANG
      * union info.
