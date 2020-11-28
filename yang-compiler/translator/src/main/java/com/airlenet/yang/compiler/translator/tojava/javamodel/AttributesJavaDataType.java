@@ -26,6 +26,7 @@ import com.airlenet.yang.compiler.datamodel.YangNode;
 import com.airlenet.yang.compiler.datamodel.YangType;
 import com.airlenet.yang.compiler.datamodel.YangTypeDef;
 import com.airlenet.yang.compiler.datamodel.YangUnion;
+import com.airlenet.yang.compiler.datamodel.javadatamodel.YangJavaAugment;
 import com.airlenet.yang.compiler.datamodel.javadatamodel.YangJavaIdentity;
 import com.airlenet.yang.compiler.datamodel.utils.builtindatatype.YangDataTypes;
 import com.airlenet.yang.compiler.translator.exception.TranslatorException;
@@ -611,6 +612,19 @@ public final class AttributesJavaDataType {
                 (ConflictResolveNode) node).isNameConflict()) {
             name = name + ((ConflictResolveNode) node).getSuffix();
         }
+        if(node instanceof YangJavaAugmentTranslator){
+            name=name.replaceAll("/([\\s\\S]*?):","/");
+            int lastIndexOf = name.lastIndexOf("/");
+            if(lastIndexOf !=-1){
+                pkg=pkg+   name.replaceAll("/",".").toLowerCase().replaceAll("-","");
+                name =name.substring(lastIndexOf+1);
+            }
+            int l=node.getName().lastIndexOf("/");
+            if(l!=-1){
+               name= "Augmented-"+node.getName().substring(l+1).replaceAll(":","");
+            }
+        }
+
         info.setJavaName(getCamelCase(name, conf));
         info.setPackage(pkg);
         info.setPackageFilePath(getPackageDirPathFromJavaJPackage(pkg));

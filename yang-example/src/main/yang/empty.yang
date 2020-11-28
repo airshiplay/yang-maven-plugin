@@ -1,4 +1,0 @@
-module empty {
-    namespace "http://tail-f.com/ns/example/empty";
-    prefix empty;
-}
