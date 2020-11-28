@@ -31,6 +31,7 @@ import com.tailf.jnc.YangElement;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.airlenet.yang.compiler.translator.tojava.GeneratedJavaFileType.GENERATE_INTERFACE_WITH_BUILDER;
 import static com.airlenet.yang.compiler.translator.tojava.YangJavaModelUtils.*;
@@ -59,7 +60,6 @@ public class YangJavaContainerTranslator
         setJavaFileInfo(new JavaFileInfoTranslator());
         getJavaFileInfo().setGeneratedFileTypes(GENERATE_INTERFACE_WITH_BUILDER);
     }
-    List<YangLeaf> allAugmentLeafList = new ArrayList<>();
     /**
      * Returns the generated java file information.
      *
@@ -249,7 +249,8 @@ public class YangJavaContainerTranslator
             JNCCodeUtil.yangLeafMethod(javaClass, yangJavaModule, yangLeaf);
 
         }
-        for (YangLeaf yangLeaf : allAugmentLeafList) {
+        List<YangLeaf> augmentLeafList = getAugmentedInfoList().stream().flatMap(a -> a.getListOfLeaf().stream()).collect(Collectors.toList());
+        for (YangLeaf yangLeaf : augmentLeafList) {
 
             JNCCodeUtil.yangLeafMethod(javaClass, yangJavaModule, yangLeaf);
 

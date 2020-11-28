@@ -2,8 +2,11 @@ package com.airlenet.yang.compiler.translator.tojava.jnc;
 
 import com.airlenet.yang.compiler.datamodel.*;
 import com.airlenet.yang.compiler.datamodel.javadatamodel.*;
+import com.airlenet.yang.compiler.translator.tojava.JavaFileInfoContainer;
+import com.airlenet.yang.compiler.translator.tojava.JavaFileInfoTranslator;
 import com.airlenet.yang.compiler.translator.tojava.javamodel.AttributesJavaDataType;
 import com.airlenet.yang.compiler.translator.tojava.javamodel.YangJavaAugmentTranslator;
+import com.airlenet.yang.compiler.translator.tojava.javamodel.YangJavaUnionTranslator;
 import com.airlenet.yang.compiler.translator.tojava.javamodel.YangJavaUsesTranslator;
 import com.tailf.jnc.ElementChildrenIterator;
 import com.tailf.jnc.ElementLeafListValueIterator;
@@ -57,20 +60,18 @@ public class JNCCodeUtil {
                 childrenNames.addLine("\t\t\"" + yangLeaf.getName() + "\",");
             }
             YangNode augmentedNode = yangAugment.getChild();
-
-            if (augmentedNode == null) {
+            if(augmentedNode==null){
                 continue;
             }
-
-            if (augmentedNode instanceof YangJavaUsesTranslator) {
-
-                augmentedNode = augmentedNode.getNextSibling();
-                if (augmentedNode == null) {
+            do {
+                if(augmentedNode instanceof YangJavaUsesTranslator ||augmentedNode instanceof YangJavaUnionTranslator){
                     continue;
                 }
-            }
 
-            childrenNames.addLine("\t\t\"" + augmentedNode.getName() + "\",");
+                childrenNames.addLine("\t\t\"" + augmentedNode.getName() + "\",");
+            } while ((augmentedNode = augmentedNode.getNextSibling()) != null);
+
+
         }
 
         while (child != null) {

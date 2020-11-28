@@ -60,7 +60,7 @@
                     <yangFilesDir>src/main/yang</yangFilesDir>
                     <packageName>com.test.yang.model.gen</packageName>
                     <excludes>
-                        <exclude>**anno.yang</exclude>
+                        <exclude>**ann.yang</exclude>
                     </excludes>
 <!--                    <classFileDir>src/main/java</classFileDir>-->
                 </configuration>
