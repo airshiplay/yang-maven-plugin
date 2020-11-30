@@ -43,9 +43,9 @@ public class JavaClass {
     }
 
     public boolean existDependency(String fullClassName) {
-        long count = this.imports.stream().map(line -> !line.equals(fullClassName)
-                && line.substring(line.lastIndexOf(".")).equals(fullClassName.substring(fullClassName.lastIndexOf(".")))).count();
-        return count > 0;
+        boolean match = this.imports.parallelStream().anyMatch(line -> !line.equals(fullClassName)
+                && line.substring(line.lastIndexOf(".")).equals(fullClassName.substring(fullClassName.lastIndexOf("."))));
+        return match;
     }
 
     public void addField(JavaField... fields) {

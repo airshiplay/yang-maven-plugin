@@ -443,7 +443,7 @@ public class JNCCodeUtil {
             JavaMethod addMethod = new JavaMethod("add" + simpleClassName, fullClassName).setModifiers("public");
             addMethod.setExceptions("JNCException");
 
-            addMethod.addLine(yangNode.getJavaPackage() + "." + simpleClassName + " " + YangElement.camelize(yangNode.getName()) + "= new " + yangNode.getJavaPackage() + "." + simpleClassName + "();");
+            addMethod.addLine(fullClassName + " " + YangElement.camelize(yangNode.getName()) + "= new " + fullClassName + "();");
             if (container) {
                 addMethod.addLine("this." + YangElement.camelize(yangNode.getName()) + " = " + YangElement.camelize(yangNode.getName()) + ";");
             }

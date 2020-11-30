@@ -26,12 +26,14 @@ import com.airlenet.yang.compiler.translator.tojava.JavaCodeGeneratorInfo;
 import com.airlenet.yang.compiler.translator.tojava.JavaFileInfoTranslator;
 import com.airlenet.yang.compiler.translator.tojava.TempJavaCodeFragmentFiles;
 import com.airlenet.yang.compiler.translator.tojava.jnc.JavaClass;
+import com.airlenet.yang.compiler.translator.tojava.jnc.JavaField;
 import com.airlenet.yang.compiler.translator.tojava.jnc.JavaMethod;
 import com.airlenet.yang.compiler.utils.io.YangPluginConfig;
 import com.tailf.jnc.*;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -193,6 +195,8 @@ public class YangJavaTypeDefTranslator
         if(typeInTypeDef.getDataType() == ENUMERATION){
             javaClass.setExtend(YangEnumeration.class.getName());
 
+            List<JavaField> javaFieldList = ((YangJavaEnumeration) this.getTypeList().get(0).getDataTypeExtendedInfo()).getEnumSet().stream().map(yangEnum -> new JavaField("String", YangElement.normalizeClass(yangEnum.getNamedValue().matches("^[0-9]+[\\s\\S]*")?"J"+yangEnum.getNamedValue():yangEnum.getNamedValue()), "\""+yangEnum.getNamedValue()+"\"", "public", "static", "final")).collect(Collectors.toList());
+            javaClass.addField(javaFieldList.toArray(new JavaField[0]));
             javaClass.addMethod(new JavaMethod(classname,"")
                     .setModifiers("public")
                     .setExceptions(YangException.class.getName())
