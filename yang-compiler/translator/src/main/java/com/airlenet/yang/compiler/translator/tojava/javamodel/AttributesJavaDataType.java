@@ -24,10 +24,7 @@ import com.airlenet.yang.compiler.datamodel.YangIdentityRef;
 import com.airlenet.yang.compiler.datamodel.YangLeafRef;
 import com.airlenet.yang.compiler.datamodel.YangNode;
 import com.airlenet.yang.compiler.datamodel.YangType;
-import com.airlenet.yang.compiler.datamodel.YangTypeDef;
 import com.airlenet.yang.compiler.datamodel.YangUnion;
-import com.airlenet.yang.compiler.datamodel.javadatamodel.YangJavaAugment;
-import com.airlenet.yang.compiler.datamodel.javadatamodel.YangJavaIdentity;
 import com.airlenet.yang.compiler.datamodel.utils.builtindatatype.YangDataTypes;
 import com.airlenet.yang.compiler.translator.exception.TranslatorException;
 import com.airlenet.yang.compiler.translator.tojava.JavaCodeGeneratorInfo;
@@ -62,7 +59,6 @@ import static com.airlenet.yang.compiler.utils.UtilConstants.SHORT;
 import static com.airlenet.yang.compiler.utils.UtilConstants.SHORT_WRAPPER;
 import static com.airlenet.yang.compiler.utils.UtilConstants.SQUARE_BRACKETS;
 import static com.airlenet.yang.compiler.utils.UtilConstants.STRING_DATA_TYPE;
-import static com.airlenet.yang.compiler.utils.UtilConstants.TYPEDEF;
 import static com.airlenet.yang.compiler.utils.io.impl.YangIoUtils.getCamelCase;
 import static com.airlenet.yang.compiler.utils.io.impl.YangIoUtils.getCapitalCase;
 import static com.airlenet.yang.compiler.utils.io.impl.YangIoUtils.getPackageDirPathFromJavaJPackage;
@@ -237,7 +233,7 @@ public final class AttributesJavaDataType {
                 case BOOLEAN:
                     return BOOLEAN_WRAPPER;
                 case ENUMERATION:
-                    return YangElement.normalize(
+                    return YangElement.normalizeClass(
                             ((YangJavaEnumerationTranslator) yangType.getDataTypeExtendedInfo()).getName()
                                          );
                 case BITS:
@@ -251,7 +247,7 @@ public final class AttributesJavaDataType {
                 case EMPTY:
                     return BOOLEAN_WRAPPER;
                 case UNION:
-                    return YangElement.normalize(((YangJavaUnionTranslator) yangType
+                    return YangElement.normalizeClass(((YangJavaUnionTranslator) yangType
                             .getDataTypeExtendedInfo()).getName());
                 case INSTANCE_IDENTIFIER:
                     return STRING_DATA_TYPE;
@@ -271,7 +267,7 @@ public final class AttributesJavaDataType {
                 case STRING:
                     return STRING_DATA_TYPE;
                 case ENUMERATION:
-                    return YangElement.normalize(
+                    return YangElement.normalizeClass(
                              (((YangJavaEnumerationTranslator) yangType.getDataTypeExtendedInfo()).getName()
                                           ));
                 case BITS:
@@ -285,7 +281,7 @@ public final class AttributesJavaDataType {
                 case EMPTY:
                     return BOOLEAN_DATA_TYPE;
                 case UNION:
-                    return YangElement.normalize((((YangJavaUnionTranslator) yangType
+                    return YangElement.normalizeClass((((YangJavaUnionTranslator) yangType
                             .getDataTypeExtendedInfo()).getName()));
                 case INSTANCE_IDENTIFIER:
                     return STRING_DATA_TYPE;
@@ -313,7 +309,7 @@ public final class AttributesJavaDataType {
 //        if (typeDef.isNameConflict()) {
 //            name = name + TYPEDEF;
 //        }
-        return YangElement.normalize(name);// getCapitalCase(getCamelCase(name, pluginConfig));
+        return YangElement.normalizeClass(name);// getCapitalCase(getCamelCase(name, pluginConfig));
     }
 
     /**

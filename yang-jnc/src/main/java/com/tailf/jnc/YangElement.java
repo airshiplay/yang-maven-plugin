@@ -103,7 +103,7 @@ public abstract class YangElement extends Element {
             throws ClassNotFoundException, InstantiationException,
             IllegalAccessException {
         final String className = pkg + "." + getPackage(parent)
-                + normalize(name);
+                + normalizeClass(name);
         final Class<?> rootClass = Class.forName(className);
         return (Element) rootClass.newInstance();
     }
@@ -356,7 +356,6 @@ public abstract class YangElement extends Element {
     }
 
     public static String normalize(String s) {
-        s= s.replaceAll("_","-");
         final String res = camelize(s);
         int start = 0, end = res.length();
 
@@ -375,8 +374,9 @@ public abstract class YangElement extends Element {
             return capitalize(res);
         }
     }
-    public static String normalizeField(String s) {
-//        s= s.replaceAll("_","-");
+
+    public static String normalizeClass(String s) {
+        s= s.replaceAll("_","-");
         final String res = camelize(s);
         int start = 0, end = res.length();
 
@@ -1131,7 +1131,7 @@ public abstract class YangElement extends Element {
      * @throws NoSuchMethodException
      */
     public Element addChild(String childName) throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
-        final String methodName = "add" + normalize(childName);
+        final String methodName = "add" + normalizeClass(childName);
         final Method addChild = getClass().getMethod(methodName, new Class[]{});
         return (Element) addChild.invoke(this, new Object[]{});
     }

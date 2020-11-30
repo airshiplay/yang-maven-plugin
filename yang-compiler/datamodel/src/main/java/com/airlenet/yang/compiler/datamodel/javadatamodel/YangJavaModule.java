@@ -65,6 +65,6 @@ public class YangJavaModule
     }
 
     public String getPrefixClassName(){
-        return YangElement.normalize(getPrefix()+"Prefix");
+        return YangElement.normalizeClass(getPrefix()+"Prefix");
     }
 }

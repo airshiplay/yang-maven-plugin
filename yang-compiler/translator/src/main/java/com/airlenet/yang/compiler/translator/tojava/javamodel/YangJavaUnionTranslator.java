@@ -15,12 +15,9 @@
  */
 package com.airlenet.yang.compiler.translator.tojava.javamodel;
 
-import com.airlenet.yang.compiler.datamodel.YangNode;
-import com.airlenet.yang.compiler.datamodel.YangType;
 import com.airlenet.yang.compiler.datamodel.javadatamodel.YangJavaType;
 import com.airlenet.yang.compiler.datamodel.javadatamodel.YangJavaTypeDef;
 import com.airlenet.yang.compiler.datamodel.javadatamodel.YangJavaUnion;
-import com.airlenet.yang.compiler.translator.exception.InvalidNodeForTranslatorException;
 import com.airlenet.yang.compiler.translator.exception.TranslatorException;
 import com.airlenet.yang.compiler.translator.tojava.JavaCodeGenerator;
 import com.airlenet.yang.compiler.translator.tojava.JavaCodeGeneratorInfo;
@@ -153,7 +150,7 @@ public class YangJavaUnionTranslator
     @Override
     public void generateCodeExit() throws TranslatorException {
 
-        String classname= YangElement.normalize(this.getName().replaceAll("_","-"));
+        String classname= YangElement.normalizeClass(this.getName().replaceAll("_","-"));
         JavaFileInfoTranslator fileInfo = this.getJavaFileInfo();
 
         String absoluteDirPath = getAbsolutePackagePath(fileInfo.getBaseCodeGenPath(),
