@@ -12,6 +12,7 @@ import com.tailf.jnc.JNCException;
 import com.tailf.jnc.YangBits;
 import com.tailf.jnc.YangElement;
 
+import java.io.File;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
@@ -58,11 +59,11 @@ public class JNCCodeUtil {
                 childrenNames.addLine("\t\t\"" + yangLeaf.getName() + "\",");
             }
             YangNode augmentedNode = yangAugment.getChild();
-            if(augmentedNode==null){
+            if (augmentedNode == null) {
                 continue;
             }
             do {
-                if(augmentedNode instanceof YangJavaUsesTranslator ||augmentedNode instanceof YangJavaUnionTranslator){
+                if (augmentedNode instanceof YangJavaUsesTranslator || augmentedNode instanceof YangJavaUnionTranslator) {
                     continue;
                 }
 
@@ -432,11 +433,17 @@ public class JNCCodeUtil {
     }
 
     public static void yangNodeMethond(JavaClass javaClass, YangNode yangNode, boolean container) {
+        String simpleClassName = YangElement.normalizeClass(yangNode.getName());
+        String fullClassName = yangNode.getJavaPackage() + "." + simpleClassName;
+        if (!simpleClassName.equals(javaClass.getName()) && !javaClass.existDependency(fullClassName)) {
+            javaClass.addDependency(fullClassName);
+            fullClassName = simpleClassName;
+        }
         {
-            JavaMethod addMethod = new JavaMethod("add" + YangElement.normalizeClass(yangNode.getName()), yangNode.getJavaPackage() + "." + YangElement.normalizeClass(yangNode.getName())).setModifiers("public");
+            JavaMethod addMethod = new JavaMethod("add" + simpleClassName, fullClassName).setModifiers("public");
             addMethod.setExceptions("JNCException");
 
-            addMethod.addLine(yangNode.getJavaPackage() + "." + YangElement.normalizeClass(yangNode.getName()) + " " + YangElement.camelize(yangNode.getName()) + "= new " + yangNode.getJavaPackage() + "." + YangElement.normalizeClass(yangNode.getName()) + "();");
+            addMethod.addLine(yangNode.getJavaPackage() + "." + simpleClassName + " " + YangElement.camelize(yangNode.getName()) + "= new " + yangNode.getJavaPackage() + "." + simpleClassName + "();");
             if (container) {
                 addMethod.addLine("this." + YangElement.camelize(yangNode.getName()) + " = " + YangElement.camelize(yangNode.getName()) + ";");
             }
@@ -446,12 +453,12 @@ public class JNCCodeUtil {
 
         }
         {
-            JavaMethod addMethod = new JavaMethod("add" + YangElement.normalizeClass(yangNode.getName()), yangNode.getJavaPackage() + "." + YangElement.normalizeClass(yangNode.getName())).setModifiers("public");
+            JavaMethod addMethod = new JavaMethod("add" + simpleClassName, fullClassName).setModifiers("public");
             addMethod.setExceptions("JNCException");
 //            addMethod.addDependency();
 
             addMethod.addDependency(JNCException.class.getName());
-            addMethod.addParameter(yangNode.getJavaPackage() + "." + YangElement.normalizeClass(yangNode.getName()), YangElement.camelize(yangNode.getName()));
+            addMethod.addParameter(fullClassName, YangElement.camelize(yangNode.getName()));
             if (container) {
                 addMethod.addLine("this." + YangElement.camelize(yangNode.getName()) + " = " + YangElement.camelize(yangNode.getName()) + ";");
             }
@@ -463,12 +470,16 @@ public class JNCCodeUtil {
 
     public static void yangJavaListMethod(JavaClass javaClass, YangJavaList yangJavaList) {
 
-
         JavaMethod iteratorMethod = new JavaMethod(YangElement.camelize(yangJavaList.getName()) + "Iterator", "ElementChildrenIterator").setModifiers("public");
         iteratorMethod.addDependency(ElementLeafListValueIterator.class.getName());
         iteratorMethod.addLine("return new ElementChildrenIterator(children, \"" + yangJavaList.getName() + "\");");
         javaClass.addMethod(iteratorMethod);
-        String fullClassName = yangJavaList.getJavaPackage() + "." + YangElement.normalizeClass(yangJavaList.getName());
+        String simpleClassName = YangElement.normalizeClass(yangJavaList.getName());
+        String fullClassName = yangJavaList.getJavaPackage() + "." + simpleClassName;
+        if (!javaClass.existDependency(fullClassName) && !simpleClassName.equals(javaClass.getName())) {
+            javaClass.addDependency(fullClassName);
+            fullClassName = simpleClassName;
+        }
         {
 //getList
             /**
@@ -484,7 +495,7 @@ public class JNCCodeUtil {
              *         return list;
              */
 
-            JavaMethod getMethod = new JavaMethod("get" + YangElement.normalizeClass(yangJavaList.getName()) + "List", "List<" + fullClassName + ">").setModifiers("public");
+            JavaMethod getMethod = new JavaMethod("get" + simpleClassName + "List", "List<" + fullClassName + ">").setModifiers("public");
 //            getMethod.addDependency();
 
             getMethod.setJavadoc(yangJavaList.getDescription());
@@ -508,7 +519,7 @@ public class JNCCodeUtil {
 
         {
 
-            JavaMethod addMethod = new JavaMethod("add" + YangElement.normalizeClass(yangJavaList.getName()), fullClassName).setModifiers("public");
+            JavaMethod addMethod = new JavaMethod("add" + simpleClassName, fullClassName).setModifiers("public");
 //            addMethod.addDependency(yangJavaList.getJavaPackage() + "." + YangElement.normalize(yangJavaList.getName()));
             addMethod.setExceptions("JNCException");
             addMethod.addLine(fullClassName + " " + YangElement.camelize(yangJavaList.getName()) + " = new " + fullClassName + "();");
@@ -520,7 +531,7 @@ public class JNCCodeUtil {
 
         {
 
-            JavaMethod addMethod = new JavaMethod("add" + YangElement.normalizeClass(yangJavaList.getName()), fullClassName).setModifiers("public");
+            JavaMethod addMethod = new JavaMethod("add" + simpleClassName, fullClassName).setModifiers("public");
             addMethod.addParameter(fullClassName, YangElement.camelize(yangJavaList.getName()));
 //            addMethod.addDependency(yangJavaList.getJavaPackage() + "." + YangElement.normalize(yangJavaList.getName()));
             addMethod.setExceptions("JNCException");
@@ -559,7 +570,7 @@ public class JNCCodeUtil {
 //            }
             ///////////////////////////add2
             {
-                JavaMethod addMethod = new JavaMethod("add" + YangElement.normalizeClass(yangJavaList.getName()), fullClassName).setModifiers("public");
+                JavaMethod addMethod = new JavaMethod("add" + simpleClassName, fullClassName).setModifiers("public");
 
                 List<String> parameterValue = new ArrayList<>();
                 for (YangLeaf keyNodeLeaf : listOfKeyLeaf) {
@@ -570,14 +581,14 @@ public class JNCCodeUtil {
 //                addMethod.addDependency(yangJavaList.getJavaPackage() + "." + YangElement.normalize(yangJavaList.getName()));
                 addMethod.setExceptions("JNCException");
                 addMethod.addLine(fullClassName + " " + YangElement.camelize(yangJavaList.getName()) + " = new " + fullClassName + "(" + parameterValue.stream().collect(Collectors.joining(",")) + ");");
-                addMethod.addLine("return add" + YangElement.normalizeClass(yangJavaList.getName()) + "(" + YangElement.camelize(yangJavaList.getName()) + ");");
+                addMethod.addLine("return add" + simpleClassName + "(" + YangElement.camelize(yangJavaList.getName()) + ");");
 
                 javaClass.addMethod(addMethod);
             }
 
             /////get1
             {
-                JavaMethod getMethod = new JavaMethod("get" + YangElement.normalizeClass(yangJavaList.getName()), fullClassName).setModifiers("public");
+                JavaMethod getMethod = new JavaMethod("get" + simpleClassName, fullClassName).setModifiers("public");
 
                 List<String> parameterValue = new ArrayList<>();
                 for (YangLeaf keyNodeLeaf : listOfKeyLeaf) {
@@ -601,7 +612,7 @@ public class JNCCodeUtil {
             }
             /////get2
             {
-                JavaMethod getMethod = new JavaMethod("get" + YangElement.normalizeClass(yangJavaList.getName()), fullClassName).setModifiers("public");
+                JavaMethod getMethod = new JavaMethod("get" + simpleClassName, fullClassName).setModifiers("public");
 
                 List<String> parameterValue = new ArrayList<>();
                 for (YangLeaf keyNodeLeaf : listOfKeyLeaf) {
@@ -617,7 +628,7 @@ public class JNCCodeUtil {
             }
             //   增加delete方法1
             {
-                JavaMethod deleteMethod = new JavaMethod("delete" + YangElement.normalizeClass(yangJavaList.getName()), "void").setModifiers("public");
+                JavaMethod deleteMethod = new JavaMethod("delete" + simpleClassName, "void").setModifiers("public");
 
                 List<String> parameterValue = new ArrayList<>();
                 for (YangLeaf keyNodeLeaf : listOfKeyLeaf) {
@@ -643,7 +654,7 @@ public class JNCCodeUtil {
             {
 
 
-                JavaMethod deleteMethod = new JavaMethod("delete" + YangElement.normalizeClass(yangJavaList.getName()), "void").setModifiers("public");
+                JavaMethod deleteMethod = new JavaMethod("delete" + simpleClassName, "void").setModifiers("public");
 
                 List<String> parameterValue = new ArrayList<>();
                 for (YangLeaf keyNodeLeaf : listOfKeyLeaf) {
@@ -665,10 +676,17 @@ public class JNCCodeUtil {
 
     public static void yangJavaContainerMethod(JavaClass javaClass, YangJavaContainer yangJavaContainer) {
 
-        javaClass.addField(new JavaField(yangJavaContainer.getJavaPackage() + "." + YangElement.normalizeClass(yangJavaContainer.getName()), YangElement.camelize(yangJavaContainer.getName()), "null", "public"));
+        String simpleClassName = YangElement.normalizeClass(yangJavaContainer.getName());
+        String fullClassName = yangJavaContainer.getJavaPackage() + "." + simpleClassName;
+        if (!javaClass.existDependency(fullClassName) && !simpleClassName.equals(javaClass.getName())) {
+            javaClass.addDependency(fullClassName);
+            fullClassName = simpleClassName;
+        }
+
+        javaClass.addField(new JavaField(fullClassName, YangElement.camelize(yangJavaContainer.getName()), "null", "private"));
 
         {
-            JavaMethod getMethod = new JavaMethod("get" + YangElement.normalizeClass(yangJavaContainer.getName()), yangJavaContainer.getJavaPackage() + "." + YangElement.normalizeClass(yangJavaContainer.getName())).setModifiers("public");
+            JavaMethod getMethod = new JavaMethod("get" + simpleClassName, fullClassName).setModifiers("public");
             getMethod.addLine("return " + YangElement.camelize(yangJavaContainer.getName()) + ";");
             javaClass.addMethod(getMethod);
 
@@ -680,7 +698,7 @@ public class JNCCodeUtil {
          *         return delete(path);
          */
         {
-            JavaMethod delelteMethod = new JavaMethod("delete" + YangElement.normalizeClass(yangJavaContainer.getName()), "void").setModifiers("public").setExceptions("JNCException");
+            JavaMethod delelteMethod = new JavaMethod("delete" + simpleClassName, "void").setModifiers("public").setExceptions("JNCException");
             delelteMethod.addLine("this." + YangElement.camelize(yangJavaContainer.getName()) + " = null;");
             delelteMethod.addLine("String path = \"" + yangJavaContainer.getName() + "\";");
             delelteMethod.addLine("delete(path);");

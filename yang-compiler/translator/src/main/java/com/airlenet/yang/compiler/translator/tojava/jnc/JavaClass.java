@@ -13,7 +13,7 @@ public class JavaClass {
     private String packageName;
     private String extend;
     private String description;
-    private List<String> imports;
+    private List<String> imports = new ArrayList<>();
     private List<JavaField> fields;
     private List<JavaMethod> methods;
 
@@ -27,25 +27,25 @@ public class JavaClass {
         return name;
     }
 
-    public JavaClass addDependency(String line) {
-        if (this.imports == null) {
-            this.imports = new ArrayList<>();
-        }
-        this.imports.add(line);
-        return this;
-    }
-
     public JavaClass setExtend(String extend) {
         this.extend = extend;
         return this;
     }
 
     public JavaClass addDependency(List<String> line) {
-        if (this.imports == null) {
-            this.imports = new ArrayList<>();
-        }
         this.imports.addAll(line);
         return this;
+    }
+
+    public JavaClass addDependency(String line) {
+        this.imports.add(line);
+        return this;
+    }
+
+    public boolean existDependency(String fullClassName) {
+        long count = this.imports.stream().map(line -> !line.equals(fullClassName)
+                && line.substring(line.lastIndexOf(".")).equals(fullClassName.substring(fullClassName.lastIndexOf(".")))).count();
+        return count > 0;
     }
 
     public void addField(JavaField... fields) {
@@ -79,15 +79,15 @@ public class JavaClass {
             String preImport = null;
             for (int i = 0; i < size; i++) {
                 String im = imports.get(i);
-                if(preImport !=null && preImport.equals(im)){
+                if (preImport != null && preImport.equals(im)) {
                     continue;
                 }
-                preImport =im;
+                preImport = im;
                 builder.append("import ");
                 builder.append(im);
                 builder.append(";\n");
                 String nextImport = null;
-                if (i < size-1) {
+                if (i < size - 1) {
                     nextImport = imports.get(i + 1);
                 }
                 if (nextImport != null && !im.substring(0, im.lastIndexOf(".")).equals(nextImport.substring(0, nextImport.lastIndexOf(".")))) {
@@ -97,17 +97,17 @@ public class JavaClass {
         }
         builder.append("\n");
         builder.append("/**\n");
-        builder.append(" * "+description+"\n");
+        builder.append(" * " + description + "\n");
         builder.append(" */\n");
         builder.append("public class ").append(name)
-            ;
-        if(extend!=null){
+        ;
+        if (extend != null) {
             builder.append(" extends ");
             builder.append(extend);
             builder.append(" ");
         }
 
-        builder     .append(" {\n");
+        builder.append(" {\n");
 
         if (this.fields != null) {
             for (JavaField field : fields) {
@@ -128,4 +128,5 @@ public class JavaClass {
 
         FileUtils.write(new File(path + File.separator + name + ".java"), builder.toString());
     }
+
 }
