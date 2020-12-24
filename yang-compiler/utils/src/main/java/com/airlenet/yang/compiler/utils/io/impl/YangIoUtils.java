@@ -31,38 +31,8 @@ import java.util.List;
 import java.util.Stack;
 import java.util.regex.Pattern;
 
+import static com.airlenet.yang.compiler.utils.UtilConstants.*;
 import static java.lang.Integer.parseInt;
-import static com.airlenet.yang.compiler.utils.UtilConstants.CLOSE_PARENTHESIS;
-import static com.airlenet.yang.compiler.utils.UtilConstants.COLON;
-import static com.airlenet.yang.compiler.utils.UtilConstants.EIGHT_SPACE_INDENTATION;
-import static com.airlenet.yang.compiler.utils.UtilConstants.EMPTY_STRING;
-import static com.airlenet.yang.compiler.utils.UtilConstants.HYPHEN;
-import static com.airlenet.yang.compiler.utils.UtilConstants.JAVA_KEY_WORDS;
-import static com.airlenet.yang.compiler.utils.UtilConstants.NEW_LINE;
-import static com.airlenet.yang.compiler.utils.UtilConstants.ONE;
-import static com.airlenet.yang.compiler.utils.UtilConstants.OPEN_PARENTHESIS;
-import static com.airlenet.yang.compiler.utils.UtilConstants.ORG;
-import static com.airlenet.yang.compiler.utils.UtilConstants.PACKAGE;
-import static com.airlenet.yang.compiler.utils.UtilConstants.PERIOD;
-import static com.airlenet.yang.compiler.utils.UtilConstants.REGEX_FOR_DIGITS_WITH_SINGLE_LETTER;
-import static com.airlenet.yang.compiler.utils.UtilConstants.REGEX_FOR_FIRST_DIGIT;
-import static com.airlenet.yang.compiler.utils.UtilConstants.REGEX_FOR_HYPHEN;
-import static com.airlenet.yang.compiler.utils.UtilConstants.REGEX_FOR_IDENTIFIER_SPECIAL_CHAR;
-import static com.airlenet.yang.compiler.utils.UtilConstants.REGEX_FOR_PERIOD;
-import static com.airlenet.yang.compiler.utils.UtilConstants.REGEX_FOR_SINGLE_LETTER;
-import static com.airlenet.yang.compiler.utils.UtilConstants.REGEX_FOR_UNDERSCORE;
-import static com.airlenet.yang.compiler.utils.UtilConstants.REGEX_WITH_ALL_SPECIAL_CHAR;
-import static com.airlenet.yang.compiler.utils.UtilConstants.REGEX_WITH_DIGITS;
-import static com.airlenet.yang.compiler.utils.UtilConstants.REGEX_WITH_SINGLE_CAPITAL_CASE;
-import static com.airlenet.yang.compiler.utils.UtilConstants.REGEX_WITH_SINGLE_CAPITAL_CASE_AND_DIGITS_SMALL_CASES;
-import static com.airlenet.yang.compiler.utils.UtilConstants.REGEX_WITH_UPPERCASE;
-import static com.airlenet.yang.compiler.utils.UtilConstants.SEMI_COLON;
-import static com.airlenet.yang.compiler.utils.UtilConstants.SLASH;
-import static com.airlenet.yang.compiler.utils.UtilConstants.SPACE;
-import static com.airlenet.yang.compiler.utils.UtilConstants.TEMP;
-import static com.airlenet.yang.compiler.utils.UtilConstants.UNDER_SCORE;
-import static com.airlenet.yang.compiler.utils.UtilConstants.UNUSED;
-import static com.airlenet.yang.compiler.utils.UtilConstants.YANG_AUTO_PREFIX;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
@@ -318,8 +288,8 @@ public final class YangIoUtils {
         if (pathOfJavaPkg.charAt(pathOfJavaPkg.length() - 1) == File.separatorChar) {
             pathOfJavaPkg = trimAtLast(pathOfJavaPkg, SLASH);
         }
-        String[] strArray = pathOfJavaPkg.split(SLASH);
-        if (strArray[0].equals(EMPTY_STRING)) {
+        String[] strArray = pathOfJavaPkg.split(REGEXSLASH);
+        if (strArray[0].equals(EMPTY_STRING) || strArray[0].endsWith(":")) {
             return pathOfJavaPkg;
         } else {
             return baseCodeGenPath + SLASH + pathOfJavaPkg;

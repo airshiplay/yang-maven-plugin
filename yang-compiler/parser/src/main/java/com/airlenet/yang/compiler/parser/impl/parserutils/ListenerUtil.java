@@ -577,7 +577,7 @@ public final class ListenerUtil {
         String tmpSchemaNodeId = removeQuotesAndHandleConcat(argumentString);
 
         // absolute-schema-nodeid = 1*("/" node-identifier)
-        if (!tmpSchemaNodeId.startsWith(SLASH)) {
+        if (!tmpSchemaNodeId.startsWith("/")) {
             ParserException parserException =
                     new ParserException("YANG file error : " + getYangConstructType(yangConstructType) +
                                                 " name " + argumentString + "is not valid");
@@ -585,7 +585,7 @@ public final class ListenerUtil {
             parserException.setCharPosition(ctx.getStart().getCharPositionInLine());
             throw parserException;
         }
-        String[] tmpData = tmpSchemaNodeId.replaceFirst(CARET + SLASH, EMPTY_STRING).split(SLASH);
+        String[] tmpData = tmpSchemaNodeId.replaceFirst("^/", EMPTY_STRING).split("/");
         for (String nodeIdentifiers : tmpData) {
             yangNodeIdentifier = getValidNodeIdentifier(nodeIdentifiers, yangConstructType, ctx);
             YangAtomicPath yangAbsPath = new YangAtomicPath();

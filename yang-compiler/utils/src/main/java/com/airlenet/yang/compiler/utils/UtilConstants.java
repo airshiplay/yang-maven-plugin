@@ -534,6 +534,7 @@ public final class UtilConstants {
      */
     public static final String SLASH = File.separator;
 
+    public static final String REGEXSLASH = "/|\\\\";
     /**
      * Static attribute for add syntax.
      */
