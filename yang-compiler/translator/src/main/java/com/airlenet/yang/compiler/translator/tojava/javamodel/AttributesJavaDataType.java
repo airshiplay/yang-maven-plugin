@@ -80,13 +80,13 @@ public final class AttributesJavaDataType {
 
         switch (type) {
             case INT8:
-                return Byte.class.getName();
+                return YangInt8.class.getName();
             case INT16:
-                return Short.class.getName();
+                return YangInt16.class.getName();
             case INT32:
-                return Integer.class.getName();
+                return YangInt32.class.getName();
             case INT64:
-                return Long.class.getName();
+                return YangInt64.class.getName();
             case UINT8:
                 return YangUInt8.class.getName();
             case UINT16:
@@ -94,8 +94,7 @@ public final class AttributesJavaDataType {
             case UINT32:
                 return YangUInt32.class.getName();
             case UINT64:
-                return BigInteger.class.getName();
-
+                return YangUInt64.class.getName();
             case BINARY:
                 return BYTE + SQUARE_BRACKETS;
             case DECIMAL64:

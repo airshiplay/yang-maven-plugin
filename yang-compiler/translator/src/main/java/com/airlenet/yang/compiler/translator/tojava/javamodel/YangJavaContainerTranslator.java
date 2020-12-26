@@ -59,6 +59,7 @@ public class YangJavaContainerTranslator
         setJavaFileInfo(new JavaFileInfoTranslator());
         getJavaFileInfo().setGeneratedFileTypes(GENERATE_INTERFACE_WITH_BUILDER);
     }
+
     /**
      * Returns the generated java file information.
      *
@@ -106,13 +107,14 @@ public class YangJavaContainerTranslator
         tempFileHandle = fileHandle;
     }
 
-    public void generatePackageInfo(YangPluginConfig yangPlugin){
-        if(this.getParent()!=null&& ((JavaCodeGeneratorInfo)this.getParent()).getJavaFileInfo().getPackage()==null){
-            ((JavaCodeGenerator)this.getParent()).generatePackageInfo(yangPlugin);
+    public void generatePackageInfo(YangPluginConfig yangPlugin) {
+        if (this.getParent() != null && ((JavaCodeGeneratorInfo) this.getParent()).getJavaFileInfo().getPackage() == null) {
+            ((JavaCodeGenerator) this.getParent()).generatePackageInfo(yangPlugin);
         }
 
         updateJNCPackageInfo(this, yangPlugin);
     }
+
     /**
      * Prepare the information for java code generation corresponding to YANG
      * container info.
@@ -126,20 +128,19 @@ public class YangJavaContainerTranslator
 
         List<YangLeaf> children = this.getListOfLeaf();
         for (YangLeaf yangLeaf : children) {
-            if (yangLeaf.getDataType().getDataType() == YangDataTypes.DERIVED || yangLeaf.getDataType().getDataType() == YangDataTypes.UNION|| yangLeaf.getDataType().getDataType() == YangDataTypes.ENUMERATION) {
+            if (yangLeaf.getDataType().getDataType() == YangDataTypes.DERIVED || yangLeaf.getDataType().getDataType() == YangDataTypes.UNION || yangLeaf.getDataType().getDataType() == YangDataTypes.ENUMERATION) {
                 ((YangJavaLeafTranslator) yangLeaf).updateJavaQualifiedInfo();
                 ((YangJavaTypeTranslator) yangLeaf.getDataType()).updateJavaQualifiedInfo(yangPlugin.getConflictResolver());
             }
         }
         for (YangLeafList yangLeaf : this.getListOfLeafList()) {
-            if (yangLeaf.getDataType().getDataType() == YangDataTypes.DERIVED || yangLeaf.getDataType().getDataType() == YangDataTypes.UNION|| yangLeaf.getDataType().getDataType() == YangDataTypes.ENUMERATION) {
+            if (yangLeaf.getDataType().getDataType() == YangDataTypes.DERIVED || yangLeaf.getDataType().getDataType() == YangDataTypes.UNION || yangLeaf.getDataType().getDataType() == YangDataTypes.ENUMERATION) {
                 ((YangJavaLeafListTranslator) yangLeaf).updateJavaQualifiedInfo();
                 ((YangJavaTypeTranslator) yangLeaf.getDataType()).updateJavaQualifiedInfo(yangPlugin.getConflictResolver());
             }
         }
 
         for (YangNode yangAugment : getAugmentedInfoList()) {
-
             List<YangLeaf> augmentListOfLeaf = ((YangJavaAugmentTranslator) yangAugment).getListOfLeaf();
 
             for (YangLeaf yangLeaf : augmentListOfLeaf) {
@@ -151,8 +152,18 @@ public class YangJavaContainerTranslator
             YangNode augmentedNode = yangAugment.getChild();
             while (augmentedNode != null) {
 
-                if (augmentedNode != null && !(augmentedNode instanceof YangJavaUsesTranslator)) {
+                if (!(augmentedNode instanceof YangJavaUsesTranslator)) {
                     ((JavaCodeGenerator) augmentedNode).generatePackageInfo(yangPlugin);
+                }
+
+                if(augmentedNode instanceof YangJavaListTranslator){
+                    List<YangLeaf> listOfKeyLeaf = ((YangJavaListTranslator) augmentedNode).getListOfKeyLeaf();
+                    for (YangLeaf yangLeaf : listOfKeyLeaf) {
+                        if (yangLeaf.getDataType().getDataType() == YangDataTypes.DERIVED || yangLeaf.getDataType().getDataType() == YangDataTypes.UNION || yangLeaf.getDataType().getDataType() == YangDataTypes.ENUMERATION) {
+                            ((YangJavaLeafTranslator) yangLeaf).updateJavaQualifiedInfo();
+                            ((YangJavaTypeTranslator) yangLeaf.getDataType()).updateJavaQualifiedInfo(yangPlugin.getConflictResolver());
+                        }
+                    }
                 }
 
                 augmentedNode = augmentedNode.getNextSibling();
@@ -171,6 +182,12 @@ public class YangJavaContainerTranslator
                         ((YangJavaLeafTranslator) yangLeaf).updateJavaQualifiedInfo();
                         ((YangJavaTypeTranslator) yangLeaf.getDataType()).updateJavaQualifiedInfo(yangPlugin.getConflictResolver());
                     }
+
+                    List<YangLeafList> listOfLeafList = ((YangJavaCase) childChild).getListOfLeafList();
+                    for (YangLeafList yangLeafList : listOfLeafList) {
+                        ((YangJavaLeafListTranslator) yangLeafList).updateJavaQualifiedInfo();
+                        ((YangJavaTypeTranslator) yangLeafList.getDataType()).updateJavaQualifiedInfo(yangPlugin.getConflictResolver());
+                    }
                     childChild = childChild.getNextSibling();
                 }
             }
@@ -179,15 +196,14 @@ public class YangJavaContainerTranslator
 
         List<YangAugment> yangAugmentList = getAugmentedInfoList();
 
-        for (YangAugment yangAugment:yangAugmentList){
+        for (YangAugment yangAugment : yangAugmentList) {
             YangNode augmentedNode = yangAugment.getChild();
-            if(augmentedNode!=null)
-            {
-                if(augmentedNode instanceof YangJavaUsesTranslator){
+            if (augmentedNode != null) {
+                if (augmentedNode instanceof YangJavaUsesTranslator) {
                     augmentedNode = augmentedNode.getNextSibling();
                 }
 
-                ((JavaCodeGenerator)augmentedNode).generatePackageInfo(yangPlugin);
+                ((JavaCodeGenerator) augmentedNode).generatePackageInfo(yangPlugin);
             }
         }
 //        try {
@@ -213,11 +229,11 @@ public class YangJavaContainerTranslator
         String classname = YangElement.normalizeClass(this.getName());
         JavaFileInfoTranslator fileInfo = this.getJavaFileInfo();
         JavaClass javaClass = new JavaClass(classname, this.getJavaFileInfo().getPackage(),
-                "Code generated by "+this.getClass().getSimpleName() +
-                        "\n * <p>"+
-                        "\n * See line "+fileInfo.getLineNumber()+" in" +
-                        "\n * "+fileInfo.getYangFileName()+
-                        "\n * "+
+                "Code generated by " + this.getClass().getSimpleName() +
+                        "\n * <p>" +
+                        "\n * See line " + fileInfo.getLineNumber() + " in" +
+                        "\n * " + fileInfo.getYangFileName().replace("\\", "/") +
+                        "\n * " +
                         "\n * @author Auto Generated");
         YangJavaModule yangJavaModule = (YangJavaModule) this.getYangJavaModule();
 
@@ -225,20 +241,21 @@ public class YangJavaContainerTranslator
         javaClass.setExtend("com.tailf.jnc.YangElement");
         JavaMethod emptyConstructorMethod = new JavaMethod(javaClass.getName(), "").setModifiers("public").addDependency(yangJavaModule.getJavaPackage() + "." + yangJavaModule.getPrefixClassName())
                 .addLine("super(" + yangJavaModule.getPrefixClassName() + ".NAMESPACE, \"" + this.getName() + "\");")
-                .addDependency(yangJavaModule.getJavaPackage() + "." + yangJavaModule.getPrefixClassName())
-                ;
+                .addDependency(yangJavaModule.getJavaPackage() + "." + yangJavaModule.getPrefixClassName());
         YangJavaModule parentYangJavaModule = (YangJavaModule) getParent().getYangJavaModule();
-        if(parentYangJavaModule ==null || getParent() instanceof YangJavaModule ||!parentYangJavaModule.getPrefixClassName().equals(yangJavaModule.getPrefixClassName())){
+        if (parentYangJavaModule == null || getParent() instanceof YangJavaModule || !parentYangJavaModule.getPrefixClassName().equals(yangJavaModule.getPrefixClassName())) {
             emptyConstructorMethod.addLine("setDefaultPrefix();");
+        }
+        if(getParent()!=null && getParent() instanceof YangJavaAugment){
+            emptyConstructorMethod.addLine("setDefaultPrefix();");
+//            emptyConstructorMethod.addLine("setPrefix("+parentYangJavaModule.getPrefixClassName()+".PREFIX);");
         }
 
         javaClass.addMethod(emptyConstructorMethod);
 
 
-
-
         JNCCodeUtil.keyNamesMethod(javaClass, null);
-        JNCCodeUtil.childrenNamesMethod(javaClass, getListOfLeaf(), getListOfLeafList(), getChild(),getAugmentedInfoList());
+        JNCCodeUtil.childrenNamesMethod(javaClass, getListOfLeaf(), getListOfLeafList(), getChild(), getAugmentedInfoList());
 
         JNCCodeUtil.cloneMethod(javaClass, null);
 
@@ -259,33 +276,53 @@ public class YangJavaContainerTranslator
         }
         YangNode child = getChild();
         while (child != null) {
-            if (child instanceof YangJavaUnion||child instanceof YangJavaUses ||child instanceof YangJavaGrouping
-                    ||child instanceof YangJavaEnumeration ||child instanceof YangTypeDef
-                    || child instanceof YangJavaAction|| child instanceof YangJavaTailfAction) {
+            if (child instanceof YangJavaUnion || child instanceof YangJavaUses || child instanceof YangJavaGrouping
+                    || child instanceof YangJavaEnumeration || child instanceof YangTypeDef
+                    || child instanceof YangJavaAction || child instanceof YangJavaTailfAction) {
 
             } else if (child instanceof YangJavaList) {
 //                JNCCodeUtil.yangNodeMethond(javaClass, child);
                 JNCCodeUtil.yangJavaListMethod(javaClass, (YangJavaList) child);
             } else if (child instanceof YangJavaContainer) {
-                JNCCodeUtil.yangNodeMethond(javaClass, child,true);
+                JNCCodeUtil.yangNodeMethond(javaClass, child, true);
                 JNCCodeUtil.yangJavaContainerMethod(javaClass, (YangJavaContainer) child);
             } else if (child instanceof YangJavaChoice) {
-                YangNode childChild = child.getChild();
-                while (childChild != null) {
-                    List<YangLeaf> listOfLeaf = ((YangJavaCase) childChild).getListOfLeaf();
+                YangNode childYangJavaCase = child.getChild();
+                while (childYangJavaCase != null) {
+                    YangNode childChildChild = childYangJavaCase.getChild();
+                    while (childChildChild != null) {
+                        if (childChildChild instanceof YangJavaList) {
+                            JNCCodeUtil.yangJavaListMethod(javaClass, (YangJavaList) childChildChild);
+                        } else if (childChildChild instanceof YangJavaContainer) {
+                            JNCCodeUtil.yangNodeMethond(javaClass, childChildChild, true);
+                            JNCCodeUtil.yangJavaContainerMethod(javaClass, (YangJavaContainer) childChildChild);
+                        } else if (childChildChild instanceof YangJavaUnion || childChildChild instanceof YangJavaUses || childChildChild instanceof YangJavaGrouping
+                                || childChildChild instanceof YangJavaEnumeration || childChildChild instanceof YangTypeDef
+                                || childChildChild instanceof YangJavaAction || childChildChild instanceof YangJavaTailfAction) {
+
+                        } else {
+                            System.out.println(childChildChild.getClass());
+                        }
+                        childChildChild =childChildChild.getNextSibling();
+                    }
+                    List<YangLeaf> listOfLeaf = ((YangJavaCase) childYangJavaCase).getListOfLeaf();
                     for (YangLeaf yangLeaf : listOfLeaf) {
                         JNCCodeUtil.yangLeafMethod(javaClass, yangJavaModule, yangLeaf);
                     }
-                    childChild = childChild.getNextSibling();
+                    List<YangLeafList> listOfLeafList = ((YangJavaCase) childYangJavaCase).getListOfLeafList();
+                    for (YangLeafList yangLeafList : listOfLeafList) {
+                        JNCCodeUtil.yangLeafListMethod(javaClass, yangJavaModule, yangLeafList);
+                    }
+                    childYangJavaCase = childYangJavaCase.getNextSibling();
                 }
             } else {
-                JNCCodeUtil.yangNodeMethond(javaClass, child,true);
+                JNCCodeUtil.yangNodeMethond(javaClass, child, true);
             }
             child = child.getNextSibling();
         }
         List<YangAugment> yangAugmentList = getAugmentedInfoList();
 
-        for (YangAugment yangAugment:yangAugmentList){
+        for (YangAugment yangAugment : yangAugmentList) {
             YangNode augmentedNode = yangAugment.getChild();
             if (augmentedNode == null) {
                 continue;
@@ -298,21 +335,32 @@ public class YangJavaContainerTranslator
                 JavaFileInfoTranslator augmentFileInfoTranslator = ((JavaFileInfoContainer) augmentedNode).getJavaFileInfo();
 
 
-                String filedName = YangElement.camelize(augmentedNode.getName());
+//                String filedName = YangElement.camelize(augmentedNode.getName());
                 String augmentClassname = YangElement.normalizeClass(augmentedNode.getName());
 
                 javaClass.addDependency(augmentFileInfoTranslator.getPackage() + "." + augmentClassname);
 
-                javaClass.addField(new JavaField(augmentClassname, filedName, "null", "public").setJavadoc("See line " + augmentedNode.getLineNumber() + " in\n" +
-                        "" + ((JavaFileInfoContainer) augmentedNode).getJavaFileInfo().getYangFileName()));
-                javaClass.addMethod(new JavaMethod("get" + augmentClassname, augmentClassname).setModifiers("public").addLine("return this." + filedName + ";"));
-                javaClass.addMethod(new JavaMethod("add" + augmentClassname, augmentClassname).setModifiers("public").addParameter(augmentClassname, filedName).setExceptions(JNCException.class.getName())
-                        .addLine(" this." + filedName + " = " + filedName + ";").addLine("this.insertChild(" + filedName + ", this.childrenNames());").addLine("return this." + filedName + ";"));
-                javaClass.addMethod(new JavaMethod("add" + augmentClassname, augmentClassname).setModifiers("public").setExceptions(JNCException.class.getName()).addLine(augmentClassname + " " + filedName + " = new " + augmentClassname + "();")
-                        .addLine(" this." + filedName + " = " + filedName + ";").addLine("this.insertChild(" + filedName + ", this.childrenNames());").addLine("return this." + filedName + ";"));
+                if(augmentedNode instanceof YangJavaListTranslator){
+                    JNCCodeUtil.yangJavaListMethod(javaClass,(YangJavaListTranslator)augmentedNode);
+                }else if(augmentedNode instanceof YangJavaContainerTranslator){
+                    JNCCodeUtil.yangJavaContainerMethod(javaClass,(YangJavaContainerTranslator)augmentedNode);
+                    JNCCodeUtil.yangNodeMethond(javaClass,(YangJavaContainerTranslator)augmentedNode,true);
+//                    javaClass.addField(new JavaField(augmentClassname, filedName, "null", "public").setJavadoc("See line " + augmentedNode.getLineNumber() + " in\n" +
+//                            "" + ((JavaFileInfoContainer) augmentedNode).getJavaFileInfo().getYangFileName()));
+//                    javaClass.addMethod(new JavaMethod("get" + augmentClassname, augmentClassname).setModifiers("public").addLine("return this." + filedName + ";"));
+//                    javaClass.addMethod(new JavaMethod("add" + augmentClassname, augmentClassname).setModifiers("public").addParameter(augmentClassname, filedName).setExceptions(JNCException.class.getName())
+//                            .addLine(" this." + filedName + " = " + filedName + ";").addLine("this.insertChild(" + filedName + ", this.childrenNames());").addLine("return this." + filedName + ";"));
+//                    javaClass.addMethod(new JavaMethod("add" + augmentClassname, augmentClassname).setModifiers("public").setExceptions(JNCException.class.getName()).addLine(augmentClassname + " " + filedName + " = new " + augmentClassname + "();")
+//                            .addLine(" this." + filedName + " = " + filedName + ";").addLine("this.insertChild(" + filedName + ", this.childrenNames());").addLine("return this." + filedName + ";"));
+//
+//                    javaClass.addMethod(new JavaMethod("delete" + augmentClassname, "void").setModifiers("public").setExceptions(JNCException.class.getName())
+//                            .addLine("this." + filedName + " = null;").addLine("String path=\"" + augmentedNode.getName() + "\";").addLine("this.delete(path);"));
+                }else{
+                    System.out.println(augmentedNode.getClass());
+                }
 
-                javaClass.addMethod(new JavaMethod("delete" + augmentClassname, "void").setModifiers("public").setExceptions(JNCException.class.getName())
-                        .addLine("this." + filedName + " = null;").addLine("String path=\"" + augmentedNode.getName() + "\";").addLine("this.delete(path);"));
+
+
             } while ((augmentedNode = augmentedNode.getNextSibling()) != null);
 
         }

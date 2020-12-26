@@ -145,7 +145,7 @@ public class YangJavaModuleTranslator
                         "\n * The root class for namespace"+this.getModuleNamespace()+
                         "\n * <p>"+
                         "\n * See line "+fileInfo.getLineNumber()+" in" +
-                        "\n * "+fileInfo.getYangFileName()+
+                        "\n * "+fileInfo.getYangFileName().replace("\\","/")+
                         "\n * "+
                         "\n * @author Auto Generated");
 

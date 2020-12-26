@@ -134,7 +134,7 @@ public final class YangIoUtils {
             int lastIndexOf = javaDoc.lastIndexOf("\n",javaDoc.length()-2);
             bufferedWriter.write(javaDoc.substring(0,lastIndexOf));
             bufferedWriter.write("\n * See line "+lineNumber+" in" +
-                                    "\n * "+yangFileName+
+                                    "\n * "+yangFileName.replace("\\","/")+
                                     "\n */\n");
 
             String pkg = PACKAGE + SPACE + pack + SEMI_COLON;

@@ -1298,11 +1298,11 @@ public class Element implements Serializable {
      * <code>setAttr(Element.NETCONF_NAMESPACE,"operation",operation);</code> see @setAttr
      */
     public void setMark(String operation) {
-        Element that = this;
-        while (that!=null&&that.prefixes==null){
-            that = that.getParent();
-        }
-        that.prefixes.merge(defaultPrefixes);
+//        Element that = this;
+//        while (that!=null&&that.prefixes==null){
+//            that = that.getParent();
+//        }
+//        that.prefixes.merge(defaultPrefixes);
         setAttr(NETCONF_NAMESPACE, OPERATION, operation);
     }
 

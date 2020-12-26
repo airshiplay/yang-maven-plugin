@@ -114,6 +114,9 @@ public final class EnumListener {
         if (name.contains(QUOTES)) {
             name = name.replace(QUOTES, EMPTY_STRING);
         }
+        if (name.contains("\'")) {
+            name = name.replace("\'", EMPTY_STRING);
+        }
         return name;
     }
 

@@ -16,6 +16,7 @@
 
 package com.airlenet.yang.compiler.parser.impl;
 
+import com.airlenet.yang.compiler.datamodel.YangDesc;
 import com.airlenet.yang.compiler.parser.antlrgencode.GeneratedYangParser;
 import com.airlenet.yang.compiler.parser.impl.listeners.*;
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -1856,19 +1857,28 @@ public class TreeWalkListener implements GeneratedYangListener {
 
     @Override
     public void enterUnknownStatement(UnknownStatementContext ctx) {
+
+        if("tailf:info".equals(ctx.unknown().getText())){
+            Parsable curData = this.getParsedDataStack().peek();
+            if(curData instanceof YangDesc){
+                ((YangDesc)curData).setDescription(ctx.string().getText());
+            }
+        }else{
             increaseUnsupportedYangConstructDepth();
             handleUnsupportedYangConstruct(UNKNOWN_STATEMENT, ctx,
                     CURRENTLY_UNSUPPORTED, getFileName(),
                     ctx.unknown().getText());
-
+        }
 
     }
 
     @Override
     public void exitUnknownStatement(UnknownStatementContext ctx) {
+        if("tailf:info".equals(ctx.unknown().getText())){
 
+        }else{
             decreaseUnsupportedYangConstructDepth();
-
+        }
     }
 
 //    @Override
