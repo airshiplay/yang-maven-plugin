@@ -177,7 +177,14 @@ public class JNCCodeUtil {
             JavaMethod setMethod = new JavaMethod("set" + YangElement.normalize(yangLeaf.getName()) + "Value", "void").setModifiers("public");
             setMethod.setExceptions("JNCException");
             setMethod.addParameter(leafDateTypeClassName, YangElement.camelize(yangLeaf.getName() + "Value"));
+            if("com.tailf.jnc.YangIdentityref".equals(leafDateTypeClassName)){
+                YangJavaModule javaModule = (YangJavaModule) ((YangIdentityRef) yangLeaf.getDataType().getDataTypeExtendedInfo()).getReferredIdentity().getYangJavaModule();
 
+                setMethod.addLine( YangElement.camelize(yangLeaf.getName())+"Value.getValue().setPrefix(new com.tailf.jnc.Prefix("+
+                        javaModule.getJavaPackage() + "." + javaModule.getPrefixClassName() + ".PREFIX,"+
+                        javaModule.getJavaPackage() + "." + javaModule.getPrefixClassName() +".NAMESPACE"
+                        +"));");
+            }
 
             setMethod.addLine("setLeafValue(" + yangJavaModule.getPrefixClassName() + ".NAMESPACE,");
             setMethod.addLine("\t\"" + yangLeaf.getName() + "\",");

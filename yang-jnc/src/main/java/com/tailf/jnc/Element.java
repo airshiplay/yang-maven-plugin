@@ -1699,6 +1699,52 @@ public class Element implements Serializable {
         return s.toString();
     }
 
+    private void toXMLString(int indent, StringBuffer s) {
+        final boolean flag = hasChildren();
+        final String qName = qualifiedName();
+        s.append(new String(new char[indent * 2]).replace("\0", " "));
+        s.append("<").append(qName);
+        // add xmlns attributes (prefixes)
+        if (prefixes != null) {
+            for (final Prefix p : prefixes) {
+                s.append(" ").append(p.toXMLString());
+            }
+        }
+        if(this.getValue() instanceof YangIdentityref && ((YangIdentityref) this.getValue()).getValue().prefixes!=null){
+            PrefixMap prefixes = ((YangIdentityref) this.getValue()).getValue().prefixes;
+            s.append(" ").append(prefixes.get(0).toXMLString());
+        }
+        // add attributes
+        if (attrs != null) {
+            for (final Attribute attr : attrs) {
+                s.append(" ").append(attr.toXMLString(this));
+            }
+        }
+        indent++;
+        // add children elements if any
+        if (flag) {
+            s.append(">").append(("\n"));
+            for (final Element child : children) {
+                child.toXMLString(indent, s);
+            }
+        } else { // add value if any
+            if (value != null) {
+                s.append(">").append((""));
+                final String stringValue = value.toString().replaceAll("&",
+                        "&amp;");
+                s.append(getIndentationSpacing(false, indent));
+                s.append(stringValue).append((""));
+            } else {
+             // self-closing tag
+             s.append("/>").append((""));
+             return;
+            }
+        }
+        indent--;
+        s.append(getIndentationSpacing(flag, indent)).append("</").append(qName).append(">\n");
+    }
+
+
     public String toCLIString() {
         final StringBuffer s = new StringBuffer();
         toCLIString(0, s);
@@ -1781,7 +1827,7 @@ public class Element implements Serializable {
             if(isArray){
                 s.append("[");
             }else{
-            s.append("{");}
+                s.append("{");}
         }
         if(!isArray)
         {
@@ -1834,47 +1880,6 @@ public class Element implements Serializable {
         }
 
         indent--;
-    }
-
-    private void toXMLString(int indent, StringBuffer s) {
-        final boolean flag = hasChildren();
-        final String qName = qualifiedName();
-        s.append(new String(new char[indent * 2]).replace("\0", " "));
-        s.append("<").append(qName);
-        // add xmlns attributes (prefixes)
-        if (prefixes != null) {
-            for (final Prefix p : prefixes) {
-                s.append(" ").append(p.toXMLString());
-            }
-        }
-        // add attributes
-        if (attrs != null) {
-            for (final Attribute attr : attrs) {
-                s.append(" ").append(attr.toXMLString(this));
-            }
-        }
-        indent++;
-        // add children elements if any
-        if (flag) {
-            s.append(">").append(("\n"));
-            for (final Element child : children) {
-                child.toXMLString(indent, s);
-            }
-        } else { // add value if any
-            if (value != null) {
-                s.append(">").append((""));
-                final String stringValue = value.toString().replaceAll("&",
-                        "&amp;");
-                s.append(getIndentationSpacing(false, indent));
-                s.append(stringValue).append((""));
-            } else {
-             // self-closing tag
-             s.append("/>").append((""));
-             return;
-            }
-        }
-        indent--;
-        s.append(getIndentationSpacing(flag, indent)).append("</").append(qName).append(">\n");
     }
     /**
      * Gets indentation spacing for any given indent level.
@@ -1954,6 +1959,13 @@ public class Element implements Serializable {
         out.print("<" + qName);
         // add xmlns attributes (prefixes)
         if (prefixes != null) {
+            for (final Prefix p : prefixes) {
+                out.print(" ");
+                p.encode(out);
+            }
+        }
+        if(this.getValue() instanceof YangIdentityref && ((YangIdentityref) this.getValue()).getValue().prefixes!=null){
+            PrefixMap prefixes = ((YangIdentityref) this.getValue()).getValue().prefixes;
             for (final Prefix p : prefixes) {
                 out.print(" ");
                 p.encode(out);
