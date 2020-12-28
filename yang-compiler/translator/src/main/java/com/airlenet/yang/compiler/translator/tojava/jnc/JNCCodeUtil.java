@@ -45,14 +45,78 @@ public class JNCCodeUtil {
         JavaMethod childrenNames = new JavaMethod("childrenNames", "String[]");
         childrenNames.setModifiers("public")
                 .addLine("return new String[]{");
+        HashMap<String, Integer> map = new LinkedHashMap<>();
 
         for (YangLeaf yangLeaf : listOfLeaf) {
-            childrenNames.addLine("\t\t\"" + yangLeaf.getName() + "\",");
+            map.put("\t\t\"" + yangLeaf.getName() + "\",", yangLeaf.getLineNumber());
         }
 
         for (YangLeafList yangLeafList : listOfLeafList) {
-            childrenNames.addLine("\t\t\"" + yangLeafList.getName() + "\",");
+            map.put("\t\t\"" + yangLeafList.getName() + "\",", yangLeafList.getLineNumber());
         }
+
+        YangNode originChild = child;
+        while (child != null) {
+            if (child instanceof YangJavaGrouping || child instanceof YangJavaEnumeration || child instanceof YangJavaUnion || child instanceof YangTypeDef) {
+
+            } else if (child instanceof YangJavaUses) {
+
+                List<YangLeaf> listOfLeaf1 = ((YangJavaUses) child).getRefGroup().getListOfLeaf();
+                for (YangLeaf yangLeaf : listOfLeaf1) {
+                    map.put("\t\t\"" + yangLeaf.getName() + "\",", child.getLineNumber());
+                }
+            } else if (child instanceof YangJavaChoice) {
+                YangJavaCase subchildJavaCase = (YangJavaCase) ((YangJavaChoice) (child)).getChild();
+                while (subchildJavaCase != null) {
+
+                    YangNode childChildChild = subchildJavaCase.getChild();
+                    while (childChildChild != null) {
+                        if (childChildChild instanceof YangJavaList) {
+                            map.put("\t\t\"" + childChildChild.getName() + "\",", childChildChild.getLineNumber());
+//                            childrenNames.addLine("\t\t\"" + childChildChild.getName() + "\",");
+                        } else if (childChildChild instanceof YangJavaContainer) {
+                            map.put("\t\t\"" + childChildChild.getName() + "\",", childChildChild.getLineNumber());
+//                            childrenNames.addLine("\t\t\"" + childChildChild.getName() + "\",");
+                        } else if (childChildChild instanceof YangJavaUnion || childChildChild instanceof YangJavaUses || childChildChild instanceof YangJavaGrouping
+                                || childChildChild instanceof YangJavaEnumeration || childChildChild instanceof YangTypeDef
+                                || childChildChild instanceof YangJavaAction || childChildChild instanceof YangJavaTailfAction) {
+
+                        } else {
+                            map.put("\t\t\"" + childChildChild.getName() + "\",", childChildChild.getLineNumber());
+//                            childrenNames.addLine("\t\t\"" + childChildChild.getName() + "\",");
+//                            System.out.println(childChildChild.getClass());
+                        }
+                        childChildChild = childChildChild.getNextSibling();
+                    }
+
+
+                    for (YangLeaf yangLeaf : subchildJavaCase.getListOfLeaf()) {
+                        map.put("\t\t\"" + yangLeaf.getName() + "\",", yangLeaf.getLineNumber());
+//                        childrenNames.addLine("\t\t\"" + yangLeaf.getName() + "\",");
+                    }
+
+                    for (YangLeafList yangLeafList : subchildJavaCase.getListOfLeafList()) {
+                        map.put("\t\t\"" + yangLeafList.getName() + "\",", yangLeafList.getLineNumber());
+//                        childrenNames.addLine("\t\t\"" + yangLeafList.getName() + "\",");
+                    }
+
+                    subchildJavaCase = (YangJavaCase) subchildJavaCase.getNextSibling();
+                }
+            } else {
+                map.put("\t\t\"" + child.getName() + "\",", child.getLineNumber());
+//                childrenNames.addLine("\t\t\"" + child.getName() + "\",");
+            }
+
+            child = child.getNextSibling();
+        }
+
+        AtomicInteger index = new AtomicInteger(0);
+        if (originChild!=null && originChild.getParent() instanceof YangJavaList) {
+            if (((YangJavaList) originChild.getParent()).getKeyList() != null)
+                ((YangJavaList) originChild.getParent()).getKeyList().stream().forEach(name -> map.put("\t\t\"" + name + "\",", index.getAndIncrement()));
+        }
+
+        map.entrySet().stream().sorted((a, b) -> a.getValue().compareTo(b.getValue())).forEach(a -> childrenNames.addLine(a.getKey()));
 
         for (YangNode yangAugment : augmentedInfoList) {
 
@@ -71,50 +135,6 @@ public class JNCCodeUtil {
 
                 childrenNames.addLine("\t\t\"" + augmentedNode.getName() + "\",");
             } while ((augmentedNode = augmentedNode.getNextSibling()) != null);
-
-
-        }
-
-        while (child != null) {
-            if (child instanceof YangJavaUses || child instanceof YangJavaGrouping || child instanceof YangJavaEnumeration || child instanceof YangJavaUnion || child instanceof YangTypeDef) {
-
-            } else if (child instanceof YangJavaChoice) {
-                YangJavaCase subchildJavaCase = (YangJavaCase) ((YangJavaChoice) (child)).getChild();
-                while (subchildJavaCase != null) {
-
-                    YangNode childChildChild = subchildJavaCase.getChild();
-                    while (childChildChild != null) {
-                        if (childChildChild instanceof YangJavaList) {
-                            childrenNames.addLine("\t\t\"" + childChildChild.getName() + "\",");
-                        } else if (childChildChild instanceof YangJavaContainer) {
-                            childrenNames.addLine("\t\t\"" + childChildChild.getName() + "\",");
-                        } else if (childChildChild instanceof YangJavaUnion || childChildChild instanceof YangJavaUses || childChildChild instanceof YangJavaGrouping
-                                || childChildChild instanceof YangJavaEnumeration || childChildChild instanceof YangTypeDef
-                                || childChildChild instanceof YangJavaAction || childChildChild instanceof YangJavaTailfAction) {
-
-                        } else {
-                            childrenNames.addLine("\t\t\"" + childChildChild.getName() + "\",");
-//                            System.out.println(childChildChild.getClass());
-                        }
-                        childChildChild =childChildChild.getNextSibling();
-                    }
-
-
-                    for (YangLeaf yangLeaf : subchildJavaCase.getListOfLeaf()) {
-                        childrenNames.addLine("\t\t\"" + yangLeaf.getName() + "\",");
-                    }
-
-                    for (YangLeafList yangLeafList : subchildJavaCase.getListOfLeafList()) {
-                        childrenNames.addLine("\t\t\"" + yangLeafList.getName() + "\",");
-                    }
-
-                    subchildJavaCase = (YangJavaCase) subchildJavaCase.getNextSibling();
-                }
-            } else {
-                childrenNames.addLine("\t\t\"" + child.getName() + "\",");
-            }
-
-            child = child.getNextSibling();
         }
         childrenNames.addLine("};");
         javaClass.addMethod(childrenNames);
@@ -177,13 +197,13 @@ public class JNCCodeUtil {
             JavaMethod setMethod = new JavaMethod("set" + YangElement.normalize(yangLeaf.getName()) + "Value", "void").setModifiers("public");
             setMethod.setExceptions("JNCException");
             setMethod.addParameter(leafDateTypeClassName, YangElement.camelize(yangLeaf.getName() + "Value"));
-            if("com.tailf.jnc.YangIdentityref".equals(leafDateTypeClassName)){
+            if ("com.tailf.jnc.YangIdentityref".equals(leafDateTypeClassName)) {
                 YangJavaModule javaModule = (YangJavaModule) ((YangIdentityRef) yangLeaf.getDataType().getDataTypeExtendedInfo()).getReferredIdentity().getYangJavaModule();
 
-                setMethod.addLine( YangElement.camelize(yangLeaf.getName())+"Value.getValue().setPrefix(new com.tailf.jnc.Prefix("+
-                        javaModule.getJavaPackage() + "." + javaModule.getPrefixClassName() + ".PREFIX,"+
-                        javaModule.getJavaPackage() + "." + javaModule.getPrefixClassName() +".NAMESPACE"
-                        +"));");
+                setMethod.addLine(YangElement.camelize(yangLeaf.getName()) + "Value.getValue().setPrefix(new com.tailf.jnc.Prefix(" +
+                        javaModule.getJavaPackage() + "." + javaModule.getPrefixClassName() + ".PREFIX," +
+                        javaModule.getJavaPackage() + "." + javaModule.getPrefixClassName() + ".NAMESPACE"
+                        + "));");
             }
 
             setMethod.addLine("setLeafValue(" + yangJavaModule.getPrefixClassName() + ".NAMESPACE,");
