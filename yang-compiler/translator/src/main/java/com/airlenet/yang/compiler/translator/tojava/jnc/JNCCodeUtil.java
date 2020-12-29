@@ -740,7 +740,7 @@ public class JNCCodeUtil {
         }
     }
 
-    public static void yangJavaContainerMethod(JavaClass javaClass, YangJavaContainer yangJavaContainer) {
+    public static void yangJavaContainerMethod(JavaClass javaClass, YangNode yangJavaContainer) {
 
         String simpleClassName = YangElement.normalizeClass(yangJavaContainer.getName());
         String fullClassName = yangJavaContainer.getJavaPackage() + "." + simpleClassName;

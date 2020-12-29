@@ -278,14 +278,14 @@ public class YangJavaContainerTranslator
         while (child != null) {
             if (child instanceof YangJavaUnion || child instanceof YangJavaUses || child instanceof YangJavaGrouping
                     || child instanceof YangJavaEnumeration || child instanceof YangTypeDef
-                    || child instanceof YangJavaAction || child instanceof YangJavaTailfAction) {
+                    || child instanceof YangJavaAction) {
 
             } else if (child instanceof YangJavaList) {
 //                JNCCodeUtil.yangNodeMethond(javaClass, child);
                 JNCCodeUtil.yangJavaListMethod(javaClass, (YangJavaList) child);
-            } else if (child instanceof YangJavaContainer) {
+            } else if (child instanceof YangJavaContainer || child instanceof YangJavaTailfAction) {
                 JNCCodeUtil.yangNodeMethond(javaClass, child, true);
-                JNCCodeUtil.yangJavaContainerMethod(javaClass, (YangJavaContainer) child);
+                JNCCodeUtil.yangJavaContainerMethod(javaClass, (YangNode) child);
             } else if (child instanceof YangJavaChoice) {
                 YangNode childYangJavaCase = child.getChild();
                 while (childYangJavaCase != null) {

@@ -229,5 +229,48 @@
                 </plugins>
             </build>
         </profile>
+		<profile>
+            <id>private</id>
+            <repositories>
+                <repository>
+                    <id>private</id>
+                    <name>private-public</name>
+                    <releases>
+                        <enabled>true</enabled>
+                    </releases>
+                    <snapshots>
+                        <enabled>true</enabled>
+                    </snapshots>
+                    <url>http://maven.airlenet.com:8081/repository/maven-public</url>
+                </repository>
+                <repository>
+                    <id>sonatype</id>
+                    <name>sonatype</name>
+                    <snapshots>
+                        <enabled>true</enabled>
+                    </snapshots>
+                    <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+                </repository>
+            </repositories>
+            <pluginRepositories>
+                <pluginRepository>
+                    <id>private</id>
+                    <name>private-public</name>
+                    <url>http://maven.airlenet.com:8081/repository/maven-public</url>
+                </pluginRepository>
+            </pluginRepositories>
+            <distributionManagement>
+                <repository>
+                    <id>private</id>
+                    <name>private-Releases</name>
+                    <url>http://maven.airlenet.com:8081/repository/maven-releases</url>
+                </repository>
+                <snapshotRepository>
+                    <id>private</id>
+                    <name>private-Snapshot</name>
+                    <url>http://maven.airlenet.com:8081/repository/maven-snapshots</url>
+                </snapshotRepository>
+            </distributionManagement>
+        </profile>
     </profiles>
 </project>
