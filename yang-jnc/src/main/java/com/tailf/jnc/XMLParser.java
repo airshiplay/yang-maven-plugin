@@ -38,6 +38,9 @@ public class XMLParser {
 
     }
 
+    public void setCapabilities(Capabilities capabilities) {
+    }
+
     /**
      * The handler with hooks for startElement etc. The SAX parser will build
      * up the parse tree, by calling these hooks.

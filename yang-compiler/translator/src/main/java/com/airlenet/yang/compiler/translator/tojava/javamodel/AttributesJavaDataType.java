@@ -117,11 +117,16 @@ public final class AttributesJavaDataType {
                 }
                 return ((YangJavaTypeTranslator) yangType).getJavaQualifiedInfo().getPkgInfo()+"."+((YangJavaTypeTranslator) yangType).getJavaQualifiedInfo().getClassInfo();
             case LEAFREF:
-                YangType refType = getReferredTypeFromLeafref(yangType);
-                if (refType == null) {
-                    return com.tailf.jnc.YangString.class.getName();
+                String pkgInfo = ((YangJavaTypeTranslator) yangType).getJavaQualifiedInfo().getPkgInfo();
+                if(pkgInfo==null || pkgInfo.equals("java.lang")){
+                    YangType refType = getReferredTypeFromLeafref(yangType);
+                    if (refType == null) {
+                        return com.tailf.jnc.YangString.class.getName();
+                    }
+                    return getJNCDataType(getReferredTypeFromLeafref(yangType));
+                }else{
+                    return ((YangJavaTypeTranslator) yangType).getJavaQualifiedInfo().getPkgInfo()+"."+((YangJavaTypeTranslator) yangType).getJavaQualifiedInfo().getClassInfo();
                 }
-                return getJNCDataType(getReferredTypeFromLeafref(yangType));
             case IDENTITYREF:
                   return YangIdentityref.class.getName();
 //                YangIdentityRef ir = (YangIdentityRef) yangType.getDataTypeExtendedInfo();

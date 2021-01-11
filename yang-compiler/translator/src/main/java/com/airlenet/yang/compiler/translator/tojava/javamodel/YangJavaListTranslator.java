@@ -130,13 +130,17 @@ public class YangJavaListTranslator
 
         List<YangLeaf> children = this.getListOfLeaf();
         for (YangLeaf yangLeaf : children) {
-            if (yangLeaf.getDataType().getDataType() == YangDataTypes.DERIVED || yangLeaf.getDataType().getDataType() == YangDataTypes.UNION || yangLeaf.getDataType().getDataType() == YangDataTypes.ENUMERATION) {
+            if (yangLeaf.getDataType().getDataType() == YangDataTypes.DERIVED || yangLeaf.getDataType().getDataType() == YangDataTypes.UNION
+                    || yangLeaf.getDataType().getDataType() == YangDataTypes.ENUMERATION
+                    || yangLeaf.getDataType().getDataType() == YangDataTypes.LEAFREF) {
                 ((YangJavaTypeTranslator) yangLeaf.getDataType()).updateJavaQualifiedInfo(yangPlugin.getConflictResolver());
                 ((YangJavaLeafTranslator) yangLeaf).updateJavaQualifiedInfo();
             }
         }
         for (YangLeafList yangLeaf : this.getListOfLeafList()) {
-            if (yangLeaf.getDataType().getDataType() == YangDataTypes.DERIVED || yangLeaf.getDataType().getDataType() == YangDataTypes.UNION || yangLeaf.getDataType().getDataType() == YangDataTypes.ENUMERATION) {
+            if (yangLeaf.getDataType().getDataType() == YangDataTypes.DERIVED || yangLeaf.getDataType().getDataType() == YangDataTypes.UNION
+                    || yangLeaf.getDataType().getDataType() == YangDataTypes.ENUMERATION
+                    || yangLeaf.getDataType().getDataType() == YangDataTypes.LEAFREF) {
                 ((YangJavaTypeTranslator) yangLeaf.getDataType()).updateJavaQualifiedInfo(yangPlugin.getConflictResolver());
                 ((YangJavaLeafListTranslator) yangLeaf).updateJavaQualifiedInfo();
             }

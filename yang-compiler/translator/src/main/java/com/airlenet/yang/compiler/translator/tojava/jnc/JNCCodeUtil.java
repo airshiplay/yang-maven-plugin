@@ -749,8 +749,8 @@ public class JNCCodeUtil {
             fullClassName = simpleClassName;
         }
 
-        javaClass.addField(new JavaField(fullClassName, YangElement.camelize(yangJavaContainer.getName()), "null", "public"));
-
+        javaClass.addField(new JavaField(fullClassName, YangElement.camelize(yangJavaContainer.getName()), "null", "public")
+                .setJavadoc("See line "+yangJavaContainer.getLineNumber()+" in "+yangJavaContainer.getRelativeFileName().replace("\\","/")));
         {
             JavaMethod getMethod = new JavaMethod("get" + simpleClassName, fullClassName).setModifiers("public");
             getMethod.addLine("return " + YangElement.camelize(yangJavaContainer.getName()) + ";");

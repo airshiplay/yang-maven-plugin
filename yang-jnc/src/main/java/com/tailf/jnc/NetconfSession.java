@@ -313,6 +313,7 @@ public class NetconfSession {
         trace("capabilities: \n" + capatree.toXMLString());
 
         capabilities = new Capabilities(capatree);
+        parser.setCapabilities(capabilities);
         if (!capabilities.baseCapability) {
             throw new JNCException(JNCException.SESSION_ERROR,
                     "server does not support NETCONF base capability: "

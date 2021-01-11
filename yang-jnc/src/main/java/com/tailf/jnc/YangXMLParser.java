@@ -13,12 +13,18 @@ import java.io.ByteArrayInputStream;
  * <p>
  */
 public class YangXMLParser extends XMLParser {
+    Capabilities capabilities;
 
     /**
      * Constructor. Initializes the parser instance.
      */
     public YangXMLParser() throws JNCException {
         super();
+    }
+
+    @Override
+    public void setCapabilities(Capabilities capabilities) {
+        this.capabilities = capabilities;
     }
 
     /**
@@ -29,6 +35,7 @@ public class YangXMLParser extends XMLParser {
     public YangElement readFile(String filename) throws JNCException {
         try {
             final ElementHandler handler = new ElementHandler();
+            handler.capabilities = capabilities;
             parser.setContentHandler(handler);
             parser.parse(filename);
             return (YangElement) handler.top;
@@ -61,6 +68,7 @@ public class YangXMLParser extends XMLParser {
     public Element parse(InputSource is) throws JNCException {
         try {
             final ElementHandler handler = new ElementHandler();
+            handler.capabilities = capabilities;
             parser.setContentHandler(handler);
             parser.parse(is);
             return handler.top;

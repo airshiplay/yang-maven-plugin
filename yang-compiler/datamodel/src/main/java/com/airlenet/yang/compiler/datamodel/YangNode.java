@@ -25,6 +25,7 @@ import com.airlenet.yang.model.SchemaContext;
 import com.airlenet.yang.model.SchemaId;
 import com.airlenet.yang.model.YangNamespace;
 
+import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -1072,6 +1073,13 @@ public abstract class YangNode
         return fileName;
     }
 
+    public String getRelativeFileName(){
+        String path = new File("src/main/yang/").getPath();
+        if(fileName ==null || fileName.indexOf(path)==-1){
+            return fileName;
+        }
+        return fileName.substring(fileName.indexOf(path)+"src/main/".length());
+    }
     @Override
     public void setFileName(String name) {
         fileName = name;

@@ -16,7 +16,10 @@
 
 package com.airlenet.yang.compiler.translator.tojava.javamodel;
 
+import com.airlenet.yang.compiler.datamodel.YangLeaf;
+import com.airlenet.yang.compiler.datamodel.YangLeafList;
 import com.airlenet.yang.compiler.datamodel.javadatamodel.YangJavaOutput;
+import com.airlenet.yang.compiler.datamodel.utils.builtindatatype.YangDataTypes;
 import com.airlenet.yang.compiler.translator.exception.TranslatorException;
 import com.airlenet.yang.compiler.translator.tojava.JavaCodeGenerator;
 import com.airlenet.yang.compiler.translator.tojava.JavaCodeGeneratorInfo;
@@ -25,6 +28,7 @@ import com.airlenet.yang.compiler.translator.tojava.TempJavaCodeFragmentFiles;
 import com.airlenet.yang.compiler.utils.io.YangPluginConfig;
 
 import java.io.IOException;
+import java.util.List;
 
 import static com.airlenet.yang.compiler.translator.tojava.GeneratedJavaFileType.GENERATE_INTERFACE_WITH_BUILDER;
 import static com.airlenet.yang.compiler.translator.tojava.YangJavaModelUtils.generateCodeOfAugmentableNode;
@@ -111,6 +115,23 @@ public class YangJavaOutputTranslator
     @Override
     public void generateCodeEntry(YangPluginConfig yangPlugin) throws TranslatorException {
         updateJNCPackageInfo(this,yangPlugin);
+        List<YangLeaf> children = this.getListOfLeaf();
+        for (YangLeaf yangLeaf : children) {
+            if (yangLeaf.getDataType().getDataType() == YangDataTypes.DERIVED || yangLeaf.getDataType().getDataType() == YangDataTypes.UNION
+                    || yangLeaf.getDataType().getDataType() == YangDataTypes.ENUMERATION
+                    || yangLeaf.getDataType().getDataType() == YangDataTypes.LEAFREF) {
+                ((YangJavaLeafTranslator) yangLeaf).updateJavaQualifiedInfo();
+                ((YangJavaTypeTranslator) yangLeaf.getDataType()).updateJavaQualifiedInfo(yangPlugin.getConflictResolver());
+            }
+        }
+        for (YangLeafList yangLeaf : this.getListOfLeafList()) {
+            if (yangLeaf.getDataType().getDataType() == YangDataTypes.DERIVED || yangLeaf.getDataType().getDataType() == YangDataTypes.UNION
+                    || yangLeaf.getDataType().getDataType() == YangDataTypes.ENUMERATION
+                    || yangLeaf.getDataType().getDataType() == YangDataTypes.LEAFREF) {
+                ((YangJavaLeafListTranslator) yangLeaf).updateJavaQualifiedInfo();
+                ((YangJavaTypeTranslator) yangLeaf.getDataType()).updateJavaQualifiedInfo(yangPlugin.getConflictResolver());
+            }
+        }
 //        try {
 //            generateCodeOfAugmentableNode(this, yangPlugin);
 //        } catch (IOException e) {

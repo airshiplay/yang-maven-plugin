@@ -29,7 +29,7 @@ class ElementHandler extends DefaultHandler {
     private String leafNs;
     private String leafName;
     private String leafValue;
-
+    protected Capabilities capabilities;
     @Override
     public void startElement(String uri, String localName, String qName,
             Attributes attributes) throws SAXException {
@@ -43,7 +43,8 @@ class ElementHandler extends DefaultHandler {
         Element child;
 
         try {
-            child = YangElement.createInstance(this, parent, uri, localName);
+            String revision =capabilities!=null? capabilities.getRevision(uri):null;
+            child = YangElement.createInstance(this, parent, uri,revision, localName);
         } catch (final JNCException e) {
 //            e.printStackTrace();
             throw new SAXException(e.toString(),e);

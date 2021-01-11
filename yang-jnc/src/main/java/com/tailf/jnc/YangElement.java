@@ -43,7 +43,6 @@ public abstract class YangElement extends Element {
     public static final String COLON_UNEXPECTED_ELEMENT = ": Unexpected element";
     public static final String DUMMY = "DUMMY";
     public static final String DUMMY_LC = "dummy";
-
     /**
      * Structure information. An array of the children names.
      */
@@ -122,8 +121,8 @@ public abstract class YangElement extends Element {
      * @throws YangException if unable to instantiate the child
      */
     public static Element createInstance(ElementHandler parser,
-                                         Element parent, String ns, String name) throws YangException {
-        final String pkg = getPackage(ns);
+                                         Element parent, String ns,String revision, String name) throws YangException {
+        final String pkg = getPackage(ns,revision);
         if (pkg == null) {
             final Element elem = new Element(ns, name);
             if (parent != null) {
@@ -238,10 +237,15 @@ public abstract class YangElement extends Element {
     static class Package {
         String pkg;
         String ns;
-
+        String rev;
         Package(String ns, String pkg) {
             this.ns = ns;
             this.pkg = pkg;
+        }
+        Package(String ns, String pkg,String rev) {
+            this.ns = ns;
+            this.pkg = pkg;
+            this.rev = rev;
         }
     }
 
@@ -250,6 +254,24 @@ public abstract class YangElement extends Element {
      */
     static List<Package> packages = new ArrayList<Package>();
 
+    public static String getPackage(String ns,String revision) {
+        if (packages == null) {
+            return null;
+        }
+        synchronized (packages) {
+            String nsPkg = null;
+            for (final Package p : packages) {
+                if (p != null && p.ns.equals(ns)) {
+                    if (revision == null ? revision == p.rev : revision.equals(p.rev)) {
+                        return p.pkg;
+                    }else {//都不匹配，选一个NS相同的即可
+                        nsPkg = p.pkg;
+                    }
+                }
+            }
+            return nsPkg;
+        }
+    }
     /**
      * Locate package from Namespace.
      *
@@ -268,7 +290,13 @@ public abstract class YangElement extends Element {
         }
         return null;
     }
-
+    public static void setPackage(String ns,String revision, String pkg) {
+        if (packages == null) {
+            packages = new ArrayList<Package>();
+        }
+        removePackage(ns,revision);
+        packages.add(new Package(ns, pkg,revision));
+    }
     /**
      * Assiciate a JAVA package with a namespace.
      */
@@ -278,6 +306,21 @@ public abstract class YangElement extends Element {
         }
         removePackage(ns);
         packages.add(new Package(ns, pkg));
+    }
+
+    public static void removePackage(String ns,String rev) {
+        if (packages == null) {
+            return;
+        }
+        synchronized (packages) {
+            for (int i = 0; i < packages.size(); i++) {
+                final Package p = packages.get(i);
+                if (p != null && p.ns.equals(ns) && (p.rev ==null ? p.rev ==rev :p.rev.equals(rev))) {
+                    packages.remove(i);
+                    return;
+                }
+            }
+        }
     }
 
     /**

@@ -20,6 +20,7 @@ import com.airlenet.yang.compiler.datamodel.YangLeaf;
 import com.airlenet.yang.compiler.datamodel.YangLeafList;
 import com.airlenet.yang.compiler.datamodel.YangNode;
 import com.airlenet.yang.compiler.datamodel.javadatamodel.*;
+import com.airlenet.yang.compiler.datamodel.utils.builtindatatype.YangDataTypes;
 import com.airlenet.yang.compiler.translator.exception.TranslatorException;
 import com.airlenet.yang.compiler.translator.tojava.JavaCodeGenerator;
 import com.airlenet.yang.compiler.translator.tojava.JavaCodeGeneratorInfo;
@@ -34,6 +35,7 @@ import com.tailf.jnc.YangElement;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.airlenet.yang.compiler.translator.tojava.YangJavaModelUtils.updateJNCPackageInfo;
 import static com.airlenet.yang.compiler.translator.tojava.YangJavaModelUtils.updatePackageInfo;
@@ -115,6 +117,19 @@ public class YangJavaTailfActionTranslator
     public void generateCodeEntry(YangPluginConfig yangPlugin)
             throws TranslatorException {
 
+        // Add package information for RPC and create corresponding folder.
+        updatePackageInfo(this, yangPlugin);
+
+        YangJavaInput yangJavaInput = (YangJavaInput) getChild();
+        YangJavaOutput yangJavaOutput = null;
+        if (yangJavaInput != null) {
+            ((JavaCodeGenerator)yangJavaInput).generateCodeEntry(yangPlugin);
+            yangJavaOutput = (YangJavaOutput) yangJavaInput.getNextSibling();
+        }
+        if(yangJavaOutput!=null){
+            ((JavaCodeGenerator)yangJavaInput).generateCodeEntry(yangPlugin);
+        }
+
         // TODO: code generation for each RPC
         /*try {
             generateCodeOfNode(this, yangPlugin);
@@ -127,8 +142,6 @@ public class YangJavaTailfActionTranslator
                             + " in " + getFileName() + " " + e.getLocalizedMessage());
         }*/
 
-        // Add package information for RPC and create corresponding folder.
-        updatePackageInfo(this, yangPlugin);
     }
 
     /**
@@ -191,6 +204,14 @@ public class YangJavaTailfActionTranslator
         if(childInput!=null &&  (childInput instanceof YangJavaContainer)){
             JNCCodeUtil.yangJavaContainerMethod(javaClass,childInput);
             JNCCodeUtil.yangNodeMethond(javaClass,childInput,true);
+        }
+        for (YangLeaf yangLeaf :listOfLeaf) {
+
+            JNCCodeUtil.yangLeafMethod(javaClass, yangJavaModule, yangLeaf);
+
+        }
+        for (YangLeafList yangLeafList : listOfLeafList) {
+            JNCCodeUtil.yangLeafListMethod(javaClass, yangJavaModule, yangLeafList);
         }
 
         try {

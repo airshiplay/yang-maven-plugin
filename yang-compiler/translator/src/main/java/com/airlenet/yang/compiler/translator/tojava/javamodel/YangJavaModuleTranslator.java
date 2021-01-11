@@ -29,6 +29,7 @@ import com.airlenet.yang.compiler.translator.tojava.jnc.JavaMethod;
 import com.airlenet.yang.compiler.utils.io.YangPluginConfig;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
 import static com.airlenet.yang.compiler.translator.tojava.GeneratedJavaFileType.GENERATE_INTERFACE_WITH_BUILDER;
@@ -47,7 +48,7 @@ public class YangJavaModuleTranslator
         implements JavaCodeGeneratorInfo, JavaCodeGenerator {
 
     private static final long serialVersionUID = 806201625L;
-
+    private static final String DATE_FORMAT = "yyyy-MM-dd";
     /**
      * File handle to maintain temporary java code fragments as per the code
      * snippet types.
@@ -148,15 +149,22 @@ public class YangJavaModuleTranslator
                         "\n * "+fileInfo.getYangFileName().replace("\\","/")+
                         "\n * "+
                         "\n * @author Auto Generated");
+        String rev = null;
+        if(this.getRevision() !=null){
+            SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
+            sdf.setLenient(false);
+              rev = sdf.format(this.getRevision().getRevDate());
+        }
 
         javaClass.addField(new JavaField("String","NAMESPACE","\""+this.getModuleNamespace()+"\"", "public" ,"static" ,"final"),
-                new JavaField("String","PREFIX","\""+this.getPrefix()+"\"", "public" ,"static" ,"final" ));
+                new JavaField("String","PREFIX","\""+this.getPrefix()+"\"", "public" ,"static" ,"final" ),
+                new JavaField("String","REVISION",rev==null?null:"\""+rev+"\"", "public" ,"static" ,"final" ));
         JavaMethod enabler = new JavaMethod("enable","void")
                 .setExceptions(new String[]{"JNCException"}).addDependency("com.tailf.jnc.JNCException")
                 .setJavadoc("Enable the elements in this namespace to be aware")
                 .setJavadoc("of the data model and use the generated classes.");
         enabler.setModifiers (new String[]{ "public", "static"});
-        enabler.addLine("YangElement.setPackage(NAMESPACE, \""+prefixPkg+"\");");
+        enabler.addLine("YangElement.setPackage(NAMESPACE, REVISION, \""+prefixPkg+"\");");
         enabler.addDependency("com.tailf.jnc.YangElement");
         enabler.addLine("//"+classname + ".registerSchema();");
         javaClass.addMethod(enabler);
