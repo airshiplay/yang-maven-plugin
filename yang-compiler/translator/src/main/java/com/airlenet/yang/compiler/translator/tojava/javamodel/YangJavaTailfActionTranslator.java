@@ -120,14 +120,28 @@ public class YangJavaTailfActionTranslator
         // Add package information for RPC and create corresponding folder.
         updatePackageInfo(this, yangPlugin);
 
-        YangJavaInput yangJavaInput = (YangJavaInput) getChild();
+        YangJavaInput yangJavaInput = null;
+
         YangJavaOutput yangJavaOutput = null;
+        YangNode child = getChild();
+        if(child!=null){
+            if (child instanceof YangJavaInput) {
+                yangJavaInput = (YangJavaInput) child;
+            }else{
+                yangJavaOutput = (YangJavaOutput) child;
+            }
+            if ( child.getNextSibling() instanceof YangJavaOutput) {
+                yangJavaOutput = (YangJavaOutput) child.getNextSibling();
+            }else{
+                yangJavaInput = (YangJavaInput) child.getNextSibling();
+            }
+        }
+
         if (yangJavaInput != null) {
             ((JavaCodeGenerator)yangJavaInput).generateCodeEntry(yangPlugin);
-            yangJavaOutput = (YangJavaOutput) yangJavaInput.getNextSibling();
         }
         if(yangJavaOutput!=null){
-            ((JavaCodeGenerator)yangJavaInput).generateCodeEntry(yangPlugin);
+            ((JavaCodeGenerator)yangJavaOutput).generateCodeEntry(yangPlugin);
         }
 
         // TODO: code generation for each RPC
@@ -174,11 +188,23 @@ public class YangJavaTailfActionTranslator
                 .addLine("setPrefix(" + yangJavaModule.getPrefixClassName() + ".PREFIX);"));
 
         JNCCodeUtil.keyNamesMethod(javaClass, null);
-        YangJavaInput yangJavaInput = (YangJavaInput) getChild();
+        YangJavaInput yangJavaInput = null;
+
         YangJavaOutput yangJavaOutput = null;
-        if (yangJavaInput != null) {
-            yangJavaOutput = (YangJavaOutput) yangJavaInput.getNextSibling();
+        YangNode child = getChild();
+        if(child!=null){
+            if (child instanceof YangJavaInput) {
+                yangJavaInput = (YangJavaInput) child;
+            }else{
+                yangJavaOutput = (YangJavaOutput) child;
+            }
+            if (child.getNextSibling() instanceof YangJavaOutput) {
+                yangJavaOutput = (YangJavaOutput) child.getNextSibling();
+            }else{
+                yangJavaInput = (YangJavaInput) child.getNextSibling();
+            }
         }
+
 
 //
         List<YangLeaf> listOfLeaf = new ArrayList<>();
