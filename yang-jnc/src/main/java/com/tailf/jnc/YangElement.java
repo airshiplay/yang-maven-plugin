@@ -121,8 +121,8 @@ public abstract class YangElement extends Element {
      * @throws YangException if unable to instantiate the child
      */
     public static Element createInstance(ElementHandler parser,
-                                         Element parent, String ns,String revision, String name) throws YangException {
-        final String pkg = getPackage(ns,revision);
+                                         Element parent, String name, String ns, String module,String revision) throws YangException {
+        final String pkg = getPackage(ns,module,revision);
         if (pkg == null) {
             final Element elem = new Element(ns, name);
             if (parent != null) {
@@ -238,13 +238,15 @@ public abstract class YangElement extends Element {
         String pkg;
         String ns;
         String rev;
+        String module;
         Package(String ns, String pkg) {
             this.ns = ns;
             this.pkg = pkg;
         }
-        Package(String ns, String pkg,String rev) {
+        Package(String ns, String pkg,String rev,String module) {
             this.ns = ns;
             this.pkg = pkg;
+            this.module = module;
             this.rev = rev;
         }
     }
@@ -254,7 +256,7 @@ public abstract class YangElement extends Element {
      */
     static List<Package> packages = new ArrayList<Package>();
 
-    public static String getPackage(String ns,String revision) {
+    public static String getPackage(String ns,String module,String revision) {
         if (packages == null) {
             return null;
         }
@@ -262,7 +264,8 @@ public abstract class YangElement extends Element {
             String nsPkg = null;
             for (final Package p : packages) {
                 if (p != null && p.ns.equals(ns)) {
-                    if (revision == null ? revision == p.rev : revision.equals(p.rev)) {
+                    if ((revision == null ? revision == p.rev : revision.equals(p.rev))
+                        &&(module == null ? module == p.module : module.equals(p.module))) {
                         return p.pkg;
                     }else {//都不匹配，选一个NS相同的即可
                         nsPkg = p.pkg;
@@ -290,12 +293,12 @@ public abstract class YangElement extends Element {
         }
         return null;
     }
-    public static void setPackage(String ns,String revision, String pkg) {
+    public static void setPackage(String ns,String module,String revision, String pkg) {
         if (packages == null) {
             packages = new ArrayList<Package>();
         }
-        removePackage(ns,revision);
-        packages.add(new Package(ns, pkg,revision));
+        removePackage(ns,revision,module);
+        packages.add(new Package(ns, pkg,revision,module));
     }
     /**
      * Assiciate a JAVA package with a namespace.
@@ -308,14 +311,16 @@ public abstract class YangElement extends Element {
         packages.add(new Package(ns, pkg));
     }
 
-    public static void removePackage(String ns,String rev) {
+    public static void removePackage(String ns,String rev,String module) {
         if (packages == null) {
             return;
         }
         synchronized (packages) {
             for (int i = 0; i < packages.size(); i++) {
                 final Package p = packages.get(i);
-                if (p != null && p.ns.equals(ns) && (p.rev ==null ? p.rev ==rev :p.rev.equals(rev))) {
+                if (p != null && p.ns.equals(ns)
+                        && (p.rev ==null ? p.rev ==rev :p.rev.equals(rev))
+                        && (p.module ==null ? p.module ==module :p.module.equals(module))     ) {
                     packages.remove(i);
                     return;
                 }

@@ -311,13 +311,27 @@ public class Capabilities {
     private final ArrayList<Capa> capas;
     private final ArrayList<Capa> data_capas;
 
-    static private class Capa {
+    static public class Capa {
         String uri;
+        String module;
         String revision;
 
-        Capa(String uri, String revision) {
+        Capa(String uri,String module, String revision) {
             this.uri = uri;
+            this.module = module;
             this.revision = revision;
+        }
+
+        public String getModule() {
+            return module;
+        }
+
+        public String getUri() {
+            return uri;
+        }
+
+        public String getRevision() {
+            return revision;
         }
     }
 
@@ -332,6 +346,7 @@ public class Capabilities {
             // Do we have a query part
             final String parts[] = cap.value.toString().split("\\?");
             String rev = null;
+            String mod= null;
             final String uri = parts[0];
             if (parts.length == 2) {
                 // we have some query part data
@@ -343,9 +358,12 @@ public class Capabilities {
                     if (kv[0].equals("revision")) {
                         rev = kv[1];
                     }
+                    if (kv[0].equals("module")) {
+                        mod = kv[1];
+                    }
                 }
             }
-            capas.add(new Capa(uri, rev));
+            capas.add(new Capa(uri,mod, rev));
             if (uri.equals(NETCONF_BASE_CAPABILITY)) {
                 baseCapability = true;
             } else if (uri.equals(WRITABLE_RUNNING_CAPABILITY)) {
@@ -402,7 +420,7 @@ public class Capabilities {
             } else {
                 // It's either a proper data schema capability or some
                 // homegrown agent capability
-                data_capas.add(new Capa(uri, rev));
+                data_capas.add(new Capa(uri,mod, rev));
             }
         }
     }
@@ -429,5 +447,12 @@ public class Capabilities {
         }
         return null;
     }
-
+    public Capa getCapa(String uri) {
+        for (Capa capa : data_capas) {
+            if (capa.uri.equals(uri)) {
+                return capa;
+            }
+        }
+        return null;
+    }
 }

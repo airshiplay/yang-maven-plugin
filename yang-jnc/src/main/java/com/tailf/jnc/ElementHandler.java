@@ -43,8 +43,8 @@ class ElementHandler extends DefaultHandler {
         Element child;
 
         try {
-            String revision =capabilities!=null? capabilities.getRevision(uri):null;
-            child = YangElement.createInstance(this, parent, uri,revision, localName);
+            Capabilities.Capa capa =capabilities!=null? capabilities.getCapa(uri):null;
+            child = YangElement.createInstance(this, parent,localName, uri,capa==null?null:capa.module,capa==null?null:capa.revision);
         } catch (final JNCException e) {
 //            e.printStackTrace();
             throw new SAXException(e.toString(),e);
