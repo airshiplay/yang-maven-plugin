@@ -1,6 +1,7 @@
 package com.tailf.jnc;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class Capabilities {
 
@@ -447,6 +448,7 @@ public class Capabilities {
         }
         return null;
     }
+
     public Capa getCapa(String uri) {
         for (Capa capa : data_capas) {
             if (capa.uri.equals(uri)) {
@@ -454,5 +456,12 @@ public class Capabilities {
             }
         }
         return null;
+    }
+
+    public List<Capa> getCapas() {
+        return capas;
+    }
+    public List<Capa> getDataCapas() {
+        return data_capas;
     }
 }
