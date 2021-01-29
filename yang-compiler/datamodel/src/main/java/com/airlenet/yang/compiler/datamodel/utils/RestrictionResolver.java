@@ -198,7 +198,7 @@ public final class RestrictionResolver {
      * @return concatenated string after removing double quotes
      */
     private static String removeQuotesAndHandleConcat(String yangStringData) {
-        yangStringData = yangStringData.replace(QUOTE, EMPTY_STRING);
+        yangStringData = yangStringData.replace(QUOTE, EMPTY_STRING).replace("\'",EMPTY_STRING);
         String[] tmpData = yangStringData.split(quote(ADD));
         StringBuilder builder = new StringBuilder();
         for (String yangString : tmpData) {
