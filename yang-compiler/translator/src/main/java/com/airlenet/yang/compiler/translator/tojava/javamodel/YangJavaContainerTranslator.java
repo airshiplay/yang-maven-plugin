@@ -363,6 +363,9 @@ public class YangJavaContainerTranslator
 //
 //                    javaClass.addMethod(new JavaMethod("delete" + augmentClassname, "void").setModifiers("public").setExceptions(JNCException.class.getName())
 //                            .addLine("this." + filedName + " = null;").addLine("String path=\"" + augmentedNode.getName() + "\";").addLine("this.delete(path);"));
+                }else if(augmentedNode instanceof YangJavaTailfActionTranslator){
+                    JNCCodeUtil.yangJavaContainerMethod(javaClass,(YangJavaTailfActionTranslator)augmentedNode);
+                    JNCCodeUtil.yangNodeMethond(javaClass,(YangJavaTailfActionTranslator)augmentedNode,true);
                 }else{
                     System.out.println(augmentedNode.getClass());
                 }
