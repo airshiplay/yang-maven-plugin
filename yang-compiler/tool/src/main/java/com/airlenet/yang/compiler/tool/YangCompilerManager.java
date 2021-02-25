@@ -16,6 +16,7 @@
 
 package com.airlenet.yang.compiler.tool;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import com.airlenet.yang.compiler.api.YangCompilationParam;
 import com.airlenet.yang.compiler.api.YangCompiledOutput;
@@ -190,6 +191,7 @@ public class YangCompilerManager implements YangCompilerService {
 
                 //add YANG files to JAR
                 processCopyYangFile(resourceGenDir);
+                FileUtils.copyFile(new File(config.getCodeGenDir(),"yang.module"),new File(resourceGenDir,"../yang.module"));
             } catch (IOException | ParserException e) {
                 //TODO: provide unified framework for exceptions
                 YangCompilerException exception =
@@ -344,6 +346,7 @@ public class YangCompilerManager implements YangCompilerService {
         List<YangNode> yangNodeSortedList = new LinkedList<>();
         yangNodeSortedList.addAll(yangNodeSet);
         sort(yangNodeSortedList);
+        FileUtils.write(new File(pluginConfig.getCodeGenDir(),"yang.module"),"",false);
         for (YangNode node : yangNodeSortedList) {
             if (node.isToTranslate() && !((YangDeviationHolder) node)
                     .isModuleForDeviation()) {

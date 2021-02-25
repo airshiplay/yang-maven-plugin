@@ -16,14 +16,14 @@ public class Capabilities {
      * "urn:ietf:params:xml:ns:netconf:notification:1.0"
      */
     public static final String NS_NOTIFICATION = URN_IETF_PARAMS_XML_NS_NETCONF +
-    		"notification:1.0";
+            "notification:1.0";
 
     /**
      * The NETCONF partial lock namespace.
      * "urn:ietf:params:xml:ns:netconf:partial-lock:1.0"
      */
     public static final String NS_PARTIAL_LOCK = URN_IETF_PARAMS_XML_NS_NETCONF +
-    		"partial-lock:1.0";
+            "partial-lock:1.0";
 
     public static final String URN_IETF_PARAMS = "urn:ietf:params:";
     /**
@@ -31,14 +31,14 @@ public class Capabilities {
      * "urn:ietf:params:netconf:base:1.0".
      */
     public static final String NETCONF_BASE_CAPABILITY = URN_IETF_PARAMS +
-    		"netconf:base:1.0";
+            "netconf:base:1.0";
 
     /**
      * String constant for the <code>:writable-running</code> capability.
      * "urn:ietf:params:netconf:capability:writable-running:1.0".
      */
     public static final String WRITABLE_RUNNING_CAPABILITY = URN_IETF_PARAMS +
-    		"netconf:capability:writable-running:1.0";
+            "netconf:capability:writable-running:1.0";
 
     public static final String URN_IETF_PARAMS_NETCONF = "urn:ietf:params:netconf:";
     /**
@@ -46,73 +46,73 @@ public class Capabilities {
      * "urn:ietf:params:netconf:capability:candidate:1.0".
      */
     public static final String CANDIDATE_CAPABILITY = URN_IETF_PARAMS_NETCONF +
-    		"capability:candidate:1.0";
+            "capability:candidate:1.0";
 
     /**
      * String constant for the <code>:confirmed-commit</code> capability.
      * "urn:ietf:params:netconf:capability:confirmed-commit:1.0".
      */
     public static final String CONFIRMED_COMMIT_CAPABILITY = URN_IETF_PARAMS +
-    		"netconf:capability:confirmed-commit:1.0";
+            "netconf:capability:confirmed-commit:1.0";
 
     /**
      * String constant for the <code>:rollback-on-error</code> capability.
      * "urn:ietf:params:netconf:capability:rollback-on-error:1.0".
      */
     public static final String ROLLBACK_ON_ERROR_CAPABILITY = URN_IETF_PARAMS +
-    		"netconf:capability:rollback-on-error:1.0";
+            "netconf:capability:rollback-on-error:1.0";
 
     /**
      * String constant for the <code>:validate</code> capability.
      * "urn:ietf:params:netconf:capability:validate:1.0".
      */
     public static final String VALIDATE_CAPABILITY = URN_IETF_PARAMS_NETCONF +
-    		"capability:validate:1.0";
+            "capability:validate:1.0";
 
     /**
      * String constant for the <code>:startup</code> capability.
      * "urn:ietf:params:netconf:capability:startup:1.0".
      */
     public static final String STARTUP_CAPABILITY = URN_IETF_PARAMS_NETCONF +
-    		"capability:startup:1.0";
+            "capability:startup:1.0";
 
     /**
      * String constant for the <code>:url</code> capability.
      * "urn:ietf:params:netconf:capability:url:1.0".
      */
     public static final String URL_CAPABILITY = URN_IETF_PARAMS_NETCONF +
-    		"capability:url:1.0";
+            "capability:url:1.0";
 
     public static final String URL_CAPABILITY_SCHEME = URN_IETF_PARAMS_NETCONF +
-    		"capability:url:1.0?scheme=";
+            "capability:url:1.0?scheme=";
 
     /**
      * String constant for the <code>:xpath</code> capability.
      * "urn:ietf:params:netconf:capability:xpath:1.0".
      */
     public static final String XPATH_CAPABILITY = URN_IETF_PARAMS_NETCONF +
-    		"capability:xpath:1.0";
+            "capability:xpath:1.0";
 
     /**
      * String constant for the <code>:notification</code> capability.
      * "urn:ietf:params:netconf:capability:notification:1.0".
      */
     public static final String NOTIFICATION_CAPABILITY = URN_IETF_PARAMS_NETCONF +
-    		"capability:notification:1.0";
+            "capability:notification:1.0";
 
     /**
      * String constant for the <code>:interleave</code> capability.
      * "urn:ietf:params:netconf:capability:interleave:1.0".
      */
     public static final String INTERLEAVE_CAPABILITY = URN_IETF_PARAMS_NETCONF +
-    		"capability:interleave:1.0";
+            "capability:interleave:1.0";
 
     /**
      * String constant for the <code>:partial-lock</code> capability.
      * "urn:ietf:params:netconf:capability:partial-lock:1.0"
      */
     public static final String PARTIAL_LOCK_CAPABILITY = URN_IETF_PARAMS_NETCONF +
-    		"capability:partial-lock:1.0";
+            "capability:partial-lock:1.0";
 
     public static final String HTTP_TAIL_F_COM = "http://tail-f.com/";
     /**
@@ -120,14 +120,14 @@ public class Capabilities {
      * "http://tail-f.com/ns/netconf/actions/1.0"
      */
     public static final String NS_ACTIONS = HTTP_TAIL_F_COM +
-    		"ns/netconf/actions/1.0";
+            "ns/netconf/actions/1.0";
 
     /**
      * The NETCONF transactions namespace.
      * "http://tail-f.com/ns/netconf/transactions/1.0"
      */
     public static final String NS_TRANSACTIONS = HTTP_TAIL_F_COM +
-    		"ns/netconf/transactions/1.0";
+            "ns/netconf/transactions/1.0";
 
     // A set of Tail-f proprietary capabilities
     // that we also check and code for
@@ -137,21 +137,21 @@ public class Capabilities {
      * "http://tail-f.com/ns/netconf/actions/1.0".
      */
     public static final String ACTIONS_CAPABILITY = HTTP_TAIL_F_COM +
-    		"ns/netconf/actions/1.0";
+            "ns/netconf/actions/1.0";
 
     /**
      * String constant for the <code>:transactions</code> capability.
      * "http://tail-f.com/ns/netconf/transactions/1.0".
      */
     public static final String TRANSACTIONS_CAPABILITY = HTTP_TAIL_F_COM +
-    		"ns/netconf/transactions/1.0";
+            "ns/netconf/transactions/1.0";
 
     /**
      * String constant for the <code>:with-defaults</code> capability.
      * "http://tail-f.com/ns/netconf/with-defaults/1.0".
      */
     public static final String WITH_DEFAULTS_CAPABILITY = HTTP_TAIL_F_COM +
-    		"ns/netconf/with-defaults/1.0";
+            "ns/netconf/with-defaults/1.0";
 
     /**
      * Capabilites
@@ -316,11 +316,13 @@ public class Capabilities {
         String uri;
         String module;
         String revision;
+        String string;
 
-        Capa(String uri,String module, String revision) {
+        Capa(String uri, String module, String revision, String string) {
             this.uri = uri;
             this.module = module;
             this.revision = revision;
+            this.string = string;
         }
 
         public String getModule() {
@@ -334,20 +336,21 @@ public class Capabilities {
         public String getRevision() {
             return revision;
         }
-    }
 
-    protected Capabilities(Element e) throws JNCException {
-        final NodeSet caps = e.get("capability");
-        capas = new ArrayList<Capa>(caps.size());
-        data_capas = new ArrayList<Capa>(caps.size());
+        @Override
+        public String toString() {
+            if (string == null) {
+                string = uri + "?module=" + module +
+                        (revision == null ? "" : "&revision=" + revision);
+            }
+            return string;
 
-        for (int i = 0; i < caps.size(); i++) {
-            final Element cap = caps.getElement(i);
+        }
 
-            // Do we have a query part
-            final String parts[] = cap.value.toString().split("\\?");
+        public static Capa valueOf(String str) {
+            final String parts[] = str.split("\\?");
             String rev = null;
-            String mod= null;
+            String mod = null;
             final String uri = parts[0];
             if (parts.length == 2) {
                 // we have some query part data
@@ -364,7 +367,40 @@ public class Capabilities {
                     }
                 }
             }
-            capas.add(new Capa(uri,mod, rev));
+            Capa capa = new Capa(uri, mod, rev, str);
+            return capa;
+        }
+    }
+
+    protected Capabilities(Element e) throws JNCException {
+        final NodeSet caps = e.get("capability");
+        capas = new ArrayList<Capa>(caps.size());
+        data_capas = new ArrayList<Capa>(caps.size());
+
+        for (int i = 0; i < caps.size(); i++) {
+            final Element cap = caps.getElement(i);
+
+            // Do we have a query part
+            final String parts[] = cap.value.toString().split("\\?");
+            String rev = null;
+            String mod = null;
+            final String uri = parts[0];
+            if (parts.length == 2) {
+                // we have some query part data
+                final String q = parts[1];
+                final String pairs[] = q.split("&");
+
+                for (final String pair : pairs) {
+                    final String kv[] = pair.split("=");
+                    if (kv[0].equals("revision")) {
+                        rev = kv[1];
+                    }
+                    if (kv[0].equals("module")) {
+                        mod = kv[1];
+                    }
+                }
+            }
+            capas.add(new Capa(uri, mod, rev, cap.value.toString()));
             if (uri.equals(NETCONF_BASE_CAPABILITY)) {
                 baseCapability = true;
             } else if (uri.equals(WRITABLE_RUNNING_CAPABILITY)) {
@@ -395,16 +431,16 @@ public class Capabilities {
             } else if (uri.equals("urn:ietf:params:xml:ns:netconf:base:1.0")) {
                 baseCapability = true;
             } else if (uri.equals(URN_IETF_PARAMS_XML_NS_NETCONF +
-            		"capability:candidate:1.0")) {
+                    "capability:candidate:1.0")) {
                 candidateCapability = true;
             } else if (uri.equals(URN_IETF_PARAMS_XML_NS_NETCONF +
-            		"capability:confirmed-commit:1.0")) {
+                    "capability:confirmed-commit:1.0")) {
                 confirmedCommitCapability = true;
             } else if (uri.equals(URN_IETF_PARAMS_XML_NS_NETCONF +
-            		"capability:validate:1.0")) {
+                    "capability:validate:1.0")) {
                 validateCapability = true;
             } else if (uri.equals(URN_IETF_PARAMS_XML_NS_NETCONF +
-            		"capability:url:1.0")) {
+                    "capability:url:1.0")) {
                 urlCapability = true;
                 if (parts[1] != null) {
                     urlSchemes = parts[1].split(",");
@@ -421,12 +457,14 @@ public class Capabilities {
             } else {
                 // It's either a proper data schema capability or some
                 // homegrown agent capability
-                data_capas.add(new Capa(uri,mod, rev));
+                data_capas.add(new Capa(uri, mod, rev, cap.value.toString()));
             }
         }
     }
 
-    /** Checks all capabilities including the rfc 4711 ones */
+    /**
+     * Checks all capabilities including the rfc 4711 ones
+     */
     public boolean hasCapability(String uri) {
         for (final Capa c : capas) {
             if (c.uri.equals(uri)) {
@@ -461,6 +499,7 @@ public class Capabilities {
     public List<Capa> getCapas() {
         return capas;
     }
+
     public List<Capa> getDataCapas() {
         return data_capas;
     }

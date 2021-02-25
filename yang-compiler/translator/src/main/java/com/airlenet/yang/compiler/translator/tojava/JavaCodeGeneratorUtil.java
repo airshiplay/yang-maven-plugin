@@ -35,8 +35,10 @@ import com.airlenet.yang.compiler.datamodel.YangOutput;
 import com.airlenet.yang.compiler.datamodel.YangSchemaNode;
 import com.airlenet.yang.compiler.datamodel.YangUses;
 import com.airlenet.yang.compiler.utils.io.YangPluginConfig;
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
