@@ -38,27 +38,7 @@ import java.util.Stack;
 
 import static com.airlenet.yang.compiler.translator.tojava.YangJavaModelUtils.getCurNodePackage;
 import static com.airlenet.yang.compiler.translator.tojava.utils.JavaIdentifierSyntax.getRootPackage;
-import static com.airlenet.yang.compiler.utils.UtilConstants.BIG_DECIMAL;
-import static com.airlenet.yang.compiler.utils.UtilConstants.BIG_INTEGER;
-import static com.airlenet.yang.compiler.utils.UtilConstants.BIT_SET;
-import static com.airlenet.yang.compiler.utils.UtilConstants.BOOLEAN_DATA_TYPE;
-import static com.airlenet.yang.compiler.utils.UtilConstants.BOOLEAN_WRAPPER;
-import static com.airlenet.yang.compiler.utils.UtilConstants.BYTE;
-import static com.airlenet.yang.compiler.utils.UtilConstants.BYTE_WRAPPER;
-import static com.airlenet.yang.compiler.utils.UtilConstants.COLLECTION_IMPORTS;
-import static com.airlenet.yang.compiler.utils.UtilConstants.IDENTITY;
-import static com.airlenet.yang.compiler.utils.UtilConstants.INT;
-import static com.airlenet.yang.compiler.utils.UtilConstants.INTEGER_WRAPPER;
-import static com.airlenet.yang.compiler.utils.UtilConstants.JAVA_LANG;
-import static com.airlenet.yang.compiler.utils.UtilConstants.JAVA_MATH;
-import static com.airlenet.yang.compiler.utils.UtilConstants.LONG;
-import static com.airlenet.yang.compiler.utils.UtilConstants.LONG_WRAPPER;
-import static com.airlenet.yang.compiler.utils.UtilConstants.OBJECT_STRING;
-import static com.airlenet.yang.compiler.utils.UtilConstants.PERIOD;
-import static com.airlenet.yang.compiler.utils.UtilConstants.SHORT;
-import static com.airlenet.yang.compiler.utils.UtilConstants.SHORT_WRAPPER;
-import static com.airlenet.yang.compiler.utils.UtilConstants.SQUARE_BRACKETS;
-import static com.airlenet.yang.compiler.utils.UtilConstants.STRING_DATA_TYPE;
+import static com.airlenet.yang.compiler.utils.UtilConstants.*;
 import static com.airlenet.yang.compiler.utils.io.impl.YangIoUtils.getCamelCase;
 import static com.airlenet.yang.compiler.utils.io.impl.YangIoUtils.getCapitalCase;
 import static com.airlenet.yang.compiler.utils.io.impl.YangIoUtils.getPackageDirPathFromJavaJPackage;
@@ -621,7 +601,7 @@ public final class AttributesJavaDataType {
             }
             int l=node.getName().lastIndexOf("/");
             if(l!=-1){
-               name= "Augmented-"+node.getName().substring(l+1).replaceAll(":","");
+               name= AUGMENTED+"-"+node.getName().substring(l+1).replaceAll(":","");
             }
         }
 

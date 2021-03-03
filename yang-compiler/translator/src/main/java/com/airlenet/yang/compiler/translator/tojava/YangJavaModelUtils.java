@@ -117,7 +117,7 @@ public final class YangJavaModelUtils {
                     .getJavaName());
             translator.setLineNumber(info.getLineNumber());
             if(info.getFileName()!=null &&config.getYangFilesDir()!=null)
-                translator.setYangFileName(info.getFileName().substring(config.getYangFilesDir().length()+1));
+                translator.setYangFileName(new File(info.getFileName()).getName());
             translator.setPackage(getCurNodePackage((YangNode) info));
         }
         updateCommonPackageInfo(translator, info, config);
@@ -135,7 +135,7 @@ public final class YangJavaModelUtils {
                     .getJavaName());
             translator.setLineNumber(info.getLineNumber());
             if(info.getFileName()!=null &&config.getYangFilesDir()!=null)
-                translator.setYangFileName(info.getFileName().substring(config.getYangFilesDir().length()+1));
+                translator.setYangFileName(new File(info.getFileName()).getName());
             translator.setPackage(getCurNodePackage((YangNode) info));
         }
         updateCommonPackageInfo(translator, info, config);
@@ -227,7 +227,7 @@ public final class YangJavaModelUtils {
         translator.setPackage(pkg);
         translator.setLineNumber(info.getLineNumber());
         if(info.getFileName()!=null && config.getYangFilesDir()!=null){
-            translator.setYangFileName(info.getFileName().substring(config.getYangFilesDir().length()+1));
+            translator.setYangFileName(new File(info.getFileName()).getName());
         }
 
         updateCommonPackageInfo(translator, info, config);
@@ -246,7 +246,7 @@ public final class YangJavaModelUtils {
         translator.setPackage(pkg);
         translator.setLineNumber(info.getLineNumber());
         if(info.getFileName()!=null && config.getYangFilesDir()!=null){
-            translator.setYangFileName(info.getFileName().substring(config.getYangFilesDir().length()+1));
+            translator.setYangFileName(new File(info.getFileName()).getName());
         }
 
         updateCommonPackageInfo(translator, info, config);
