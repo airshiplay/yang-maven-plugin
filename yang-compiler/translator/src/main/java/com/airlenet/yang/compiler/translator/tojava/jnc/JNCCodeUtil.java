@@ -331,7 +331,7 @@ public class JNCCodeUtil {
             getMethod.addLine("List<" + leafDateTypeClassName + "> list = new ArrayList<>();");
             getMethod.addLine("ElementLeafListValueIterator iterator = " + YangElement.camelize(yangLeafList.getName()) + "Iterator();");
             getMethod.addLine("if(iterator==null){");
-            getMethod.addLine("    return null;");
+            getMethod.addLine("    return list;");
             getMethod.addLine("}");
             getMethod.addLine("while (iterator.hasNext()){");
             getMethod.addLine("    " + leafDateTypeClassName + " next =(" + leafDateTypeClassName + ") iterator.next();");
@@ -563,7 +563,7 @@ public class JNCCodeUtil {
             getMethod.addLine("List<" + fullClassName + "> list = new ArrayList<>();");
             getMethod.addLine("ElementChildrenIterator iterator = " + YangElement.camelize(yangJavaList.getName()) + "Iterator();");
             getMethod.addLine("if(iterator==null){");
-            getMethod.addLine("    return null;");
+            getMethod.addLine("    return list;");
             getMethod.addLine("}");
             getMethod.addLine("while (iterator.hasNext()){");
             getMethod.addLine("    " + fullClassName + " next =(" + fullClassName + ") iterator.next();");
