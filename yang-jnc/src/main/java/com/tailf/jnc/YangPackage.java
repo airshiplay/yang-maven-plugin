@@ -1,8 +1,6 @@
 package com.tailf.jnc;
 
-public interface YangPackage {
+@Deprecated
+public interface YangPackage extends YangNsPackageExtend {
 
-    public boolean can(String ns, String module, String revision);
-
-    public String getPackage(String ns, String module, String revision);
 }

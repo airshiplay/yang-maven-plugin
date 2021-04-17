@@ -42,11 +42,11 @@ public abstract class YangElement extends Element {
     public static final String COLON_UNEXPECTED_ELEMENT = ": Unexpected element";
     public static final String DUMMY = "DUMMY";
     public static final String DUMMY_LC = "dummy";
-    public static List<YangPackage> yangPackageList = new ArrayList<>();
+    public static List<YangNsPackageExtend> yangPackageList = new ArrayList<>();
 
     static {
-        ServiceLoader<YangPackage> serviceLoader = ServiceLoader.load(YangPackage.class);
-        Iterator<YangPackage> iterator = serviceLoader.iterator();
+        ServiceLoader<YangNsPackageExtend> serviceLoader = ServiceLoader.load(YangNsPackageExtend.class);
+        Iterator<YangNsPackageExtend> iterator = serviceLoader.iterator();
         while (iterator.hasNext()) {
             yangPackageList.add(iterator.next());
         }
@@ -270,7 +270,7 @@ public abstract class YangElement extends Element {
 
     public static String getPackage(String ns, String module, String revision) {
         if(!yangPackageList.isEmpty()){
-            Optional<YangPackage> yangPackage = yangPackageList.stream()
+            Optional<YangNsPackageExtend> yangPackage = yangPackageList.stream()
                     .filter(yangElementPackageExtension -> yangElementPackageExtension.can(ns, module, revision))
                     .findFirst();
             if (yangPackage.isPresent()) {

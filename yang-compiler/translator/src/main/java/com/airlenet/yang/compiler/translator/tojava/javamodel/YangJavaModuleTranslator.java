@@ -162,13 +162,14 @@ public class YangJavaModuleTranslator
         javaClass.addField(new JavaField("String", "NAMESPACE", "\"" + this.getModuleNamespace() + "\"", "public", "static", "final"),
                 new JavaField("String", "PREFIX", "\"" + this.getPrefix() + "\"", "public", "static", "final"),
                 new JavaField("String", "MODULE_NAME", "\"" + this.getModuleName() + "\"", "public", "static", "final"),
-                new JavaField("String", "REVISION", rev == null ? null : "\"" + rev + "\"", "public", "static", "final"));
+                new JavaField("String", "REVISION", rev == null ? null : "\"" + rev + "\"", "public", "static", "final"),
+                new JavaField("String", "PACKAGE_NAME", rev == null ? null : "\"" + prefixPkg + "\"", "public", "static", "final"));
         JavaMethod enabler = new JavaMethod("enable", "void")
                 .setExceptions(new String[]{"JNCException"}).addDependency("com.tailf.jnc.JNCException")
                 .setJavadoc("Enable the elements in this namespace to be aware")
                 .setJavadoc("of the data model and use the generated classes.");
         enabler.setModifiers(new String[]{"public", "static"});
-        enabler.addLine("YangElement.setPackage(NAMESPACE,MODULE_NAME, REVISION, \"" + prefixPkg + "\");");
+        enabler.addLine("YangElement.setPackage(NAMESPACE,MODULE_NAME, REVISION,PACKAGE_NAME);");
         enabler.addDependency("com.tailf.jnc.YangElement");
         enabler.addLine("//" + classname + ".registerSchema();");
         javaClass.addMethod(enabler);
