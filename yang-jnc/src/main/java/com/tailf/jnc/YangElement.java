@@ -316,6 +316,12 @@ public abstract class YangElement extends Element {
         return null;
     }
 
+    public static void setPackage(YangNsPackage ... yangNsPackages) {
+        for (YangNsPackage yangNsPackage:yangNsPackages){
+            setPackage(yangNsPackage.getNs(),yangNsPackage.getModule(),yangNsPackage.getRevision(),yangNsPackage.getPkg());
+        }
+    }
+
     public static void setPackage(String ns, String module, String revision, String pkg) {
         if (packages == null) {
             packages = new ArrayList<Package>();
@@ -335,6 +341,11 @@ public abstract class YangElement extends Element {
         packages.add(new Package(ns, pkg));
     }
 
+    public static void removePackage(YangNsPackage ... yangNsPackages) {
+        for (YangNsPackage yangNsPackage:yangNsPackages){
+            removePackage(yangNsPackage.getNs(),yangNsPackage.getModule(),yangNsPackage.getRevision());
+        }
+    }
     public static void removePackage(String ns, String rev, String module) {
         if (packages == null) {
             return;
