@@ -166,6 +166,8 @@ public class YangJavaEnumerationTranslator
                 "\"" + yangEnum.getNamedValue() + "\"", "public", "static", "final"))
                 .collect(Collectors.toList());
         javaClass.addField(javaFieldList.toArray(new JavaField[0]));
+        javaClass.addField(new JavaField("String[]","EnumValues","new String[] {"+this.getEnumSet().stream()
+                .map(yangEnum -> "\"" + yangEnum.getNamedValue() + "\"").collect(Collectors.joining(",\t"))+"}","public", "static", "final"));
         javaClass.addMethod(new JavaMethod(classname, "")
                 .setModifiers("public")
                 .setExceptions(YangException.class.getName())
