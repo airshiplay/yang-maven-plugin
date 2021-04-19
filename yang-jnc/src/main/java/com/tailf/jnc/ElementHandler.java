@@ -30,7 +30,7 @@ class ElementHandler extends DefaultHandler {
     private String leafName;
     private String leafValue;
     protected Capabilities capabilities;
-
+    protected YangNsPackage[] yangNsPackages;
     @Override
     public void startElement(String uri, String localName, String qName,
                              Attributes attributes) throws SAXException {
@@ -45,7 +45,7 @@ class ElementHandler extends DefaultHandler {
 
         try {
             Capabilities.Capa capa = capabilities != null ? capabilities.getCapa(uri) : null;
-            child = YangElement.createInstance(this, parent,localName, uri,capa==null?null:capa.module,capa==null?null:capa.revision);
+            child = YangElement.createInstance(this, parent,yangNsPackages,localName,new YangNsPackage(uri,capa==null?null:capa.module,capa==null?null:capa.revision));
         } catch (final JNCException e) {
 //            e.printStackTrace();
             throw new SAXException(e.toString(), e);

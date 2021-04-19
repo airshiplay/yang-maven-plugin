@@ -129,10 +129,11 @@ public class XMLParser {
 
     /**
      * Parses an XML string returning an element tree from it.
-     * 
+     *
      * @param is Inputsource (byte stream) where the XML text is read from
+     * @param yangNsPackages
      */
-    public Element parse(InputSource is) throws JNCException {
+    public Element parse(InputSource is, YangNsPackage... yangNsPackages) throws JNCException {
         try {
             final ConfHandler handler = new ConfHandler();
             parser.setContentHandler(handler);
@@ -147,10 +148,11 @@ public class XMLParser {
     /**
      * Parses an XML String, returning a Element tree representing the XML
      * structure.
-     * 
+     *
      * @param str String containing the XML text to parse
+     * @param yangNsPackages
      */
-    public Element parse(String str) throws JNCException {
+    public Element parse(String str, YangNsPackage... yangNsPackages) throws JNCException {
         final ByteArrayInputStream istream = new ByteArrayInputStream(
                 str.getBytes());
         final InputSource is = new InputSource(istream);

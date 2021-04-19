@@ -45,12 +45,12 @@ public class YangXMLParser extends XMLParser {
         }
     }
 
-    public Element parse(String str) throws JNCException {
+    public Element parse(String str, YangNsPackage... yangNsPackages) throws JNCException {
         final ByteArrayInputStream istream = new ByteArrayInputStream(
                 str.getBytes());
         final InputSource is = new InputSource(istream);
         try {
-            Element parse = parse(is);
+            Element parse = parse(is,yangNsPackages);
             return parse;
         } catch (JNCException e) {
             throw new JNCException(JNCException.PARSER_ERROR, "parse error: "
@@ -63,12 +63,14 @@ public class YangXMLParser extends XMLParser {
      * instantiating an ElementHandler to use as content handler.
      *
      * @param is Input source (byte stream) where the XML text is read from
+     * @param yangNsPackages
      */
     @Override
-    public Element parse(InputSource is) throws JNCException {
+    public Element parse(InputSource is, YangNsPackage... yangNsPackages) throws JNCException {
         try {
             final ElementHandler handler = new ElementHandler();
             handler.capabilities = capabilities;
+            handler.yangNsPackages = yangNsPackages;
             parser.setContentHandler(handler);
             parser.parse(is);
             return handler.top;

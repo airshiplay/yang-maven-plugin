@@ -2,6 +2,7 @@ package com.tailf.jnc;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A NETCONF session class. It makes it possible to connect to a NETCONF agent
@@ -367,6 +368,10 @@ public class NetconfSession {
         request.encode(out, false, capabilities);
         out.flush();
         final StringBuffer reply = in.readOne();
+        if(request instanceof YangElement){
+            List<YangNsPackage> yangNsPackageList = ((YangElement) request).getYangNsPackageList();
+            return parser.parse(reply.toString(),new YangNsPackage[yangNsPackageList.size()]);
+        }
         return parser.parse(reply.toString());
     }
 
@@ -452,6 +457,10 @@ public class NetconfSession {
         trace("call: " + data.toXMLString());
         final int mid = encode_rpc(out, data);
         out.flush();
+        if(data instanceof YangElement){
+            List<YangNsPackage> yangNsPackageList = ((YangElement) data).getYangNsPackageList();
+            return recv_call_rpc_reply(data,mid,yangNsPackageList.toArray(new YangNsPackage[yangNsPackageList.size()]));
+        }
         return recv_call_rpc_reply(data, mid);
     }
 
@@ -491,6 +500,10 @@ public class NetconfSession {
         final int mid = encode_getConfig(out, encode_datastore(datastore),
                 subtreeFilter);
         out.flush();
+        if(subtreeFilter instanceof YangElement){
+            List<YangNsPackage> yangNsPackageList = ((YangElement) subtreeFilter).getYangNsPackageList();
+            return recv_rpc_reply_data(mid,yangNsPackageList.toArray(new YangNsPackage[yangNsPackageList.size()]));
+        }
         return recv_rpc_reply_data(mid);
     }
 
@@ -535,6 +548,10 @@ public class NetconfSession {
         trace("get: " + subtreeFilter.toXMLString());
         final int mid = encode_get(out, subtreeFilter);
         out.flush();
+        if(subtreeFilter instanceof YangElement){
+            List<YangNsPackage> yangNsPackageList = ((YangElement) subtreeFilter).getYangNsPackageList();
+            return recv_rpc_reply_data(mid,yangNsPackageList.toArray(new YangNsPackage[yangNsPackageList.size()]));
+        }
         return recv_rpc_reply_data(mid);
     }
 
@@ -1411,6 +1428,10 @@ public class NetconfSession {
         trace("action: " + data.toXMLString());
         encode_action(out, data);
         out.flush();
+        if(data instanceof YangElement){
+            List<YangNsPackage> yangNsPackageList = ((YangElement) data).getYangNsPackageList();
+            return recv_rpc_reply_ok(null,yangNsPackageList.toArray(new YangNsPackage[yangNsPackageList.size()]));
+        }
         return recv_rpc_reply_ok(null);
     }
 
@@ -1435,13 +1456,13 @@ public class NetconfSession {
      * @throws JNCException
      * @throws IOException
      */
-    protected Element recv_rpc_reply_ok(String mid) throws JNCException, IOException {
+    protected Element recv_rpc_reply_ok(String mid,YangNsPackage ... yangNsPackages) throws JNCException, IOException {
         final StringBuffer reply = in.readOne();
         trace("reply= " + reply);
         if (reply.length() == 0) {
             throw new JNCException(JNCException.PARSER_ERROR, "empty input");
         }
-        final Element t = parser.parse(reply.toString());
+        final Element t = parser.parse(reply.toString(),yangNsPackages);
         final Element ok;
 
         if (mid != null) {
@@ -1470,8 +1491,8 @@ public class NetconfSession {
      * Reads one rpc-reply from session and parse the &lt;data&gt;. Returns the
      * NodeSet contained in the data tag.
      */
-    NodeSet recv_rpc_reply_data(int mid) throws JNCException, IOException {
-        return recv_rpc_reply("/data", parser, Integer.toString(mid));
+    NodeSet recv_rpc_reply_data(int mid,YangNsPackage ... yangNsPackages) throws JNCException, IOException {
+        return recv_rpc_reply("/data", parser, Integer.toString(mid),yangNsPackages);
     }
 
     NodeSet recv_rpc_reply_lockPartial(int mid) throws JNCException,
@@ -1479,22 +1500,22 @@ public class NetconfSession {
         return recv_rpc_reply("", parser, Integer.toString(mid));
     }
 
-    NodeSet recv_call_rpc_reply(Element e, int mid) throws JNCException,
+    NodeSet recv_call_rpc_reply(Element e, int mid,YangNsPackage ... yangNsPackages) throws JNCException,
             IOException {
         final XMLParser parser = new XMLParser(); // XXX: Why new parser?
-        return recv_rpc_reply("", parser, Integer.toString(mid));
+        return recv_rpc_reply("", parser, Integer.toString(mid),yangNsPackages);
     }
 
     NodeSet recv_rpc_reply(String path) throws JNCException, IOException {
         return recv_rpc_reply(path, parser, null);
     }
 
-    NodeSet recv_rpc_reply(String path, XMLParser parser, String mid)
+    NodeSet recv_rpc_reply(String path, XMLParser parser, String mid,YangNsPackage ... yangNsPackages)
             throws JNCException, IOException {
         final StringBuffer reply = in.readOne();
         trace("reply= " + reply);
 
-        final Element t = parser.parse(reply.toString());
+        final Element t = parser.parse(reply.toString(),yangNsPackages);
         final Element rep = t.getFirst("self::rpc-reply");
         if (rep != null) {
             check_mid(rep, mid);
