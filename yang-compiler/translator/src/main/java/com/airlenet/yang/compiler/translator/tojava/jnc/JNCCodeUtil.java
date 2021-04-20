@@ -111,7 +111,7 @@ public class JNCCodeUtil {
         }
 
         AtomicInteger index = new AtomicInteger(0);
-        if (originChild!=null && originChild.getParent() instanceof YangJavaList) {
+        if (originChild != null && originChild.getParent() instanceof YangJavaList) {
             if (((YangJavaList) originChild.getParent()).getKeyList() != null)
                 ((YangJavaList) originChild.getParent()).getKeyList().stream().forEach(name -> map.put("\t\t\"" + name + "\",", index.getAndIncrement()));
         }
@@ -179,19 +179,45 @@ public class JNCCodeUtil {
 //            dataTypeYangLeaf =dataTypeYangLeaf.getReferredSchema();
 //        }
         String leafDateTypeClassName = AttributesJavaDataType.getJNCDataType(dataTypeYangLeaf.getDataType());
-        JavaMethod getMethod = new JavaMethod("get" + YangElement.normalize(yangLeaf.getName()) + "Value", leafDateTypeClassName).setModifiers("public");
-        getMethod.setExceptions("JNCException");
-        getMethod.setJavadoc(yangLeaf.getDescription());
-        if (yangLeaf.getDefaultValueInString() == null) {
-            getMethod.addLine("return (" + leafDateTypeClassName + ")" + "getValue(\"" + yangLeaf.getName() + "\");");
-        } else {
-            getMethod.addLine(leafDateTypeClassName + " " + YangElement.camelize(yangLeaf.getName()) + " = (" + leafDateTypeClassName + ")" + "getValue(\"" + yangLeaf.getName() + "\");");
-            getMethod.addLine("if (" + YangElement.camelize(yangLeaf.getName()) + " == null) {");
-            getMethod.addLine("\t" + YangElement.camelize(yangLeaf.getName()) + "= new " + leafDateTypeClassName + "(\"" + yangLeaf.getDefaultValueInString() + "\");");
-            getMethod.addLine("}");
-            getMethod.addLine("return " + YangElement.camelize(yangLeaf.getName()) + ";");
+
+        {
+            JavaMethod getMethod = new JavaMethod("get" + YangElement.normalize(yangLeaf.getName()) + "Value", leafDateTypeClassName).setModifiers("public");
+            getMethod.setExceptions("JNCException");
+            getMethod.setJavadoc(yangLeaf.getDescription());
+            if (yangLeaf.getDefaultValueInString() == null) {
+                getMethod.addLine("return (" + leafDateTypeClassName + ")" + "getValue(\"" + yangLeaf.getName() + "\");");
+            } else {
+                getMethod.addLine(leafDateTypeClassName + " " + YangElement.camelize(yangLeaf.getName()) + " = (" + leafDateTypeClassName + ")" + "getValue(\"" + yangLeaf.getName() + "\");");
+                getMethod.addLine("if (" + YangElement.camelize(yangLeaf.getName()) + " == null) {");
+                getMethod.addLine("\t" + YangElement.camelize(yangLeaf.getName()) + "= new " + leafDateTypeClassName + "(\"" + yangLeaf.getDefaultValueInString() + "\");");
+                getMethod.addLine("}");
+                getMethod.addLine("return " + YangElement.camelize(yangLeaf.getName()) + ";");
+            }
+            javaClass.addMethod(getMethod);
+
         }
-        javaClass.addMethod(getMethod);
+        {
+            if(!leafDateTypeClassName.startsWith("com.tailf.jnc")){
+                JavaMethod getMethod = new JavaMethod("get" + YangElement.normalize(yangLeaf.getName()) + "ValueToString", "String").setModifiers("public");
+                getMethod.setExceptions("JNCException");
+                getMethod.setJavadoc(yangLeaf.getDescription());
+                if (yangLeaf.getDefaultValueInString() == null) {
+                    getMethod.addLine("com.tailf.jnc.YangType "+YangElement.camelize(yangLeaf.getName())+" = (com.tailf.jnc.YangType)" + "getValue(\"" + yangLeaf.getName() + "\");");
+                    getMethod.addLine("if("+YangElement.camelize(yangLeaf.getName())+"==null) return null;");
+                    getMethod.addLine("return " + YangElement.camelize(yangLeaf.getName()) + ".toString();");
+                } else {
+                    getMethod.addLine(leafDateTypeClassName + " " + YangElement.camelize(yangLeaf.getName()) + " = (" + leafDateTypeClassName + ")" + "getValue(\"" + yangLeaf.getName() + "\");");
+                    getMethod.addLine("if (" + YangElement.camelize(yangLeaf.getName()) + " == null) {");
+                    getMethod.addLine("\t" + YangElement.camelize(yangLeaf.getName()) + "= new " + leafDateTypeClassName + "(\"" + yangLeaf.getDefaultValueInString() + "\");");
+                    getMethod.addLine("}");
+                    getMethod.addLine("return " + YangElement.camelize(yangLeaf.getName()) + ".toString();");
+                }
+                javaClass.addMethod(getMethod);
+            }
+
+
+        }
+
         yangLeaf.getDefaultValueInString();
         {
             JavaMethod setMethod = new JavaMethod("set" + YangElement.normalize(yangLeaf.getName()) + "Value", "void").setModifiers("public");
@@ -750,7 +776,7 @@ public class JNCCodeUtil {
         }
 
         javaClass.addField(new JavaField(fullClassName, YangElement.camelize(yangJavaContainer.getName()), "null", "public")
-                .setJavadoc("See line "+yangJavaContainer.getLineNumber()+" in "+new File(yangJavaContainer.getFileName()).getName()));
+                .setJavadoc("See line " + yangJavaContainer.getLineNumber() + " in " + new File(yangJavaContainer.getFileName()).getName()));
         {
             JavaMethod getMethod = new JavaMethod("get" + simpleClassName, fullClassName).setModifiers("public");
             getMethod.addLine("return " + YangElement.camelize(yangJavaContainer.getName()) + ";");

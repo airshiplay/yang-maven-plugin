@@ -38,7 +38,7 @@ public abstract class YangElement extends Element {
             "new", "package", "private", "protected", "public", "return",
             "short", "static", "super", "switch", "synchronized", "this",
             "throw", "throws", "transient", "try", "void", "volatile",
-            "while", "values"};
+            "while", "values","assert"};
     public static final String COLON_UNEXPECTED_ELEMENT = ": Unexpected element";
     public static final String DUMMY = "DUMMY";
     public static final String DUMMY_LC = "dummy";
