@@ -457,10 +457,6 @@ public class NetconfSession {
         trace("call: " + data.toXMLString());
         final int mid = encode_rpc(out, data);
         out.flush();
-        if(data instanceof YangElement){
-            List<YangNsPackage> yangNsPackageList = ((YangElement) data).getYangNsPackageList();
-            return recv_call_rpc_reply(data,mid,yangNsPackageList.toArray(new YangNsPackage[yangNsPackageList.size()]));
-        }
         return recv_call_rpc_reply(data, mid);
     }
 
