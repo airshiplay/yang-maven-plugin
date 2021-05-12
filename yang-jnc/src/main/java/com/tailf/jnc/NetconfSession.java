@@ -482,6 +482,10 @@ public class NetconfSession {
         return getConfig(RUNNING, xpath);
     }
 
+    public NodeSet getConfig(String xpath,YangNsPackage ... yangNsPackages) throws JNCException, IOException {
+        return getConfig(RUNNING, xpath,yangNsPackages);
+    }
+
     /**
      * Gets the device configuration data specified by subtree filtering.
      * 
@@ -510,7 +514,7 @@ public class NetconfSession {
      *            {@link #CANDIDATE}, {@link #STARTUP}
      * @param xpath XPath expression
      */
-    public NodeSet getConfig(int datastore, String xpath)
+    public NodeSet getConfig(int datastore, String xpath,YangNsPackage ... yangNsPackages)
             throws JNCException, IOException {
         trace("getConfig: " + datastoreToString(datastore) + " \"" + xpath
                 + "\"");
@@ -521,7 +525,7 @@ public class NetconfSession {
         final int mid = encode_getConfig(out, encode_datastore(datastore),
                 xpath);
         out.flush();
-        return recv_rpc_reply_data(mid);
+        return recv_rpc_reply_data(mid,yangNsPackages);
     }
 
     /**
@@ -566,6 +570,17 @@ public class NetconfSession {
         final int mid = encode_get(out, xpath);
         out.flush();
         return recv_rpc_reply_data(mid);
+    }
+
+    public NodeSet get(String xpath,YangNsPackage ... yangNsPackages) throws JNCException, IOException {
+        trace("get: \"" + xpath + "\"");
+        if (!capabilities.hasXPath()) {
+            throw new JNCException(JNCException.SESSION_ERROR,
+                    "the :xpath capability is not supported by server");
+        }
+        final int mid = encode_get(out, xpath);
+        out.flush();
+        return recv_rpc_reply_data(mid,yangNsPackages);
     }
 
     /**
