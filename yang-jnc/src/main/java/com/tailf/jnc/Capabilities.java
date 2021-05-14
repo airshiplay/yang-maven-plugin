@@ -1,7 +1,9 @@
 package com.tailf.jnc;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Capabilities {
 
@@ -311,7 +313,7 @@ public class Capabilities {
 
     private final ArrayList<Capa> capas;
     private final ArrayList<Capa> data_capas;
-
+    private final Map<String,Capa> dataCapaUriMap;
     static public class Capa {
         String uri;
         String module;
@@ -376,7 +378,7 @@ public class Capabilities {
         final NodeSet caps = e.get("capability");
         capas = new ArrayList<Capa>(caps.size());
         data_capas = new ArrayList<Capa>(caps.size());
-
+        dataCapaUriMap = new HashMap<>();
         for (int i = 0; i < caps.size(); i++) {
             final Element cap = caps.getElement(i);
 
@@ -400,7 +402,8 @@ public class Capabilities {
                     }
                 }
             }
-            capas.add(new Capa(uri, mod, rev, cap.value.toString()));
+            Capa capa = new Capa(uri, mod, rev, cap.value.toString());
+            capas.add(capa);
             if (uri.equals(NETCONF_BASE_CAPABILITY)) {
                 baseCapability = true;
             } else if (uri.equals(WRITABLE_RUNNING_CAPABILITY)) {
@@ -457,7 +460,8 @@ public class Capabilities {
             } else {
                 // It's either a proper data schema capability or some
                 // homegrown agent capability
-                data_capas.add(new Capa(uri, mod, rev, cap.value.toString()));
+                data_capas.add(capa);
+                dataCapaUriMap.put(uri,capa);
             }
         }
     }
@@ -502,5 +506,9 @@ public class Capabilities {
 
     public List<Capa> getDataCapas() {
         return data_capas;
+    }
+
+    public Capa getCapaByUri(String namespace){
+        return dataCapaUriMap.get(namespace);
     }
 }
