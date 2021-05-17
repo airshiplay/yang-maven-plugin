@@ -94,6 +94,9 @@ public class Element implements Serializable {
      */
     protected Element parent = null;
 
+
+    protected List<YangNsPackage> yangNsPackageList = new ArrayList<>();
+
     /**
      * Constructor that creates a new element tree. An element consists of a
      * name that belongs to a namespace.
@@ -401,6 +404,15 @@ public class Element implements Serializable {
             addChild(elem);
             return elem;
         }
+    }
+
+    public void addYangNsPackage(YangNsPackage... yangNsPackages) {
+        for (YangNsPackage yangNsPackage : yangNsPackages)
+            yangNsPackageList.add(yangNsPackage);
+    }
+
+    public List<YangNsPackage> getYangNsPackageList() {
+        return yangNsPackageList;
     }
 
     /**

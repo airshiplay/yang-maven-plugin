@@ -268,7 +268,6 @@ public abstract class YangElement extends Element {
      * Static list of packages.
      */
     static List<Package> packages = new ArrayList<Package>();
-    private List<YangNsPackage> yangNsPackageList = new ArrayList<>();
 
     public static String getPackage(YangNsPackage[] yangNsPackages, String ns, String module, String revision, String name) {
         if (yangNsPackages != null && yangNsPackages.length > 0) {
@@ -333,15 +332,6 @@ public abstract class YangElement extends Element {
         packages.add(new Package(ns, pkg, revision, module));
     }
 
-    public void addYangNsPackage(YangNsPackage... yangNsPackages) {
-        for (YangNsPackage yangNsPackage : yangNsPackages)
-            yangNsPackageList.add(yangNsPackage);
-    }
-
-    public List<YangNsPackage> getYangNsPackageList() {
-        return yangNsPackageList;
-    }
-
     /**
      * Assiciate a JAVA package with a namespace.
      */
@@ -351,12 +341,6 @@ public abstract class YangElement extends Element {
         }
         removePackage(ns);
         packages.add(new Package(ns, pkg));
-    }
-
-    public static void removePackage(YangNsPackage... yangNsPackages) {
-        for (YangNsPackage yangNsPackage : yangNsPackages) {
-            removePackage(yangNsPackage.getNs(), yangNsPackage.getModule(), yangNsPackage.getRevision());
-        }
     }
 
     public static void removePackage(String ns, String rev, String module) {

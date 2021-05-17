@@ -22,22 +22,22 @@ import java.util.List;
  * tree is received it is edited locally and written back with an
  * <code>edit-config</code> operation. The read and write is done towards the
  * RUNNING datastore.
- * 
+ *
  * <pre>
  * // Start NETCONF session towards devices
  * SSHConnection c = new SSHConnection(&quot;127.0.0.1&quot;, 5678);
  * c.authenticateWithPassword(&quot;admin&quot;, &quot;pass&quot;);
  * SSHSession ssh = new SSHSession(c);
  * NetconfSession dev1 = new NetconfSession(ssh);
- * 
+ *
  * // Get system configuration from dev1 (RUNNING datastore)
  * // Read is done using Xpath expression
  * Element sys1 = dev1.getConfig(&quot;/system&quot;).first();
- * 
+ *
  * // Manipulate the config tree locally
  * sys1.setValue(&quot;dns&quot;, &quot;83.100.1.1&quot;);
  * sys1.setValue(&quot;gateway&quot;, &quot;10.0.0.1&quot;);
- * 
+ *
  * // Write back the updated element tree to the device
  * dev1.editConfig(sys1);
  * </pre>
@@ -48,23 +48,23 @@ import java.util.List;
  * matching configuration is received and one of the elements is deleted. It is
  * "marked" for deletion and an <code>edit-config</code> operation is used to
  * actually delete the element on the agent.
- * 
+ *
  * <pre>
  * // Start NETCONF session toward our device
  * SSHConnection c = new SSHConnection(&quot;127.0.0.1&quot;, 5678);
  * c.authenticateWithPassword(&quot;admin&quot;, &quot;pass&quot;);
  * SSHSession ssh = new SSHSession(c);
  * NetconfSession dev1 = new NetconfSession(ssh);
- * 
+ *
  * // Create subtree filter
  * Element filter = Element.create(&quot;/hosts/host[name='kalle']&quot;);
  * // Read from RUNNING datastore
  * Element hosts = dev1.getConfig(filter).first();
- * 
+ *
  * // delete host 'kalle'
  * // that is... mark the node for deletion
  * sys1.markDelete(&quot;hosts/host[name='kalle']&quot;);
- * 
+ *
  * // edit-config. The deleted node has the operation=&quot;delete&quot;
  * // marked on it.
  * dev1.editConfig(sys1);
@@ -72,7 +72,7 @@ import java.util.List;
  * <p>
  * Example 3: Transaction using candidates
  * <p>
- * 
+ *
  * <pre>
  * try {
  *     // Start (NETCONF) sessions towards devices
@@ -84,45 +84,45 @@ import java.util.List;
  *     SSHSession ssh2 = new SSHSession(c2);
  *     NetconfSession dev1 = new NetconfSession(ssh1);
  *     NetconfSession dev2 = new NetconfSession(ssh2);
- * 
+ *
  *     // take locks on CANDIDATE datastore so that we are not interrupted
  *     dev1.lock(NetconfSession.CANDIDATE);
  *     dev2.lock(NetconfSession.CANDIDATE);
- * 
+ *
  *     // reset candidates so that CANDIDATE is an exact copy of running
  *     dev1.copyConfig(NetconfSession.RUNNING, NetconfSession.CANDIDATE);
  *     dev2.copyConfig(NetconfSession.RUNNING, NetconfSession.CANDIDATE);
- * 
+ *
  *     // Get system configuration from dev1
  *     Element sys1 = dev1.getConfig(&quot;/system&quot;).first();
- * 
+ *
  *     // Manipulate element trees locally
  *     sys1.setValue(&quot;dns&quot;, &quot;83.100.1.1&quot;);
  *     sys1.setValue(&quot;gateway&quot;, &quot;10.0.0.1&quot;);
- * 
+ *
  *     // Write back the updated element tree to both devices
  *     dev1.editConfig(NetconfSession.CANDIDATE, sys1);
  *     dev2.editConfig(NetconfSession.CANDIDATE, sys1);
- * 
+ *
  *     // candidates are now updated
  *     dev1.confirmedCommit(60);
  *     dev2.confirmedCommit(60);
- * 
+ *
  *     // now commit them
  *     dev1.commit();
  *     dev2.commit();
- * 
+ *
  *     dev1.unlock(NetconfSession.CANDIDATE);
  *     dev2.unlock(NetconfSession.CANDIDATE);
- * 
+ *
  * } catch (Exception e) {
  *     // Devices will rollback within 1 min
- * 
+ *
  * }
  * </pre>
- * 
+ *
  * @see Element
- * 
+ *
  **/
 
 public class NetconfSession {
@@ -197,7 +197,7 @@ public class NetconfSession {
 
     /**
      * Check if a specific named capability is supported.
-     * 
+     *
      * @param uri Name of capability to check
      */
     public boolean hasCapability(String uri) {
@@ -208,10 +208,9 @@ public class NetconfSession {
      * Creates a new session object using the given transport object. This will
      * initialize the transport and send out an initial hello message to the
      * server.
-     * 
-     * @see SSHSession
-     * 
+     *
      * @param transport Transport object
+     * @see SSHSession
      */
 
     public NetconfSession(Transport transport) throws JNCException,
@@ -226,29 +225,28 @@ public class NetconfSession {
      * Creates a new session object using the given transport object. This will
      * initialize the transport and send out an initial hello message to the
      * server.
-     * 
-     * @see SSHSession
-     * 
+     *
      * @param transport Transport object
-     * @param parser XML parser object
-     * 
-     *            If we are using the confm package to create and manipulate
-     *            objects we must instantiate the parser as an
-     *            com.tailf.confm.XMLParser() If we fail to do that, we get the
-     *            XMLParser class from the inm package which always only
-     *            returns Element objects as opposed to the XMLParser from the
-     *            confm package which can return objects matching the confm
-     *            generated classes. If we use the confm Device class to create
-     *            our netconf sessions, this is all done automatically, whereas
-     *            if we create our netconf sessions ourselves, _and_ also want
-     *            to retrieve real confm objects we must:
-     * 
-     *            <pre>
-     * SSHConnection ssh = new SSHConnection(&quot;127.0.0.1&quot;, 2022);
-     * ssh.authenticateWithPassword(&quot;admin&quot;, &quot;admin&quot;);
-     * Transport tr = new SSHSession(ssh);
-     * NetconfSession sess = new NetconfSession(tr, new com.tailf.confm.XMLParser());
-     * </pre>
+     * @param parser    XML parser object
+     *                  <p>
+     *                  If we are using the confm package to create and manipulate
+     *                  objects we must instantiate the parser as an
+     *                  com.tailf.confm.XMLParser() If we fail to do that, we get the
+     *                  XMLParser class from the inm package which always only
+     *                  returns Element objects as opposed to the XMLParser from the
+     *                  confm package which can return objects matching the confm
+     *                  generated classes. If we use the confm Device class to create
+     *                  our netconf sessions, this is all done automatically, whereas
+     *                  if we create our netconf sessions ourselves, _and_ also want
+     *                  to retrieve real confm objects we must:
+     *
+     *                  <pre>
+     *                  SSHConnection ssh = new SSHConnection(&quot;127.0.0.1&quot;, 2022);
+     *                  ssh.authenticateWithPassword(&quot;admin&quot;, &quot;admin&quot;);
+     *                  Transport tr = new SSHSession(ssh);
+     *                  NetconfSession sess = new NetconfSession(tr, new com.tailf.confm.XMLParser());
+     *                  </pre>
+     * @see SSHSession
      **/
 
     public NetconfSession(Transport transport, XMLParser parser)
@@ -270,7 +268,7 @@ public class NetconfSession {
 
     /**
      * Sets the transport used by this session.
-     * 
+     *
      * @param transport Transport object, for example {@link SSHSession}
      */
     public void setTransport(Transport transport) {
@@ -280,7 +278,7 @@ public class NetconfSession {
 
     /**
      * Returns the transport object used by this session.
-     * 
+     *
      * @see SSHSession
      */
     public Transport getTransport() {
@@ -340,7 +338,7 @@ public class NetconfSession {
      * session and receiving a reply.
      * <p>
      * The reply is parsed into an element tree.
-     * 
+     *
      * @param request XML encoded NETCONF request
      */
     public Element rpc(String request) throws IOException, JNCException {
@@ -360,7 +358,7 @@ public class NetconfSession {
      * session and receiving a reply.
      * <p>
      * The reply is parsed into an element tree.
-     * 
+     *
      * @param request XML element tree
      */
     public Element rpc(Element request) throws IOException, JNCException {
@@ -368,11 +366,8 @@ public class NetconfSession {
         request.encode(out, false, capabilities);
         out.flush();
         final StringBuffer reply = in.readOne();
-        if(request instanceof YangElement){
-            List<YangNsPackage> yangNsPackageList = ((YangElement) request).getYangNsPackageList();
-            return parser.parse(reply.toString(),new YangNsPackage[yangNsPackageList.size()]);
-        }
-        return parser.parse(reply.toString());
+        List<YangNsPackage> yangNsPackageList = request.getYangNsPackageList();
+        return parser.parse(reply.toString(),yangNsPackageList.toArray(new YangNsPackage[yangNsPackageList.size()]));
     }
 
     /**
@@ -383,7 +378,7 @@ public class NetconfSession {
      * Note that the return value reflects the last request-id generated by the
      * NetconfSession methods, and is not checked against the request-id in the
      * request parameter.
-     * 
+     *
      * @param request XML encoded NETCONF request
      */
     public int sendRequest(String request) throws IOException {
@@ -401,7 +396,7 @@ public class NetconfSession {
      * Note that the return value reflects the last request-id generated by the
      * NetconfSession methods, and is not checked against the request-id in the
      * request parameter.
-     * 
+     *
      * @param request Element tree
      */
     public int sendRequest(Element request) throws IOException, JNCException {
@@ -415,7 +410,7 @@ public class NetconfSession {
      * Reads a rpc reply from NETCONF. Preforms a blocking read.
      * <p>
      * The reply is parsed into an element tree.
-     * 
+     *
      * @see #sendRequest(Element)
      */
     public Element readReply() throws IOException, JNCException {
@@ -425,7 +420,7 @@ public class NetconfSession {
 
     /**
      * Gets the device configuration data specified by subtree filtering.
-     * 
+     *
      * @param subtreeFilter A subtree filter
      */
     public NodeSet getConfig(Element subtreeFilter) throws JNCException,
@@ -475,22 +470,22 @@ public class NetconfSession {
     /**
      * Gets the device configuration data specified by an xpath expression. The
      * <code>:xpath</code> capability must be supported by the server.
-     * 
+     *
      * @param xpath XPath expression
      */
     public NodeSet getConfig(String xpath) throws JNCException, IOException {
         return getConfig(RUNNING, xpath);
     }
 
-    public NodeSet getConfig(String xpath,YangNsPackage ... yangNsPackages) throws JNCException, IOException {
-        return getConfig(RUNNING, xpath,yangNsPackages);
+    public NodeSet getConfig(String xpath, YangNsPackage... yangNsPackages) throws JNCException, IOException {
+        return getConfig(RUNNING, xpath, yangNsPackages);
     }
 
     /**
      * Gets the device configuration data specified by subtree filtering.
-     * 
-     * @param datastore The datastore. One of {@link #RUNNING},
-     *            {@link #CANDIDATE}, {@link #STARTUP}
+     *
+     * @param datastore     The datastore. One of {@link #RUNNING},
+     *                      {@link #CANDIDATE}, {@link #STARTUP}
      * @param subtreeFilter A subtree filter
      */
     public NodeSet getConfig(int datastore, Element subtreeFilter)
@@ -500,21 +495,18 @@ public class NetconfSession {
         final int mid = encode_getConfig(out, encode_datastore(datastore),
                 subtreeFilter);
         out.flush();
-        if(subtreeFilter instanceof YangElement){
-            List<YangNsPackage> yangNsPackageList = ((YangElement) subtreeFilter).getYangNsPackageList();
-            return recv_rpc_reply_data(mid,yangNsPackageList.toArray(new YangNsPackage[yangNsPackageList.size()]));
-        }
-        return recv_rpc_reply_data(mid);
+        List<YangNsPackage> yangNsPackageList = subtreeFilter.getYangNsPackageList();
+        return recv_rpc_reply_data(mid, yangNsPackageList.toArray(new YangNsPackage[yangNsPackageList.size()]));
     }
 
     /**
      * Gets the device configuration data specified by an xpath filter.
-     * 
+     *
      * @param datastore The datastore. One of {@link #RUNNING},
-     *            {@link #CANDIDATE}, {@link #STARTUP}
-     * @param xpath XPath expression
+     *                  {@link #CANDIDATE}, {@link #STARTUP}
+     * @param xpath     XPath expression
      */
-    public NodeSet getConfig(int datastore, String xpath,YangNsPackage ... yangNsPackages)
+    public NodeSet getConfig(int datastore, String xpath, YangNsPackage... yangNsPackages)
             throws JNCException, IOException {
         trace("getConfig: " + datastoreToString(datastore) + " \"" + xpath
                 + "\"");
@@ -525,7 +517,7 @@ public class NetconfSession {
         final int mid = encode_getConfig(out, encode_datastore(datastore),
                 xpath);
         out.flush();
-        return recv_rpc_reply_data(mid,yangNsPackages);
+        return recv_rpc_reply_data(mid, yangNsPackages);
     }
 
     /**
@@ -540,7 +532,7 @@ public class NetconfSession {
 
     /**
      * Retrieves running configuration and device state information.
-     * 
+     *
      * @param subtreeFilter A subtree filter
      */
     public NodeSet get(Element subtreeFilter) throws JNCException,
@@ -548,17 +540,14 @@ public class NetconfSession {
         trace("get: " + subtreeFilter.toXMLString());
         final int mid = encode_get(out, subtreeFilter);
         out.flush();
-        if(subtreeFilter instanceof YangElement){
-            List<YangNsPackage> yangNsPackageList = ((YangElement) subtreeFilter).getYangNsPackageList();
-            return recv_rpc_reply_data(mid,yangNsPackageList.toArray(new YangNsPackage[yangNsPackageList.size()]));
-        }
-        return recv_rpc_reply_data(mid);
+        List<YangNsPackage> yangNsPackageList = subtreeFilter.getYangNsPackageList();
+        return recv_rpc_reply_data(mid, yangNsPackageList.toArray(new YangNsPackage[yangNsPackageList.size()]));
     }
 
     /**
      * Retrieves running configuration and device state information. The
      * <code>:xpath</code> capability must be supported by the server.
-     * 
+     *
      * @param xpath An xpath epxression.
      */
     public NodeSet get(String xpath) throws JNCException, IOException {
@@ -572,7 +561,7 @@ public class NetconfSession {
         return recv_rpc_reply_data(mid);
     }
 
-    public NodeSet get(String xpath,YangNsPackage ... yangNsPackages) throws JNCException, IOException {
+    public NodeSet get(String xpath, YangNsPackage... yangNsPackages) throws JNCException, IOException {
         trace("get: \"" + xpath + "\"");
         if (!capabilities.hasXPath()) {
             throw new JNCException(JNCException.SESSION_ERROR,
@@ -580,14 +569,14 @@ public class NetconfSession {
         }
         final int mid = encode_get(out, xpath);
         out.flush();
-        return recv_rpc_reply_data(mid,yangNsPackages);
+        return recv_rpc_reply_data(mid, yangNsPackages);
     }
 
     /**
      * Edits the configuration. The <code>edit-config</code> operation loads
      * all or part of a specified configuration to the {@link #RUNNING} target
      * datatore.
-     * 
+     *
      * @param configTree Configuration tree
      */
     public void editConfig(Element configTree) throws JNCException,
@@ -610,9 +599,9 @@ public class NetconfSession {
      * Edits the configuration. The <code>edit-config</code> operation loads
      * all or part of a specified configuration to the specified target
      * configuration.
-     * 
-     * @param datastore The target datastore. One of {@link #RUNNING},
-     *            {@link #CANDIDATE}, {@link #STARTUP}
+     *
+     * @param datastore  The target datastore. One of {@link #RUNNING},
+     *                   {@link #CANDIDATE}, {@link #STARTUP}
      * @param configTree The config tree to edit.
      */
     public void editConfig(int datastore, Element configTree)
@@ -638,10 +627,10 @@ public class NetconfSession {
     /**
      * Edits the configuration. The &lt;edit-config&gt; operation loads all or part
      * of a specified configuration to the specified target configuration.
-     * 
+     *
      * @param datastore The target datastore. One of {@link #RUNNING},
-     *            {@link #CANDIDATE}, {@link #STARTUP}
-     * @param url The source url.
+     *                  {@link #CANDIDATE}, {@link #STARTUP}
+     * @param url       The source url.
      */
     public void editConfig(int datastore, String url) throws JNCException,
             IOException {
@@ -660,21 +649,21 @@ public class NetconfSession {
 
     /**
      * Value for default operation.
-     * 
+     *
      * @see #setDefaultOperation(int)
      */
     public static final int MERGE = 1;
 
     /**
      * Value for default operation.
-     * 
+     *
      * @see #setDefaultOperation(int)
      */
     public static final int REPLACE = 2;
 
     /**
      * Value for default operation.
-     * 
+     *
      * @see #setDefaultOperation(int)
      */
     public static final int NONE = 3;
@@ -704,7 +693,7 @@ public class NetconfSession {
      * operations like "delete" to avoid unintentionally creating the parent
      * hierarchy of the element to be deleted.
      * </ul>
-     * 
+     *
      * @param op One of {@link #MERGE}, {@link #REPLACE}, {@link #NONE}.
      */
     public void setDefaultOperation(int op) {
@@ -718,21 +707,21 @@ public class NetconfSession {
 
     /**
      * Value for test option.
-     * 
+     *
      * @see #setTestOption(int)
      */
     public static final int SET = 1;
 
     /**
      * Value for test option.
-     * 
+     *
      * @see #setTestOption(int)
      */
     public static final int TEST_THEN_SET = 2;
 
     /**
      * Value for test option.
-     * 
+     *
      * @see #setTestOption(int)
      */
     public static final int TEST_ONLY = 3;
@@ -754,9 +743,9 @@ public class NetconfSession {
      * {@link #TEST_ONLY}: Only test. (Option is not supported in the
      * standard.)
      * </ul>
-     * 
+     *
      * @param testoption One of {@link #SET}, {@link #TEST_THEN_SET},
-     *            {@link #TEST_ONLY}
+     *                   {@link #TEST_ONLY}
      */
     public void setTestOption(int testoption) {
         testOption = testoption;
@@ -769,21 +758,21 @@ public class NetconfSession {
 
     /**
      * Value for error option.
-     * 
+     *
      * @see #setErrorOption(int)
      */
     public static final int STOP_ON_ERROR = 1;
 
     /**
      * Value for error option.
-     * 
+     *
      * @see #setErrorOption(int)
      */
     public static final int CONTINUE_ON_ERROR = 2;
 
     /**
      * Value for error option.
-     * 
+     *
      * @see #setErrorOption(int)
      */
     public static final int ROLLBACK_ON_ERROR = 3;
@@ -807,10 +796,9 @@ public class NetconfSession {
      * operation. This option requires the server to support the
      * <code>:rollback-on-error</code> capability.
      * </ul>
-     * 
+     *
      * @param erroroption One of {@link #STOP_ON_ERROR},
-     *            {@link #CONTINUE_ON_ERROR}, {@link #ROLLBACK_ON_ERROR}
-     * 
+     *                    {@link #CONTINUE_ON_ERROR}, {@link #ROLLBACK_ON_ERROR}
      */
     public void setErrorOption(int erroroption) {
         errorOption = erroroption;
@@ -825,9 +813,9 @@ public class NetconfSession {
      * Creates or replace an entire configuration datastore with the contents
      * of another complete configuration datastore. If the target datastore
      * exists, it is overwritten. Otherwise, a new one is created, if allowed.
-     * 
+     *
      * @param sourceTree A config tree
-     * @param target The target datastore
+     * @param target     The target datastore
      */
     public void copyConfig(Element sourceTree, int target)
             throws JNCException, IOException {
@@ -849,11 +837,11 @@ public class NetconfSession {
     }
 
     /**
-     * Same as {@link #copyConfig(Element,int)} but uses an url as target. Only
+     * Same as {@link #copyConfig(Element, int)} but uses an url as target. Only
      * possible if <code>:url</code> capability is supported.
-     * 
+     *
      * @param sourceTree A config tree
-     * @param targetUrl The target URL.
+     * @param targetUrl  The target URL.
      */
     public void copyConfig(Element sourceTree, String targetUrl)
             throws JNCException, IOException {
@@ -874,7 +862,7 @@ public class NetconfSession {
      * Creates or replace an entire configuration datastore with the contents
      * of another complete configuration datastore. If the target datastore
      * exists, it is overwritten. Otherwise, a new one is created, if allowed.
-     * 
+     *
      * @param source The source datastore
      * @param target The target datastore
      */
@@ -889,10 +877,10 @@ public class NetconfSession {
     }
 
     /**
-     * Same as {@link #copyConfig(int,int)} but uses an url as target. Only
+     * Same as {@link #copyConfig(int, int)} but uses an url as target. Only
      * possible if <code>:url</code> capability is supported.
-     * 
-     * @param source The datastore to be used as source
+     *
+     * @param source    The datastore to be used as source
      * @param targetUrl The target URL.
      */
     public void copyConfig(int source, String targetUrl) throws JNCException,
@@ -906,10 +894,10 @@ public class NetconfSession {
     }
 
     /**
-     * Same as {@link #copyConfig(int,int)} but uses an url as target and an
+     * Same as {@link #copyConfig(int, int)} but uses an url as target and an
      * url as a source. Only possible if <code>:url</code> capability is
      * supported.
-     * 
+     *
      * @param sourceUrl The source URL.
      * @param targetUrl The target URL.
      */
@@ -922,11 +910,11 @@ public class NetconfSession {
     }
 
     /**
-     * Same as {@link #copyConfig(int,int)} but uses an url as the source. Only
+     * Same as {@link #copyConfig(int, int)} but uses an url as the source. Only
      * possible if <code>:url</code> capability is supported.
-     * 
+     *
      * @param sourceUrl The source URL.
-     * @param target The target datastore
+     * @param target    The target datastore
      */
     public void copyConfig(String sourceUrl, int target) throws JNCException,
             IOException {
@@ -941,7 +929,7 @@ public class NetconfSession {
     /**
      * Deletes a configuration datastore. The &lt;running&gt; configuration datastore
      * cannot be deleted.
-     * 
+     *
      * @param datastore Datastore to be deleted
      */
     public void deleteConfig(int datastore) throws JNCException, IOException {
@@ -953,7 +941,7 @@ public class NetconfSession {
 
     /**
      * Deletes a configuration target url.
-     * 
+     *
      * @param targetUrl Name of configuration target url to be deleted.
      */
     public void deleteConfig(String targetUrl) throws JNCException,
@@ -973,7 +961,7 @@ public class NetconfSession {
      * <p>
      * An attempt to lock the configuration must fail if an existing session or
      * other entity holds a lock on any portion of the lock target.
-     * 
+     *
      * @param datastore The datastore to lock
      */
     public void lock(int datastore) throws JNCException, IOException {
@@ -986,7 +974,7 @@ public class NetconfSession {
     /**
      * The unlock operation is used to release a configuration lock, previously
      * obtained with the {@link #lock} operation.
-     * 
+     *
      * @param datastore The target datastore to unlock
      */
     public void unlock(int datastore) throws JNCException, IOException {
@@ -1024,9 +1012,9 @@ public class NetconfSession {
      * <p>
      * An attempt to lock the configuration must fail if an existing session or
      * other entity holds a lock on any portion of the lock target.
-     * 
+     *
      * @param datastore datastore of which a part will be locked
-     * @param select An array of selection filters
+     * @param select    An array of selection filters
      * @return A unique lock reference which should be used to unlockPartial()
      */
     public int lockPartial(String[] select) throws JNCException, IOException {
@@ -1053,21 +1041,21 @@ public class NetconfSession {
     }
 
     /**
-     * Same as {@link #lockPartial(int,String[])} except it only takes one
+     * Same as {@link #lockPartial(int, String[])} except it only takes one
      * selection as argument.
-     * 
-     * @see #lockPartial(int,String[])
+     *
+     * @see #lockPartial(int, String[])
      */
     public int lockPartial(String select) throws JNCException, IOException {
-        return lockPartial(new String[] { select });
+        return lockPartial(new String[]{select});
     }
 
     /**
      * The unlock operation is used to release a configuration lock, previously
      * obtained with the {@link #lock} operation.
-     * 
+     *
      * @param lockId Previously received lock identifier from
-     *            {@link #lockPartial(int,String[])}
+     *               {@link #lockPartial(int, String[])}
      */
     public void unlockPartial(int lockId) throws JNCException, IOException {
         trace("partialUnlock: " + lockId);
@@ -1103,7 +1091,6 @@ public class NetconfSession {
      * <p>
      * If the system does not have the <code>:candidate</code> capability, the
      * <code>commit</code> operation is not available.
-     * 
      */
     public void commit() throws JNCException, IOException {
         trace("commit");
@@ -1148,9 +1135,9 @@ public class NetconfSession {
      * started). Therefore, it is strongly suggested that in order to use this
      * feature with shared configuration databases, configuration locking
      * should also be used.
-     * 
+     *
      * @param timeout Time that server will wait for confirming commit before
-     *            reverting config
+     *                reverting config
      */
     public void confirmedCommit(int timeout) throws JNCException, IOException {
         trace("confirmedCommit: " + timeout);
@@ -1208,7 +1195,7 @@ public class NetconfSession {
      * <p>
      * Session identifier of the NETCONF session to be terminated, if this
      * value is the current session ID a JNCException will be thrown.
-     * 
+     *
      * @param sessionId The id of the session to terminate
      */
     public void killSession(long sessionId) throws JNCException, IOException {
@@ -1225,7 +1212,7 @@ public class NetconfSession {
     /**
      * This protocol operation validates the contents of the specified
      * configuration.
-     * 
+     *
      * @param configTree configuration tree to validate
      */
     public void validate(Element configTree) throws JNCException, IOException {
@@ -1242,7 +1229,7 @@ public class NetconfSession {
     /**
      * This protocol operation validates the given datastore. For example the
      * {@link #CANDIDATE} datastore.
-     * 
+     *
      * @param datastore The datastore to validate
      */
     public void validate(int datastore) throws IOException, JNCException {
@@ -1260,7 +1247,7 @@ public class NetconfSession {
      * This protocol operation validates the given URL. The url may for example
      * be a file <code>"file://incoming.conf"</code> then file must be
      * supported by the <code>:url</code> capability.
-     * 
+     *
      * @param url The source url to validate
      */
     public void validate(String url) throws IOException, JNCException {
@@ -1278,8 +1265,8 @@ public class NetconfSession {
      * The notification capability makes it possible to receive notifications
      * specified in a subscription. The <code>:notification</code> capability
      * must be supported by the server.
-     * 
-     * @see #createSubscription(String,String,String,String)
+     *
+     * @see #createSubscription(String, String, String, String)
      */
     public void createSubscription() throws IOException, JNCException {
         createSubscription(null, (String) null, null, null);
@@ -1291,10 +1278,10 @@ public class NetconfSession {
      * must be supported by the server.
      * <p>
      * Subscribe on specified stream name.
-     * 
+     *
      * @param stream The name of the stream or <code>null</code> if all streams
-     *         of events are of interest.
-     * @see #createSubscription(String,String,String,String)
+     *               of events are of interest.
+     * @see #createSubscription(String, String, String, String)
      */
     public void createSubscription(String stream)
             throws IOException, JNCException {
@@ -1329,20 +1316,20 @@ public class NetconfSession {
      * <code>startTime</code>. Values of <code>stopTime</code> in the future
      * are valid. The time is specified in dateTime format.
      * <p>
-     * 
-     * @param streamName The name of the stream or <code>null</code>
+     *
+     * @param streamName  The name of the stream or <code>null</code>
      * @param eventFilter a subtree filter - list of events, or
-     *            <code>null</code>
-     * @param startTime a dateTime string specifying the replay start, or
-     *            <code>null</code> if the subscription is not a replay
-     *            subscription
-     * @param stopTime a dateTime string specifying the stop of replay, or
-     *            <code>null</code> if the subscription is not a replay
-     *            subscription or infinite subscription is desired
+     *                    <code>null</code>
+     * @param startTime   a dateTime string specifying the replay start, or
+     *                    <code>null</code> if the subscription is not a replay
+     *                    subscription
+     * @param stopTime    a dateTime string specifying the stop of replay, or
+     *                    <code>null</code> if the subscription is not a replay
+     *                    subscription or infinite subscription is desired
      * @see #receiveNotification()
      */
     public void createSubscription(String streamName, NodeSet eventFilter,
-            String startTime, String stopTime) throws IOException,
+                                   String startTime, String stopTime) throws IOException,
             JNCException {
         trace("createSubscription: stream=" + streamName + " filter="
                 + eventFilter.toXMLString() + " from=" + startTime + " to="
@@ -1358,19 +1345,19 @@ public class NetconfSession {
     }
 
     /**
-     * Same as {@link #createSubscription(String,NodeSet,String,String)} except
+     * Same as {@link #createSubscription(String, NodeSet, String, String)} except
      * a filter in xpath format can be given instead of a subtree filter.
-     * 
-     * @param streamName The name of the stream or <code>null</code>
+     *
+     * @param streamName  The name of the stream or <code>null</code>
      * @param eventFilter a filter xpath expression, or <code>null</code>
-     * @param startTime a dateTime string specifying the replay start, or
-     *            <code>null</code>
-     * @param stopTime a dateTime string specifying the stop of replay, or
-     *            <code>null</code>
+     * @param startTime   a dateTime string specifying the replay start, or
+     *                    <code>null</code>
+     * @param stopTime    a dateTime string specifying the stop of replay, or
+     *                    <code>null</code>
      * @see #receiveNotification()
      */
     public void createSubscription(String streamName, String eventFilter,
-            String startTime, String stopTime) throws IOException,
+                                   String startTime, String stopTime) throws IOException,
             JNCException {
         trace("createSubscription: stream=" + streamName + " filter="
                 + eventFilter + " from=" + startTime + " to=" + stopTime);
@@ -1390,13 +1377,13 @@ public class NetconfSession {
 
     /**
      * Method to get the available streams from the agent. This will do:
-     * 
+     *
      * <pre>
      * Element subtree = Element.create(
      *         &quot;urn:ietf:params:xml:ns:netmod:notification&quot;, &quot;netconf/streams&quot;);
      * return session.get(subtree);
      * </pre>
-     * 
+     * <p>
      * The available streams are returned.
      */
     public NodeSet getStreams() throws JNCException, IOException {
@@ -1432,18 +1419,15 @@ public class NetconfSession {
      * Action capability. An action that does not return any result value,
      * replies with the standard 'ok' element. If a result value is returned,
      * it is encapsulated within a returned 'data' element.
-     * 
+     *
      * @param data element tree with action-data
      */
     public Element action(Element data) throws JNCException, IOException {
         trace("action: " + data.toXMLString());
         encode_action(out, data);
         out.flush();
-        if(data instanceof YangElement){
-            List<YangNsPackage> yangNsPackageList = ((YangElement) data).getYangNsPackageList();
-            return recv_rpc_reply_ok(null,yangNsPackageList.toArray(new YangNsPackage[yangNsPackageList.size()]));
-        }
-        return recv_rpc_reply_ok(null);
+        List<YangNsPackage> yangNsPackageList = data.getYangNsPackageList();
+        return recv_rpc_reply_ok(null, yangNsPackageList.toArray(new YangNsPackage[yangNsPackageList.size()]));
     }
 
     /* Receive from session */
@@ -1467,13 +1451,13 @@ public class NetconfSession {
      * @throws JNCException
      * @throws IOException
      */
-    protected Element recv_rpc_reply_ok(String mid,YangNsPackage ... yangNsPackages) throws JNCException, IOException {
+    protected Element recv_rpc_reply_ok(String mid, YangNsPackage... yangNsPackages) throws JNCException, IOException {
         final StringBuffer reply = in.readOne();
         trace("reply= " + reply);
         if (reply.length() == 0) {
             throw new JNCException(JNCException.PARSER_ERROR, "empty input");
         }
-        final Element t = parser.parse(reply.toString(),yangNsPackages);
+        final Element t = parser.parse(reply.toString(), yangNsPackages);
         final Element ok;
 
         if (mid != null) {
@@ -1502,8 +1486,8 @@ public class NetconfSession {
      * Reads one rpc-reply from session and parse the &lt;data&gt;. Returns the
      * NodeSet contained in the data tag.
      */
-    NodeSet recv_rpc_reply_data(int mid,YangNsPackage ... yangNsPackages) throws JNCException, IOException {
-        return recv_rpc_reply("/data", parser, Integer.toString(mid),yangNsPackages);
+    NodeSet recv_rpc_reply_data(int mid, YangNsPackage... yangNsPackages) throws JNCException, IOException {
+        return recv_rpc_reply("/data", parser, Integer.toString(mid), yangNsPackages);
     }
 
     NodeSet recv_rpc_reply_lockPartial(int mid) throws JNCException,
@@ -1511,22 +1495,22 @@ public class NetconfSession {
         return recv_rpc_reply("", parser, Integer.toString(mid));
     }
 
-    NodeSet recv_call_rpc_reply(Element e, int mid,YangNsPackage ... yangNsPackages) throws JNCException,
+    NodeSet recv_call_rpc_reply(Element e, int mid, YangNsPackage... yangNsPackages) throws JNCException,
             IOException {
         final XMLParser parser = new XMLParser(); // XXX: Why new parser?
-        return recv_rpc_reply("", parser, Integer.toString(mid),yangNsPackages);
+        return recv_rpc_reply("", parser, Integer.toString(mid), yangNsPackages);
     }
 
     NodeSet recv_rpc_reply(String path) throws JNCException, IOException {
         return recv_rpc_reply(path, parser, null);
     }
 
-    NodeSet recv_rpc_reply(String path, XMLParser parser, String mid,YangNsPackage ... yangNsPackages)
+    NodeSet recv_rpc_reply(String path, XMLParser parser, String mid, YangNsPackage... yangNsPackages)
             throws JNCException, IOException {
         final StringBuffer reply = in.readOne();
         trace("reply= " + reply);
 
-        final Element t = parser.parse(reply.toString(),yangNsPackages);
+        final Element t = parser.parse(reply.toString(), yangNsPackages);
         final Element rep = t.getFirst("self::rpc-reply");
         if (rep != null) {
             check_mid(rep, mid);
@@ -1574,7 +1558,7 @@ public class NetconfSession {
      * Set a proprietary capability. This capability will be advertised in the
      * initial hello message so this method need to invoked before the
      * {@link #hello()} method to have any effect.
-     * 
+     *
      * @param capability Add a capablity string for this client session
      */
     protected void setCapability(String capability) {
@@ -1626,7 +1610,7 @@ public class NetconfSession {
      * Encodes the RPC header and writes it to the provided output transport.
      * This method is provided to be able extend this class with proprietary
      * capabilities.
-     * 
+     *
      * @param out Transport output stream
      */
     protected int encode_rpc_begin(Transport out) {
@@ -1638,8 +1622,8 @@ public class NetconfSession {
      * This method is provided to be able to extend this class with proprietary
      * capabilities. The extra attribute arguement makes it possible to add an
      * extra attribute to the RPC header.
-     * 
-     * @param out Transport output stream
+     *
+     * @param out  Transport output stream
      * @param attr Extra attribute to be added to rpc header
      */
     protected int encode_rpc_begin(Transport out, Attribute attr) {
@@ -1671,7 +1655,7 @@ public class NetconfSession {
 
     /**
      * Closes the rpc tag.
-     * 
+     *
      * @param out Transport output stream
      */
     protected void encode_rpc_end(Transport out) {
@@ -1681,7 +1665,7 @@ public class NetconfSession {
 
     /**
      * Encode the &lt;getConfig&gt;. Example:
-     * 
+     *
      * <pre>
      * &lt;rpc message-id="101"
      *        xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"&gt;
@@ -1713,7 +1697,7 @@ public class NetconfSession {
 
     /**
      * Encode the &lt;rpc&gt;. Example:
-     * 
+     *
      * <pre>
      * &lt;rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="1"&gt;
      *   &lt;math xmlns="http://example.com/math"&gt;
@@ -1734,7 +1718,7 @@ public class NetconfSession {
 
     /**
      * Encode the &lt;getConfig&gt;. Example:
-     * 
+     *
      * <pre>
      * &lt;rpc message-id="101"
      *        xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"&gt;
@@ -1764,7 +1748,7 @@ public class NetconfSession {
 
     /**
      * Encode the &lt;getConfig&gt;. Example:
-     * 
+     *
      * <pre>
      * &lt;rpc message-id="101"
      *        xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"&gt;
@@ -1790,12 +1774,12 @@ public class NetconfSession {
      */
     String datastoreToString(int datastore) {
         switch (datastore) {
-        case RUNNING:
-            return "RUNNING";
-        case CANDIDATE:
-            return "CANDIDATE";
-        case STARTUP:
-            return "STARTUP";
+            case RUNNING:
+                return "RUNNING";
+            case CANDIDATE:
+                return "CANDIDATE";
+            case STARTUP:
+                return "STARTUP";
         }
         return "UNKNOWN_DATASTORE(" + datastore + ")";
     }
@@ -1809,12 +1793,12 @@ public class NetconfSession {
         nc = mk_prefix_colon(prefix);
 
         switch (datastore) {
-        case RUNNING:
-            return "<" + nc + "running/>";
-        case CANDIDATE:
-            return "<" + nc + "candidate/>";
-        case STARTUP:
-            return "<" + nc + "startup/>";
+            case RUNNING:
+                return "<" + nc + "running/>";
+            case CANDIDATE:
+                return "<" + nc + "candidate/>";
+            case STARTUP:
+                return "<" + nc + "startup/>";
         }
         throw new JNCException(JNCException.SESSION_ERROR,
                 "unknown datastore: " + datastore);
@@ -1854,7 +1838,7 @@ public class NetconfSession {
 
     /**
      * Encode the &lt;get&gt;. Example:
-     * 
+     *
      * <pre>
      * &lt;rpc message-id="101"
      *        xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"&gt;
@@ -1881,7 +1865,7 @@ public class NetconfSession {
 
     /**
      * Encode the &lt;get&gt;. Example:
-     * 
+     *
      * <pre>
      * &lt;rpc message-id="101"
      *        xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"&gt;
@@ -1907,7 +1891,7 @@ public class NetconfSession {
 
     /**
      * Encode the &lt;edit-Config&gt;. Example:
-     * 
+     *
      * <pre>
      * &lt;rpc message-id="101"
      *      xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"&gt;
@@ -1951,7 +1935,7 @@ public class NetconfSession {
 
     /**
      * Encode the &lt;edit-Config&gt;. Example:
-     * 
+     *
      * <pre>
      * &lt;rpc message-id="101"
      *      xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"&gt;
@@ -1983,23 +1967,23 @@ public class NetconfSession {
      */
     void encode_defaultOperation(Transport out) throws JNCException {
         switch (defaultOperation) {
-        case NOT_SET:
-            return;
-        case MERGE:
-            out.println("<" + nc + "default-operation>merge</" + nc
-                    + "default-operation>");
-            return;
-        case REPLACE:
-            out.println("<" + nc + "default-operation>replace</" + nc
-                    + "default-operation>");
-            return;
-        case NONE:
-            out.println("<" + nc + "default-operation>none</" + nc
-                    + "default-operation>");
-            return;
-        default:
-            throw new JNCException(JNCException.SESSION_ERROR,
-                    "unknown default-operation value: " + defaultOperation);
+            case NOT_SET:
+                return;
+            case MERGE:
+                out.println("<" + nc + "default-operation>merge</" + nc
+                        + "default-operation>");
+                return;
+            case REPLACE:
+                out.println("<" + nc + "default-operation>replace</" + nc
+                        + "default-operation>");
+                return;
+            case NONE:
+                out.println("<" + nc + "default-operation>none</" + nc
+                        + "default-operation>");
+                return;
+            default:
+                throw new JNCException(JNCException.SESSION_ERROR,
+                        "unknown default-operation value: " + defaultOperation);
         }
     }
 
@@ -2008,37 +1992,37 @@ public class NetconfSession {
      */
     void encode_testOption(Transport out) throws JNCException {
         switch (testOption) {
-        case NOT_SET:
-            return;
-        case SET:
-            if (!capabilities.hasValidate()) {
+            case NOT_SET:
+                return;
+            case SET:
+                if (!capabilities.hasValidate()) {
+                    throw new JNCException(JNCException.SESSION_ERROR,
+                            "test-option is given but the :validate "
+                                    + "capability is not supported by server");
+                }
+                out.println("<" + nc + "test-option>set</" + nc + "test-option>");
+                return;
+            case TEST_THEN_SET:
+                if (!capabilities.hasValidate()) {
+                    throw new JNCException(JNCException.SESSION_ERROR,
+                            "test-option is given but the :validate "
+                                    + "capability is not supported by server");
+                }
+                out.println("<" + nc + "test-option>test-then-set</" + nc
+                        + "test-option>");
+                return;
+            case TEST_ONLY:
+                if (!capabilities.hasValidate()) {
+                    throw new JNCException(JNCException.SESSION_ERROR,
+                            "test-option is given but the :validate "
+                                    + "capability is not supported by server");
+                }
+                out.println("<" + nc + "test-option>test-only</" + nc
+                        + "test-option>");
+                return;
+            default:
                 throw new JNCException(JNCException.SESSION_ERROR,
-                        "test-option is given but the :validate "
-                                + "capability is not supported by server");
-            }
-            out.println("<" + nc + "test-option>set</" + nc + "test-option>");
-            return;
-        case TEST_THEN_SET:
-            if (!capabilities.hasValidate()) {
-                throw new JNCException(JNCException.SESSION_ERROR,
-                        "test-option is given but the :validate "
-                                + "capability is not supported by server");
-            }
-            out.println("<" + nc + "test-option>test-then-set</" + nc
-                    + "test-option>");
-            return;
-        case TEST_ONLY:
-            if (!capabilities.hasValidate()) {
-                throw new JNCException(JNCException.SESSION_ERROR,
-                        "test-option is given but the :validate "
-                                + "capability is not supported by server");
-            }
-            out.println("<" + nc + "test-option>test-only</" + nc
-                    + "test-option>");
-            return;
-        default:
-            throw new JNCException(JNCException.SESSION_ERROR,
-                    "unknown test-option value: " + testOption);
+                        "unknown test-option value: " + testOption);
         }
     }
 
@@ -2047,34 +2031,34 @@ public class NetconfSession {
      */
     void encode_errorOption(Transport out) throws JNCException {
         switch (errorOption) {
-        case NOT_SET:
-            return;
-        case STOP_ON_ERROR:
-            out.println("<" + nc + "error-option>stop-on-error</" + nc
-                    + "error-option>");
-            return;
-        case CONTINUE_ON_ERROR:
-            out.println("<" + nc + "error-option>continue-on-error</" + nc
-                    + "error-option>");
-            return;
-        case ROLLBACK_ON_ERROR:
-            if (!capabilities.hasRollbackOnError()) {
+            case NOT_SET:
+                return;
+            case STOP_ON_ERROR:
+                out.println("<" + nc + "error-option>stop-on-error</" + nc
+                        + "error-option>");
+                return;
+            case CONTINUE_ON_ERROR:
+                out.println("<" + nc + "error-option>continue-on-error</" + nc
+                        + "error-option>");
+                return;
+            case ROLLBACK_ON_ERROR:
+                if (!capabilities.hasRollbackOnError()) {
+                    throw new JNCException(JNCException.SESSION_ERROR,
+                            "the :rollback-on-error capability "
+                                    + "is used but not supported by server");
+                }
+                out.println("<" + nc + "error-option>rollback-on-error</" + nc
+                        + "error-option>");
+                return;
+            default:
                 throw new JNCException(JNCException.SESSION_ERROR,
-                        "the :rollback-on-error capability "
-                                + "is used but not supported by server");
-            }
-            out.println("<" + nc + "error-option>rollback-on-error</" + nc
-                    + "error-option>");
-            return;
-        default:
-            throw new JNCException(JNCException.SESSION_ERROR,
-                    "unknown error-option value: " + errorOption);
+                        "unknown error-option value: " + errorOption);
         }
     }
 
     /**
      * Encode the &lt;copy-config&gt;. Example:
-     * 
+     *
      * <pre>
      * &lt;rpc message-id="101"
      *      xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"&gt;
@@ -2122,7 +2106,7 @@ public class NetconfSession {
 
     /**
      * Encode the &lt;copy-config&gt;. Example:
-     * 
+     *
      * <pre>
      * &lt;rpc message-id="101"
      *      xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"&gt;
@@ -2158,7 +2142,7 @@ public class NetconfSession {
 
     /**
      * Encode the &lt;delete-config&gt;. Example:
-     * 
+     *
      * <pre>
      * &lt;rpc message-id="101"
      *      xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"&gt;
@@ -2183,7 +2167,7 @@ public class NetconfSession {
 
     /**
      * Encode the &lt;lock&gt;. Example:
-     * 
+     *
      * <pre>
      * &lt;rpc message-id="101"
      *      xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"&gt;
@@ -2206,7 +2190,7 @@ public class NetconfSession {
 
     /**
      * Encode the &lt;unlock&gt;. Example:
-     * 
+     *
      * <pre>
      * &lt;rpc message-id="101"
      *      xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"&gt;
@@ -2229,7 +2213,7 @@ public class NetconfSession {
 
     /**
      * Encode the &lt;partial-lock&gt;. Example:
-     * 
+     *
      * <pre>
      * &lt;nc:rpc
      * xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0"
@@ -2268,7 +2252,7 @@ public class NetconfSession {
 
     /**
      * Encode the &lt;partial-unlock&gt;. Example:
-     * 
+     *
      * <pre>
      * &lt;nc:rpc xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0"
      * xmlns="urn:ietf:params:xml:ns:netconf:partial-lock:1.0"
@@ -2298,7 +2282,7 @@ public class NetconfSession {
 
     /**
      * Encode the &lt;commit&gt;. Example:
-     * 
+     *
      * <pre>
      * &lt;rpc message-id="101"
      *      xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"&gt;
@@ -2315,7 +2299,7 @@ public class NetconfSession {
 
     /**
      * Encode the &lt;commit&gt;. (confirmed) Example:
-     * 
+     *
      * <pre>
      * &lt;rpc message-id="101"
      *      xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"&gt;
@@ -2340,7 +2324,7 @@ public class NetconfSession {
 
     /**
      * Encode the &lt;discard-changes&gt;. Example:
-     * 
+     *
      * <pre>
      * &lt;rpc message-id="101"
      *      xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"&gt;
@@ -2357,7 +2341,7 @@ public class NetconfSession {
 
     /**
      * Encode the &lt;close-session&gt;. Example:
-     * 
+     *
      * <pre>
      * &lt;rpc message-id="101"
      *      xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"&gt;
@@ -2374,7 +2358,7 @@ public class NetconfSession {
 
     /**
      * Encode the &lt;kill-session&gt;. Example:
-     * 
+     *
      * <pre>
      * &lt;rpc message-id="101"
      *      xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"&gt;
@@ -2397,7 +2381,7 @@ public class NetconfSession {
 
     /**
      * Encode the &lt;validate&gt;. Example:
-     * 
+     *
      * <pre>
      * &lt;rpc message-id="101"
      *      xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"&gt;
@@ -2432,7 +2416,7 @@ public class NetconfSession {
 
     /**
      * Encode the &lt;validate&gt;. Example:
-     * 
+     *
      * <pre>
      * &lt;rpc message-id="101"
      *      xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"&gt;
@@ -2455,7 +2439,7 @@ public class NetconfSession {
 
     /**
      * Encode the &lt;create-subscription&gt;. Example:
-     * 
+     *
      * <pre>
      * &lt;rpc message-id="101"
      *      xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"&gt;
@@ -2466,7 +2450,7 @@ public class NetconfSession {
      * </pre>
      */
     int encode_createSubscription(Transport out, String stream,
-            String filter, String startTime, String stopTime) {
+                                  String filter, String startTime, String stopTime) {
         final String prefix = Element.defaultPrefixes
                 .nsToPrefix(Capabilities.NS_NOTIFICATION);
         final String ncn = mk_prefix_colon(prefix);
@@ -2502,7 +2486,7 @@ public class NetconfSession {
 
     /**
      * Encode the &lt;create-subscription&gt;. Example:
-     * 
+     *
      * <pre>
      * &lt;rpc message-id="101"
      *      xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"&gt;
@@ -2513,7 +2497,7 @@ public class NetconfSession {
      * </pre>
      */
     int encode_createSubscription(Transport out, String stream,
-            NodeSet eventFilter, String startTime, String stopTime)
+                                  NodeSet eventFilter, String startTime, String stopTime)
             throws JNCException {
         final String prefix = Element.defaultPrefixes
                 .nsToPrefix(Capabilities.NS_NOTIFICATION);
@@ -2552,7 +2536,7 @@ public class NetconfSession {
      * Encodes an Element tree (data) and sends it to out.
      * <p>
      * Example:
-     * 
+     *
      * <pre>
      * &lt;rpc message-id="101"
      * xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"&gt;
@@ -2568,8 +2552,8 @@ public class NetconfSession {
      *  &lt;/action&gt;
      * &lt;/rpc&gt;
      * </pre>
-     * 
-     * @param out The transport interface to send the action to
+     *
+     * @param out  The transport interface to send the action to
      * @param data Element tree representing the action
      * @throws JNCException if unable to encode data
      */
@@ -2590,10 +2574,10 @@ public class NetconfSession {
 
     /**
      * Help function to make prefix. Returns either: "PREFIX:" or "".
-     * 
+     *
      * @param prefix
      * @return "unknown:" if prefix is null, an empty string if prefix is
-     *         empty, otherwise prefix appended with a colon.
+     * empty, otherwise prefix appended with a colon.
      */
     String mk_prefix_colon(String prefix) {
         if (prefix == null) {
@@ -2629,8 +2613,8 @@ public class NetconfSession {
     /**
      * Checks that message id attribute of t is mid. If mid is null, no check
      * is performed.
-     * 
-     * @param t rpc-reply Element tree
+     *
+     * @param t   rpc-reply Element tree
      * @param mid message id to check for
      * @throws JNCException if there is a message id mismatch
      */
